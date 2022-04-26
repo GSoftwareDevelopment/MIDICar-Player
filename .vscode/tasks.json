@@ -8,9 +8,10 @@
 			"type": "shell",
 			"command": "mp",
 			"args": [
-				"${fileBasename}",
+				"MIDICar Player.pas",
 				"-ipath:./",
-				"-define:DEBUG"
+				"-define:DEBUG",
+				"-o:./asm/MIDICar Player.a65"
 			],
 			"presentation": {
 				"echo": false,
@@ -44,12 +45,12 @@
 			"type": "shell",
 			"command": "mads",
 			"args": [
-				"${fileBasenameNoExtension}.a65",
+				"./asm/MIDICar Player.a65",
 				"-x",
 				"-l",
 				"-t",
 				"-i:$HOME/Atari/MadPascal/base",
-				"-o:${fileBasenameNoExtension}.xex"
+				"-o:./bin/midiplay.xex"
 			],
 			"presentation": {
 				"echo": false,
@@ -93,7 +94,7 @@
 			"command": "wine",
 			"args": [
 				"C:\\Program Files\\Altirra-4.00\\Altirra64.exe",
-				"${fileBasenameNoExtension}.xex"
+				"\\mnt\\data\\Projekty\\MIDI\\MIDICar\\bin\\midiplay.xex"
 			],
 			"runOptions": {
 				"instanceLimit": 1,
