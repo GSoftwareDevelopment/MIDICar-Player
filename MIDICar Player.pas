@@ -15,7 +15,9 @@ begin
   MC6850_Reset;
   MC6850_Init(CD_64+WS_OddParity+WS_8bits);
 
-  LoadMIDI('H1:SELFTEST.MID');
+  MIDData:=Pointer($6000);
+  MIDTracks:=Pointer($5F00);
+  LoadMID('D2:OVERWORL.MID');
 
 //  MIDI_SendNoteOn(0,64,64);
 //  FIFO_Flush;
