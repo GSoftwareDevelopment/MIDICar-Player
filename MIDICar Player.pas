@@ -11,12 +11,12 @@ begin
 end;
 
 begin
-  LoadMIDI('H1:SELFTEST.MID');
-
   FIFO_Reset;
   MC6850_Reset;
   MC6850_Init(CD_64+WS_OddParity+WS_8bits);
 
-  MIDI_SendNoteOn(0,64,64);
-  FIFO_Flush;
+  LoadMIDI('H1:SELFTEST.MID');
+
+//  MIDI_SendNoteOn(0,64,64);
+//  FIFO_Flush;
 end.

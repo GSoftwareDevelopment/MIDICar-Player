@@ -2,8 +2,8 @@ unit MIDFiles;
 
 interface
 const
+  MIDTRACKSREC_ADDR = $5F00;
   MIDDATA_ADDR = $6000;
-  MIDDATA_LENGTH = 129;
 
 type
   TMIDTrack = record
@@ -21,14 +21,16 @@ type
 
 var
   MID_DATA:Array[0..0] of byte absolute MIDDATA_ADDR;
-  Tracks:Array[0..0] of byte absolute MIDDATA_ADDR+MIDDATA_LENGTH;
+  Tracks:Array[0..0] of byte absolute MIDTRACKSREC_ADDR;
   CurTrack:TMIDTrack;
   MIDHeader:TMIDHeader;
 
 procedure LoadMIDI(fn:String);
 
 implementation
+{$IFDEF DEBUG}
 Uses CRT;
+{$ENDIF}
 
 var
   BI:Array[0..3] of byte;
