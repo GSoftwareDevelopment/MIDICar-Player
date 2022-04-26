@@ -1,0 +1,117 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Compile source",
+			"type": "shell",
+			"command": "mp",
+			"args": [
+				"${fileBasename}",
+				"-ipath:./",
+				"-define:DEBUG"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": false
+			},
+			"runOptions": {
+				"instanceLimit": 1,
+				"reevaluateOnRerun": false
+			},
+			"problemMatcher": {
+				"owner": "external",
+				"fileLocation": ["relative", "${workspaceFolder}"],
+				"pattern": [
+					{
+						"kind": "location",
+						"regexp": "^(.+)\\s\\((.+)\\)\\s(\\w+):\\s(.+)$",
+						"file": 1,
+						"location": 2,
+						"severity": 3,
+						"message": 4
+					}
+				]
+			}
+		},
+		{
+			"label": "Compile ASM",
+			"type": "shell",
+			"command": "mads",
+			"args": [
+				"${fileBasenameNoExtension}.a65",
+				"-x",
+				"-l",
+				"-t",
+				"-i:$HOME/Atari/MadPascal/base",
+				"-o:${fileBasenameNoExtension}.xex"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": false
+			},
+			"runOptions": {
+				"instanceLimit": 1,
+				"reevaluateOnRerun": false
+			},
+			"problemMatcher": {
+				"source": "Assembler",
+				"fileLocation": ["relative", "${workspaceFolder}"],
+				"pattern": [
+					{
+						"kind": "location",
+						"regexp": "^(.+)\\s\\((.+)\\)\\s(\\w+):\\s(.+)$",
+						"file": 1,
+						"location": 2,
+						"severity": 3,
+						"message": 4
+					}
+				]
+			}
+		},
+		{
+			"label": "Build executable",
+			"runOptions": {
+				"instanceLimit": 1,
+				"reevaluateOnRerun": false
+			},
+			"dependsOrder": "sequence",
+			"dependsOn": ["Compile source", "Compile ASM"]
+		},
+		{
+			"label": "Run",
+			"type": "shell",
+			"command": "wine",
+			"args": [
+				"C:\\Program Files\\Altirra-4.00\\Altirra64.exe",
+				"${fileBasenameNoExtension}.xex"
+			],
+			"runOptions": {
+				"instanceLimit": 1,
+				"reevaluateOnRerun": false
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "never",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"dependsOn": ["Build executable"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}
