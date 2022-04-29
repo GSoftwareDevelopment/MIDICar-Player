@@ -8,6 +8,8 @@ interface
 
 var
   ZP_Data:Byte absolute $ff;
+  FIFO_Head:Byte absolute $F0;
+  FIFO_Tail:Byte absolute $F1;
 
 procedure FIFO_Reset();
 function FIFO_ReadByte(var data:Byte):boolean;
@@ -15,7 +17,7 @@ function FIFO_WriteByte(data:byte):boolean;
 procedure FIFO_Flush();
 
 implementation
-uses mc6850;
+uses mc6850, SysUtils;
 
 const
   FIFO_SIZE = 255;
@@ -23,8 +25,6 @@ const
 
 var
   FIFO_Buf:Array[0..FIFO_SIZE] of byte absolute FIFO_ADDR;
-  FIFO_Head:Byte absolute $F0;
-  FIFO_Tail:Byte absolute $F1;
 
 procedure FIFO_Reset;
 begin
@@ -54,6 +54,9 @@ begin
   else
   begin
     FIFO_Buf[FIFO_Head]:=data;
+{$IFDEF FIFO_DEBUG}
+    Write(IntToHex(data,2));
+{$ENDIF}
     inc(FIFO_Head);
     if (FIFO_Head=FIFO_Size) then FIFO_Head:=0;
   end;

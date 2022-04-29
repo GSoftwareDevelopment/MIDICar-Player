@@ -2,16 +2,18 @@ unit MIDFiles;
 
 interface
 type
+  TDeltaTime = longint;
   TByteArray = Array[0..0] of byte;
   TBigIndian = Array[0..3] of byte;
 
   PMIDTrack = ^TMIDTrack;
   TMIDTrack = record
     ptr:Pointer;
-    deltaTime,
-    size:Longint;
+    deltaTime:TDeltaTime;
+//    size:Longint;
     skipDelta,
     EOT:Boolean;
+    _event:byte;
   end;
 
 var
@@ -23,8 +25,8 @@ var
   fsd:byte;
   tickDiv:word;
 
-Procedure LoadMID(fn:String);
-Procedure GetTrackData(track:PMIDTrack);
+Function LoadMID(fn:String):Boolean;
+function GetTrackData(track:PMIDTrack):TDeltaTime;
 
 implementation
 Uses MIDI_FIFO
@@ -64,7 +66,7 @@ end;
 //
 //
 
-procedure LoadMID(fn:String);
+function LoadMID(fn:String):boolean;
 var
   f:File;
   trackCount:word;
@@ -87,14 +89,15 @@ end;
 
 begin
   nTrkRec:=@MIDTracks;
-  Write('Open file ',fn);
+  WriteLn('Open file ',fn);
+{$I-}
   Assign(f,fn);
   Reset(f,1);
   if IOResult>127 then
   begin
     WriteLn(#155,'I/O Error #',IOResult);
     Close(f);
-    exit;
+    exit(false);
   end;
   trackCount:=0; dataPos:=0; nTracks:=255;
   SetLength(chunkHead,4);
@@ -143,7 +146,7 @@ begin
       BlockRead(f,MIDData[dataPos],Len);
       nTrkRec^.ptr:=@MIDData[dataPos];
       nTrkRec^.deltaTime:=0;
-      nTrkRec^.size:=Len;
+//      nTrkRec^.size:=Len;
       nTrkRec^.skipDelta:=false;
       nTrkRec^.EOT:=false;
       inc(nTrkRec,1);
@@ -152,16 +155,17 @@ begin
 {$IFDEF DEBUG} Write(#156); {$ENDIF}
   end;
   Close(f);
+  result:=true;
 end;
 
-procedure GetTrackData(track:PMIDTrack);
+function GetTrackData(track:PMIDTrack):TDeltaTime;
 var
   TrackData:^Byte;
   flagSysEx:Boolean;
-  DeltaTime,msgLen:Longint;
+  DeltaTime,msgLen:TDeltaTime;
   v,Event:Byte;
 
-  function decodeDeltaTime:longint;
+  function decodeDeltaTime:TDeltaTime;
   var
     v:byte;
 
@@ -169,7 +173,8 @@ var
     result:=0;
     repeat
       v:=TrackData^; inc(TrackData);
-      result:=result shl 7+(v and $7f);
+      result:=result shl 7;
+      result:=result or (v and $7f);
     until (v and $80=0);
   end;
 
@@ -180,6 +185,7 @@ var
 
 begin
   TrackData:=Track^.ptr;
+  event:=Track^._event;
   repeat
     if not Track^.skipDelta then
     begin
@@ -191,31 +197,25 @@ begin
       Track^.skipDelta:=false;
 
     if TrackData^ and $80<>0 then
-    begin
       event:=getByte;
-      if (event>=$80) and (event<=$f7) then
-        FIFO_WriteByte(event);
-    end;
 
     case event of
+      $80..$BF,
+      $E0..$EF: // two parameters for event
+        begin
+          FIFO_WriteByte(event);
+          FIFO_WriteByte(getByte);
+          FIFO_WriteByte(getByte);
+        end;
       $C0..$DF: // one parameter for event
         begin
-          FIFO_WriteByte(getByte);
-        end;
-      $80..$BF: // two parameters for event
-        begin
-          FIFO_WriteByte(getByte);
-          FIFO_WriteByte(getByte);
-        end;
-      $E0..$EF: // three parameters for event
-        begin
-          FIFO_WriteByte(getByte);
-          FIFO_WriteByte(getByte);
+          FIFO_WriteByte(event);
           FIFO_WriteByte(getByte);
         end;
       $F0..$F7: // SysEx Event
         begin
           msgLen:=decodeDeltaTime;
+          FIFO_WriteByte(event);
           while msgLen>0 do
           begin
             v:=getByte;
@@ -231,18 +231,14 @@ begin
           if event=$2f then
             Track^.EOT:=true
           else
-          begin
-            while msgLen>0 do
-            begin
-              v:=getByte; dec(msgLen);
-            end;
-          end;
+            inc(TrackData,msgLen);
         end;
     end;
   until Track^.EOT;
   Track^.ptr:=Pointer(TrackData);
   Track^.skipDelta:=true;
-  Track^.deltaTime:=deltaTime;
+  Track^._event:=event;
+  result:=deltaTime;
 end;
 
 end.
