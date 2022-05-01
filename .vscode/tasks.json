@@ -10,7 +10,7 @@
 			"args": [
 				"MIDICar Player.pas",
 				"-ipath:./",
-				// "-define:DEBUG",
+				// "-define:USE_FIFO",
 				"-o:./asm/MIDICar Player.a65"
 			],
 			"presentation": {

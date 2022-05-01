@@ -1,6 +1,9 @@
 unit MIDFiles;
 
 interface
+const
+  freq_ratio=2;
+
 type
   TDeltaTime = longint;
   TByteArray = Array[0..0] of byte;
@@ -10,7 +13,6 @@ type
   TMIDTrack = record
     ptr:Pointer;
     deltaTime:TDeltaTime;
-//    size:Longint;
     skipDelta,
     EOT:Boolean;
     _event:byte;
@@ -24,19 +26,39 @@ var
   fps:byte;
   fsd:byte;
   tickDiv:word;
+  totalTicks:longint;
+  ms_per_qnote:longint;
+  tactNum:byte;
+  tactDenum:byte;
+  ticks_per_qnote:byte;
+  ticks_per_32nd:byte;
+  BPM:Word;
 
-Function LoadMID(fn:String):Boolean;
+  oldVec:Pointer;
+  _pauseCount:boolean = false;
+  _subCnt:byte;
+
+function LoadMID(fn:PString):Boolean;
 function GetTrackData(track:PMIDTrack):TDeltaTime;
+procedure setTempo(nTempo:longint);
 
 implementation
-Uses MIDI_FIFO
-{$IFDEF DEBUG}
-,CRT
-{$ENDIF}
-;
+Uses
+  {$IFDEF USE_FIFO}MIDI_FIFO,{$ENDIF}
+  MC6850
+  {$IFDEF DEBUG},CRT{$ENDIF}
+  ;
+
+type
+  TTag = Longint;
+
+const
+  TAG_MTHD : TTag = $6468544D;
+  TAG_MTRK : TTag = $6B72544D;
 
 var
   BI:TBigIndian;
+  RBuf:Array[0..0] of byte absolute $600;
 
 function wordBI(var bi:TByteArray):word;
 var
@@ -66,11 +88,11 @@ end;
 //
 //
 
-function LoadMID(fn:String):boolean;
+function LoadMID(fn:PString):boolean;
 var
   f:File;
   trackCount:word;
-  chunkHead:String[4];
+  chunkTag:TTag;
   v,dataPos:word;
   Len:Longint;
   nTrkRec:PMIDTrack;
@@ -100,22 +122,16 @@ begin
     exit(false);
   end;
   trackCount:=0; dataPos:=0; nTracks:=255;
-  SetLength(chunkHead,4);
   while (IOResult<128) and (not EOF(F)) and (trackCount<nTracks) do
   begin
-    BlockRead(f,chunkHead[1],4,v);
+    BlockRead(f,chunkTag,4,v);
     if (v<>4) then break;
     Len:=ReadLongBI;
-{$IFDEF DEBUG} Write('-',ChunkHead,'(',Len,') ');{$ENDIF}
-    if chunkHead='MThd' then
+    if chunkTag=TAG_MTHD then
     begin
       format:=readWordBI;
       nTracks:=readWordBI;
       v:=readWordBI;
-{$IFDEF DEBUG}
-      WriteLn('Format: ',format);
-      WriteLn('Tracks: ',nTracks);
-{$ENDIF}
       if (v and $8000)<>0 then
       begin
         fps:=(v shr 8) and $7F;
@@ -139,20 +155,19 @@ begin
 {$ENDIF}
       end;
     end
-    else if chunkHead='MTrk' then
+    else if chunkTag=TAG_MTRK then
     begin
       inc(trackCount);
-{$IFDEF DEBUG} Write('Track: ',trackCount,'/',nTracks,'...'); {$ELSE} Write('.'); {$ENDIF}
+      Write('Track: ',trackCount,'/',nTracks,'...');
       BlockRead(f,MIDData[dataPos],Len);
       nTrkRec^.ptr:=@MIDData[dataPos];
       nTrkRec^.deltaTime:=0;
-//      nTrkRec^.size:=Len;
       nTrkRec^.skipDelta:=false;
       nTrkRec^.EOT:=false;
       inc(nTrkRec,1);
       inc(dataPos,Len);
     end;
-{$IFDEF DEBUG} Write(#156); {$ENDIF}
+    Write(#156);
   end;
   Close(f);
   result:=true;
@@ -165,7 +180,7 @@ var
   DeltaTime,msgLen:TDeltaTime;
   v,Event:Byte;
 
-  function decodeDeltaTime:TDeltaTime;
+  function getVarLong:TDeltaTime;
   var
     v:byte;
 
@@ -183,13 +198,28 @@ var
     result:=TrackData^; inc(TrackData);
   end;
 
+  function get24bitVal:longint;
+  var
+    ResultPTR:^Byte;
+    a,b,c:byte;
+
+  begin
+    ResultPTR:=@Result;
+    a:=TrackData^; inc(TrackData);
+    b:=TrackData^; inc(TrackData);
+    c:=TrackData^; inc(TrackData);
+    ResultPTR^:=c;
+    inc(ResultPTR); ResultPTR^:=b;
+    inc(ResultPTR); ResultPTR^:=a;
+  end;
+
 begin
   TrackData:=Track^.ptr;
   event:=Track^._event;
   repeat
     if not Track^.skipDelta then
     begin
-      deltaTime:=decodeDeltaTime;
+      deltaTime:=getVarLong;
       if deltaTime>0 then
         break;
     end
@@ -203,23 +233,42 @@ begin
       $80..$BF,
       $E0..$EF: // two parameters for event
         begin
+{$IFDEF USE_FIFO}
           FIFO_WriteByte(event);
           FIFO_WriteByte(getByte);
           FIFO_WriteByte(getByte);
+{$ELSE}
+          MC6850_Send(event);
+          MC6850_Send(getByte);
+          MC6850_Send(getByte);
+{$ENDIF}
         end;
       $C0..$DF: // one parameter for event
         begin
+{$IFDEF USE_FIFO}
           FIFO_WriteByte(event);
           FIFO_WriteByte(getByte);
+{$ELSE}
+          MC6850_Send(event);
+          MC6850_Send(getByte);
+{$ENDIF}
         end;
       $F0..$F7: // SysEx Event
         begin
-          msgLen:=decodeDeltaTime;
+          msgLen:=getVarLong;
+{$IFDEF USE_FIFO}
           FIFO_WriteByte(event);
+{$ELSE}
+          MC6850_Send(event);
+{$ENDIF}
           while msgLen>0 do
           begin
             v:=getByte;
+{$IFDEF USE_FIFO}
             FIFO_WriteByte(v);
+{$ELSE}
+            MC6850_Send(v);
+{$ENDIF}
             dec(msgLen);
           end;
           if v=$F7 then flagSysEx:=false else flagSysEx:=true;
@@ -227,11 +276,26 @@ begin
       $FF: // Meta events
         begin
           event:=getByte;
-          msgLen:=decodeDeltaTime;
-          if event=$2f then
-            Track^.EOT:=true
+          msgLen:=getVarLong;
+          case event of
+            $2f: // end of track
+              Track^.EOT:=true;
+            $51: // tempo
+              begin
+                ms_per_qnote:=get24bitVal;
+                setTempo(ms_per_qnote);
+              end;
+            $58: // time signature
+              begin
+                tactNum:=getByte;
+                tactDenum:=getByte;
+                ticks_per_qnote:=getByte;
+                ticks_per_32nd:=getByte;
+                // setTempo(ms_per_qnote);
+              end;
           else
             inc(TrackData,msgLen);
+          end;
         end;
     end;
   until Track^.EOT;
@@ -241,4 +305,43 @@ begin
   result:=deltaTime;
 end;
 
+
+procedure int_play; Interrupt;
+begin
+  if not _pauseCount then
+  begin
+    inc(_subCnt);
+    if _subCnt>=freq_ratio then
+    begin
+      _subCnt:=0;
+      inc(totalTicks);
+    end;
+  end;
+  asm
+    pla
+  end;
+end;
+
+procedure setTempo(nTempo:longint);
+var
+  freq:float;
+  _fdiv:byte;
+
+begin
+  setIntVec(iTim1,oldVec);
+
+  freq:=1/((nTempo/tickDiv)/1000000)*freq_ratio;
+  _fdiv:=round(64000/freq);
+  BPM:=Round(60000000/nTempo);
+  setIntVec(iTim1,@int_play,0,_fdiv);
+end;
+
+initialization
+  tactNum:=4;
+  tactDenum:=4;
+  ticks_per_qnote:=24;
+  ticks_per_32nd:=8;
+  ms_per_qnote:=500000;
+
+  getIntVec(iTim1,oldVec);
 end.
