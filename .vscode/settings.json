@@ -6,8 +6,8 @@
 		"**/CVS": true,
 		"**/.DS_Store": true,
 		"**/Thumbs.db": true,
-		"*.lab": true,
-		"*.xex": true,
+		"*.lab": false,
+		"*.xex": false,
 		"*.lst": false
 	},
 	"explorerExclude.backup": null

@@ -24,7 +24,7 @@ begin
     fn:='D2:SELFTEST.MID';
 
   MIDTracks:=Pointer($4000);
-  MIDData:=Pointer($4100);
+  // MIDData:=Pointer($4100);
   if not LoadMID(fn) then halt(1);
   totalTicks:=0;
 
@@ -32,7 +32,7 @@ begin
 
   Repeat
     PlayingTracks:=nTracks; curTrackOfs:=0;
-    for cTrk:=0 to nTracks-1 do
+    for cTrk:=1 to nTracks do
     begin
       Track:=@MIDTracks[curTrackOfs];
       inc(curTrackOfs,sizeOf(TMIDTrack));

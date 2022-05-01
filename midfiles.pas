@@ -1,6 +1,8 @@
 unit MIDFiles;
 
 interface
+uses Objects;
+
 const
   freq_ratio=2;
 
@@ -11,7 +13,8 @@ type
 
   PMIDTrack = ^TMIDTrack;
   TMIDTrack = record
-    ptr:Pointer;
+    // ptr:Pointer;
+    pos:Cardinal;
     deltaTime:TDeltaTime;
     skipDelta,
     EOT:Boolean;
@@ -19,7 +22,8 @@ type
   end;
 
 var
-  MIDData:TByteArray;
+  // MIDData:TByteArray;
+  MIDData:TMemoryStream;
   MIDTracks:TByteArray;
   format:word;
   nTracks:word;
@@ -58,7 +62,7 @@ const
 
 var
   BI:TBigIndian;
-  RBuf:Array[0..0] of byte absolute $600;
+  RBuf:TByteArray absolute $600;
 
 function wordBI(var bi:TByteArray):word;
 var
@@ -110,6 +114,7 @@ var
 end;
 
 begin
+  MIDData.Create;
   nTrkRec:=@MIDTracks;
   WriteLn('Open file ',fn);
 {$I-}
@@ -159,8 +164,16 @@ begin
     begin
       inc(trackCount);
       Write('Track: ',trackCount,'/',nTracks,'...');
-      BlockRead(f,MIDData[dataPos],Len);
-      nTrkRec^.ptr:=@MIDData[dataPos];
+      // BlockRead(f,MIDData[dataPos],Len);
+      nTrkRec^.pos:=MIDData.Position;
+      while Len>0 do
+      begin
+        if len>256 then v:=256 else v:=len;
+        BlockRead(f,RBuf,v);
+        MIDData.WriteBuffer(RBuf,v);
+        Dec(Len,v);
+      end;
+      // nTrkRec^.ptr:=@MIDData[dataPos];
       nTrkRec^.deltaTime:=0;
       nTrkRec^.skipDelta:=false;
       nTrkRec^.EOT:=false;
@@ -175,7 +188,8 @@ end;
 
 function GetTrackData(track:PMIDTrack):TDeltaTime;
 var
-  TrackData:^Byte;
+  TrkPos:Cardinal;
+  // TrackData:^Byte;
   flagSysEx:Boolean;
   DeltaTime,msgLen:TDeltaTime;
   v,Event:Byte;
@@ -187,7 +201,8 @@ var
   begin
     result:=0;
     repeat
-      v:=TrackData^; inc(TrackData);
+      // v:=TrackData^; inc(TrackData);
+      v:=MIDData.ReadByte;
       result:=result shl 7;
       result:=result or (v and $7f);
     until (v and $80=0);
@@ -195,7 +210,8 @@ var
 
   function getByte:Byte;
   begin
-    result:=TrackData^; inc(TrackData);
+    // result:=TrackData^; inc(TrackData);
+    result:=MIDData.ReadByte;
   end;
 
   function get24bitVal:longint;
@@ -205,16 +221,20 @@ var
 
   begin
     ResultPTR:=@Result;
-    a:=TrackData^; inc(TrackData);
-    b:=TrackData^; inc(TrackData);
-    c:=TrackData^; inc(TrackData);
+    a:=MIDData.ReadByte;
+    b:=MIDData.ReadByte;
+    c:=MIDData.ReadByte;
+    // a:=TrackData^; inc(TrackData);
+    // b:=TrackData^; inc(TrackData);
+    // c:=TrackData^; inc(TrackData);
     ResultPTR^:=c;
     inc(ResultPTR); ResultPTR^:=b;
     inc(ResultPTR); ResultPTR^:=a;
   end;
 
 begin
-  TrackData:=Track^.ptr;
+  //TrackData:=Track^.ptr;
+  MIDData.Position:=Track^.pos;
   event:=Track^._event;
   repeat
     if not Track^.skipDelta then
@@ -226,8 +246,13 @@ begin
     else
       Track^.skipDelta:=false;
 
-    if TrackData^ and $80<>0 then
-      event:=getByte;
+    v:=MIDData.readByte;
+    if v and $80<>0 then
+      event:=v
+    else
+      Dec(MIDData.Position);
+    // if TrackData^ and $80<>0 then
+    //   event:=getByte;
 
     case event of
       $80..$BF,
@@ -294,12 +319,14 @@ begin
                 // setTempo(ms_per_qnote);
               end;
           else
-            inc(TrackData,msgLen);
+            // inc(TrackData,msgLen);
+            inc(MIDData.Position,msgLen);
           end;
         end;
     end;
   until Track^.EOT;
-  Track^.ptr:=Pointer(TrackData);
+  // Track^.ptr:=Pointer(TrackData);
+  Track^.pos:=MIDData.Position;
   Track^.skipDelta:=true;
   Track^._event:=event;
   result:=deltaTime;
@@ -337,6 +364,7 @@ begin
 end;
 
 initialization
+  oldVec:=nil;
   tactNum:=4;
   tactDenum:=4;
   ticks_per_qnote:=24;
