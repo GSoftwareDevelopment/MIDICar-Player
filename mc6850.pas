@@ -48,7 +48,7 @@ const
     FE   = 16      ;   // Framming Error (active HIGH)
     OVRN = 32      ;   // Receiver Overrun(active HIGH)
     PE   = 64      ;   // Parity Error (active HIGH)
-    IRQ  = 128     ;   // Interrupt Request - state of the /IRQ output, set HIGH when IRQ appeared. Crear automaticale when read/write to buffer.
+    IRQ  = 128     ;   // Interrupt Request - state of the /IRQ output, set HIGH when IRQ appeared. Clear automaticale when read/write to buffer.
 
 var
 // VIA6522 registers
@@ -81,8 +81,10 @@ end;
 
 procedure MC6850_Send(data:byte);
 begin
+{$IFDEF DEBUG} poke($d01a,0); {$ENDIF}
     repeat until (MC6850_CNTRReg and TDRE)<>0;
     MC6850_BUFFER:=data;
+{$IFDEF DEBUG} poke($d01a,data); {$ENDIF}
 end;
 
 end.

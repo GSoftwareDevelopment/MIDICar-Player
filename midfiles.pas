@@ -1,20 +1,19 @@
 unit MIDFiles;
 
 interface
-uses Objects;
-
 const
   freq_ratio=2;
+  f_counter = %10000000;
+  f_tick    = %01000000;
 
 type
-  TDeltaTime = longint;
+  TDeltaTime = word;
   TByteArray = Array[0..0] of byte;
   TBigIndian = Array[0..3] of byte;
 
   PMIDTrack = ^TMIDTrack;
   TMIDTrack = record
-    // ptr:Pointer;
-    pos:Cardinal;
+    ptr:Pointer;
     deltaTime:TDeltaTime;
     skipDelta,
     EOT:Boolean;
@@ -22,15 +21,13 @@ type
   end;
 
 var
-  // MIDData:TByteArray;
-  MIDData:TMemoryStream;
+  MIDData:Pointer;
   MIDTracks:TByteArray;
   format:word;
   nTracks:word;
   fps:byte;
   fsd:byte;
   tickDiv:word;
-  totalTicks:longint;
   ms_per_qnote:longint;
   tactNum:byte;
   tactDenum:byte;
@@ -38,9 +35,19 @@ var
   ticks_per_32nd:byte;
   BPM:Word;
 
-  oldVec:Pointer;
-  _pauseCount:boolean = false;
-  _subCnt:byte;
+  // VIMIRQ:Pointer absolute $216;
+  // oldIRQ:Pointer;
+  oldTimerVec:Pointer;
+
+  _timerStatus:byte absolute $df;
+{ 76543210
+  ||
+  |+-- tick flag (f_tick)
+  +--- counter flag (f_counter)
+}
+
+  _subCnt:byte absolute $f2;
+  totalTicks:longint absolute $f3;
 
 function LoadMID(fn:PString):Boolean;
 function GetTrackData(track:PMIDTrack):TDeltaTime;
@@ -49,8 +56,8 @@ procedure setTempo(nTempo:longint);
 implementation
 Uses
   {$IFDEF USE_FIFO}MIDI_FIFO,{$ENDIF}
-  MC6850
-  {$IFDEF DEBUG},CRT{$ENDIF}
+  MC6850,
+  sysutils
   ;
 
 type
@@ -63,6 +70,7 @@ const
 var
   BI:TBigIndian;
   RBuf:TByteArray absolute $600;
+  TrackData:^Byte absolute $f7;
 
 function wordBI(var bi:TByteArray):word;
 var
@@ -88,6 +96,45 @@ begin
   end;
 end;
 
+{
+  memory under XDOS 2.43N:
+
+  $0700..$1df0 XDOS
+  $4000..$7fff Free mem - extended memory bank
+  $8000..$9c1f Free mem
+  $9c20..$9c3f Display List
+  $9c40..$9fff Screen
+  $a000..$bfff Free mem
+  $c000..$d7ff Free mem (under ROM)
+  $d800..$dfff Free mem (under ROM)
+  $e000..$e3ff Font set
+  $e400..$fffd Free mem (under ROM)
+
+  free memory gaps in page align:
+
+  $4000..$9bff
+  $a000..$bfff
+  $c000..$d7ff
+  $e400..$ff00
+
+  total free: AF00 (44800)
+}
+
+procedure memBoundCheck(var adr:word);
+begin
+  if adr=$9c00 then
+    adr:=$A000
+  else if adr=$d000 then
+    adr:=$d800
+  else if adr=$E000 then
+    adr:=$e400
+  else if adr=$FF00 then
+  begin
+    WriteLn('Not enought memory.');
+    halt(2);
+  end;
+end;
+
 //
 //
 //
@@ -97,8 +144,9 @@ var
   f:File;
   trackCount:word;
   chunkTag:TTag;
-  v,dataPos:word;
+  v,top,loadAdr,endAdr:word;
   Len:Longint;
+  loadSize:byte;
   nTrkRec:PMIDTrack;
 
   function ReadWordBI:word;
@@ -114,7 +162,6 @@ var
 end;
 
 begin
-  MIDData.Create;
   nTrkRec:=@MIDTracks;
   WriteLn('Open file ',fn);
 {$I-}
@@ -126,7 +173,7 @@ begin
     Close(f);
     exit(false);
   end;
-  trackCount:=0; dataPos:=0; nTracks:=255;
+  trackCount:=0; nTracks:=255;
   while (IOResult<128) and (not EOF(F)) and (trackCount<nTracks) do
   begin
     BlockRead(f,chunkTag,4,v);
@@ -164,21 +211,39 @@ begin
     begin
       inc(trackCount);
       Write('Track: ',trackCount,'/',nTracks,'...');
-      // BlockRead(f,MIDData[dataPos],Len);
-      nTrkRec^.pos:=MIDData.Position;
-      while Len>0 do
-      begin
-        if len>256 then v:=256 else v:=len;
-        BlockRead(f,RBuf,v);
-        MIDData.WriteBuffer(RBuf,v);
-        Dec(Len,v);
-      end;
-      // nTrkRec^.ptr:=@MIDData[dataPos];
+
+      nTrkRec^.ptr:=MIDData;
       nTrkRec^.deltaTime:=0;
       nTrkRec^.skipDelta:=false;
       nTrkRec^.EOT:=false;
+
+      while Len>0 do
+      begin
+        loadAdr:=word(MIDData);
+        memBoundCheck(loadAdr);
+        MIDData:=pointer(loadAdr);
+        if len>128 then loadSize:=128 else loadSize:=len;
+        endAdr:=loadAdr+loadSize;
+        if (endAdr>=$9c00) and (endAdr<$A000) then
+          top:=$9c00
+        else if (endAdr>=$d000) and (endAdr<$d800) then
+          top:=$d000
+        else if (endAdr>=$e000) and (endAdr<$e400) then
+          top:=$e000
+        else top:=0;
+        if top<>0 then
+          loadSize:=top-loadAdr;
+        if loadSize=0 then continue;
+        // WriteLn(intToHex(loadAdr,4),' ',intToHex(loadSize,4));
+
+        BlockRead(f,RBuf,loadSize,v);
+        if v<>loadSize then halt(1);
+        move(@RBuf,MIDData,loadSize);
+        inc(MIDData,v);
+        Dec(Len,v);
+      end;
+
       inc(nTrkRec,1);
-      inc(dataPos,Len);
     end;
     Write(#156);
   end;
@@ -188,53 +253,85 @@ end;
 
 function GetTrackData(track:PMIDTrack):TDeltaTime;
 var
-  TrkPos:Cardinal;
-  // TrackData:^Byte;
   flagSysEx:Boolean;
   DeltaTime,msgLen:TDeltaTime;
-  v,Event:Byte;
+  v,Event,Meta:Byte;
+  // readBuf:Boolean;
+  adr:word;
+
+  function ReadB:Byte;
+  begin
+    adr:=word(TrackData);
+    memBoundCheck(adr);
+    TrackData:=pointer(adr);
+    result:=TrackData^;
+    inc(TrackData);
+  end;
+
+  procedure getData(var buf:TByteArray; size:byte);
+  var
+    i:byte;
+
+  begin
+    i:=0;
+    while size>0 do
+    begin
+      adr:=word(TrackData);
+      memBoundCheck(adr);
+      TrackData:=pointer(adr);
+      buf[i]:=TrackData^;
+      inc(TrackData);
+      inc(i);
+      dec(size);
+    end;
+  end;
+
+  procedure skip(n:byte);
+  begin
+    while n>0 do
+    begin
+      adr:=word(TrackData);
+      memBoundCheck(adr);
+      TrackData:=pointer(adr);
+      dec(n);
+      inc(TrackData);
+    end;
+  end;
 
   function getVarLong:TDeltaTime;
-  var
-    v:byte;
+  // var
+  //   v:byte;
 
   begin
     result:=0;
     repeat
-      // v:=TrackData^; inc(TrackData);
-      v:=MIDData.ReadByte;
+      v:=ReadB;
       result:=result shl 7;
       result:=result or (v and $7f);
     until (v and $80=0);
   end;
 
-  function getByte:Byte;
-  begin
-    // result:=TrackData^; inc(TrackData);
-    result:=MIDData.ReadByte;
-  end;
-
   function get24bitVal:longint;
   var
     ResultPTR:^Byte;
-    a,b,c:byte;
+    // a,b,c:byte;
 
   begin
     ResultPTR:=@Result;
-    a:=MIDData.ReadByte;
-    b:=MIDData.ReadByte;
-    c:=MIDData.ReadByte;
-    // a:=TrackData^; inc(TrackData);
-    // b:=TrackData^; inc(TrackData);
-    // c:=TrackData^; inc(TrackData);
-    ResultPTR^:=c;
-    inc(ResultPTR); ResultPTR^:=b;
-    inc(ResultPTR); ResultPTR^:=a;
+    getData(BI,3);
+    ResultPTR^:=BI[2]; inc(ResultPTR);
+    ResultPTR^:=BI[1]; inc(ResultPTR);
+    ResultPTR^:=BI[0];
+    // a:=ReadB;
+    // b:=ReadB;
+    // c:=ReadB;
+    // ResultPTR^:=c;
+    // inc(ResultPTR); ResultPTR^:=b;
+    // inc(ResultPTR); ResultPTR^:=a;
   end;
 
 begin
-  //TrackData:=Track^.ptr;
-  MIDData.Position:=Track^.pos;
+  trackData:=Track^.ptr;
   event:=Track^._event;
   repeat
     if not Track^.skipDelta then
@@ -246,13 +343,8 @@ begin
     else
       Track^.skipDelta:=false;
 
-    v:=MIDData.readByte;
-    if v and $80<>0 then
-      event:=v
-    else
-      Dec(MIDData.Position);
-    // if TrackData^ and $80<>0 then
-    //   event:=getByte;
+    if TrackData^ and $80<>0 then
+      event:=ReadB;
 
     case event of
       $80..$BF,
@@ -260,22 +352,22 @@ begin
         begin
 {$IFDEF USE_FIFO}
           FIFO_WriteByte(event);
-          FIFO_WriteByte(getByte);
-          FIFO_WriteByte(getByte);
+          FIFO_WriteByte(ReadB);
+          FIFO_WriteByte(ReadB);
 {$ELSE}
           MC6850_Send(event);
-          MC6850_Send(getByte);
-          MC6850_Send(getByte);
+          MC6850_Send(ReadB);
+          MC6850_Send(ReadB);
 {$ENDIF}
         end;
       $C0..$DF: // one parameter for event
         begin
 {$IFDEF USE_FIFO}
           FIFO_WriteByte(event);
-          FIFO_WriteByte(getByte);
+          FIFO_WriteByte(ReadB);
 {$ELSE}
           MC6850_Send(event);
-          MC6850_Send(getByte);
+          MC6850_Send(ReadB);
 {$ENDIF}
         end;
       $F0..$F7: // SysEx Event
@@ -288,7 +380,7 @@ begin
 {$ENDIF}
           while msgLen>0 do
           begin
-            v:=getByte;
+            v:=ReadB;
 {$IFDEF USE_FIFO}
             FIFO_WriteByte(v);
 {$ELSE}
@@ -300,11 +392,13 @@ begin
         end;
       $FF: // Meta events
         begin
-          event:=getByte;
+          meta:=ReadB;
           msgLen:=getVarLong;
-          case event of
+          case meta of
             $2f: // end of track
-              Track^.EOT:=true;
+              begin
+                Track^.EOT:=true;
+              end;
             $51: // tempo
               begin
                 ms_per_qnote:=get24bitVal;
@@ -312,21 +406,19 @@ begin
               end;
             $58: // time signature
               begin
-                tactNum:=getByte;
-                tactDenum:=getByte;
-                ticks_per_qnote:=getByte;
-                ticks_per_32nd:=getByte;
-                // setTempo(ms_per_qnote);
+                tactNum:=ReadB;
+                tactDenum:=ReadB;
+                ticks_per_qnote:=ReadB;
+                ticks_per_32nd:=ReadB;
+                setTempo(ms_per_qnote);
               end;
           else
-            // inc(TrackData,msgLen);
-            inc(MIDData.Position,msgLen);
+            skip(msgLen);
           end;
         end;
     end;
   until Track^.EOT;
-  // Track^.ptr:=Pointer(TrackData);
-  Track^.pos:=MIDData.Position;
+  Track^.ptr:=Pointer(TrackData);
   Track^.skipDelta:=true;
   Track^._event:=event;
   result:=deltaTime;
@@ -335,13 +427,14 @@ end;
 
 procedure int_play; Interrupt;
 begin
-  if not _pauseCount then
+  if (_timerStatus and f_counter)=0 then
   begin
     inc(_subCnt);
     if _subCnt>=freq_ratio then
     begin
       _subCnt:=0;
       inc(totalTicks);
+      _timerStatus:=_timerStatus or f_tick;
     end;
   end;
   asm
@@ -351,25 +444,31 @@ end;
 
 procedure setTempo(nTempo:longint);
 var
-  freq:float;
-  _fdiv:byte;
+  freq:single;
+  fdiv:byte;
 
 begin
-  setIntVec(iTim1,oldVec);
-
-  freq:=1/((nTempo/tickDiv)/1000000)*freq_ratio;
-  _fdiv:=round(64000/freq);
-  BPM:=Round(60000000/nTempo);
-  setIntVec(iTim1,@int_play,0,_fdiv);
+  setIntVec(iTim1,oldTimerVec);
+  freq:=nTempo/1000000;
+  freq:=freq/tickDiv;
+  freq:=1/freq;
+  // freq:=1/((tickDiv*ticks_per_qnote)/1000000)*8;
+  fdiv:=round(64000/(freq*freq_ratio));
+  BPM:=60000000 div nTempo;
+  // writeLn(tickDiv,#127,nTempo,#127,ticks_per_qnote,#127,BPM,#127,round(freq));
+  setIntVec(iTim1,@int_play,0,fdiv);
 end;
 
 initialization
-  oldVec:=nil;
+  oldTimerVec:=nil;
+  tickDiv:=384;
   tactNum:=4;
   tactDenum:=4;
   ticks_per_qnote:=24;
   ticks_per_32nd:=8;
   ms_per_qnote:=500000;
+  _timerStatus:=0;
 
-  getIntVec(iTim1,oldVec);
+  getIntVec(iTim1,oldTimerVec);
+  // oldIRQ:=VIMIRQ;
 end.

@@ -14,6 +14,7 @@ var
 procedure FIFO_Reset();
 function FIFO_ReadByte(var data:Byte):boolean;
 function FIFO_WriteByte(data:byte):boolean;
+function FIFO_Send(var data; len:byte):boolean;
 procedure FIFO_Flush();
 
 implementation
@@ -63,10 +64,28 @@ begin
   result:=true;
 end;
 
+function FIFO_Send(var data; len:byte):boolean;
+var
+  p:^Byte;
+
+begin
+  p:=@data;
+  while len>0 do
+  begin
+    if not FIFO_WriteByte(p^) then exit(false);
+    inc(p); dec(len);
+  end;
+  result:=true;
+end;
+
 procedure FIFO_Flush;
 begin
   While FIFO_ReadByte(ZP_Data) do
+  begin
+    poke($d01a,ZP_Data);
     MC6850_Send(ZP_Data);
+  end;
+  poke($d01a,0);
 end;
 
 end.

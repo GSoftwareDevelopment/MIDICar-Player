@@ -11,6 +11,7 @@
 				"MIDICar Player.pas",
 				"-ipath:./",
 				// "-define:USE_FIFO",
+				"-code:1E00",
 				"-o:./asm/MIDICar Player.a65"
 			],
 			"presentation": {
