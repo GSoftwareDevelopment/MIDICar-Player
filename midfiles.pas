@@ -3,8 +3,8 @@ unit MIDFiles;
 interface
 const
   freq_ratio=2;
-  f_counter = %10000000;
-  f_tick    = %01000000;
+  f_counter = %10000000; // prevents counting
+  f_tick    = %01000000; // tic indicator
 
 type
   TDeltaTime = word;
@@ -35,8 +35,6 @@ var
   ticks_per_32nd:byte;
   BPM:Word;
 
-  // VIMIRQ:Pointer absolute $216;
-  // oldIRQ:Pointer;
   oldTimerVec:Pointer;
 
   _timerStatus:byte absolute $df;
@@ -50,7 +48,7 @@ var
   totalTicks:longint absolute $f3;
 
 function LoadMID(fn:PString):Boolean;
-function GetTrackData(track:PMIDTrack):TDeltaTime;
+function ProcessTrack(track:PMIDTrack):TDeltaTime;
 procedure setTempo(nTempo:longint);
 
 implementation
@@ -251,12 +249,11 @@ begin
   result:=true;
 end;
 
-function GetTrackData(track:PMIDTrack):TDeltaTime;
+function ProcessTrack(track:PMIDTrack):TDeltaTime;
 var
   flagSysEx:Boolean;
   DeltaTime,msgLen:TDeltaTime;
   v,Event,Meta:Byte;
-  // readBuf:Boolean;
   adr:word;
 
   function ReadB:Byte;
@@ -299,9 +296,6 @@ var
   end;
 
   function getVarLong:TDeltaTime;
-  // var
-  //   v:byte;
-
   begin
     result:=0;
     repeat
@@ -314,7 +308,6 @@ var
   function get24bitVal:longint;
   var
     ResultPTR:^Byte;
-    // a,b,c:byte;
 
   begin
     ResultPTR:=@Result;
@@ -322,12 +315,6 @@ var
     ResultPTR^:=BI[2]; inc(ResultPTR);
     ResultPTR^:=BI[1]; inc(ResultPTR);
     ResultPTR^:=BI[0];
-    // a:=ReadB;
-    // b:=ReadB;
-    // c:=ReadB;
-    // ResultPTR^:=c;
-    // inc(ResultPTR); ResultPTR^:=b;
-    // inc(ResultPTR); ResultPTR^:=a;
   end;
 
 begin
@@ -470,5 +457,4 @@ initialization
   _timerStatus:=0;
 
   getIntVec(iTim1,oldTimerVec);
-  // oldIRQ:=VIMIRQ;
 end.

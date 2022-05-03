@@ -1179,14 +1179,14 @@ Source: MIDICar Player.a65
   1043
   1044 2D0F			.local	WORDBI						; FUNCTION
   1045
-  1046 				; optimize OK (MIDFILES), line = 80
+  1046 				; optimize OK (MIDFILES), line = 78
   1047
   1048 2D0F A9 E3			lda <RESULT
   1049 2D11 8D E5 3B			sta RESULTPTR
   1050 2D14 A9 3B			lda >RESULT
   1051 2D16 8D E6 3B			sta RESULTPTR+1
   1052
-  1053 				; optimize OK (MIDFILES), line = 81
+  1053 				; optimize OK (MIDFILES), line = 79
   1054
   1055 2D19 AC E1 3B 84 82 AC + 	mwy BI :bp2
   1056 2D23 A0 01			ldy #$01
@@ -1198,7 +1198,7 @@ Source: MIDICar Player.a65
   1062 2D34 D0 03			sne
   1063 2D36 EE E6 3B			inc RESULTPTR+1
   1064
-  1065 				; optimize OK (MIDFILES), line = 82
+  1065 				; optimize OK (MIDFILES), line = 80
   1066
   1067 2D39 A0 00			ldy #$00
   1068 2D3B B1 82			lda (:bp2),y
@@ -1221,14 +1221,14 @@ Source: MIDICar Player.a65
   1085
   1086 2D48			.local	LONGBI						; FUNCTION
   1087
-  1088 				; optimize OK (MIDFILES), line = 91
+  1088 				; optimize OK (MIDFILES), line = 89
   1089
   1090 2D48 A9 E9			lda <RESULT
   1091 2D4A 8D ED 3B			sta RESULTPTR
   1092 2D4D A9 3B			lda >RESULT
   1093 2D4F 8D EE 3B			sta RESULTPTR+1
   1094
-  1095 				; optimize OK (MIDFILES), line = 92
+  1095 				; optimize OK (MIDFILES), line = 90
   1096
   1097 2D52 A9 03			lda #$03
   1098 2D54 8D EF 3B			sta I
@@ -1236,7 +1236,7 @@ Source: MIDICar Player.a65
   1100 2D57			l_029A
   1101 				; --- ForToDoCondition
   1102
-  1103 				; optimize OK (MIDFILES), line = 94
+  1103 				; optimize OK (MIDFILES), line = 92
   1104
   1105 2D57 AC E7 3B 84 82 AC + 	mwy BI :bp2
   1106 2D61 AC EF 3B			ldy I
@@ -1245,7 +1245,7 @@ Source: MIDICar Player.a65
   1109 2D6B AC ED 3B			ldy RESULTPTR
   1110 2D6E 91 80			sta (:bp),y
   1111
-  1112 				; optimize FAIL (0, MIDFILES), line = 95
+  1112 				; optimize FAIL (0, MIDFILES), line = 93
   1113
   1114 2D70 EE ED 3B			inc RESULTPTR
   1115 2D73 D0 03			sne
@@ -1272,7 +1272,7 @@ Source: MIDICar Player.a65
   1136
   1137 2D7E			.local	MEMBOUNDCHECK					; PROCEDURE
   1138
-  1139 				; optimize OK (MIDFILES), line = 125
+  1139 				; optimize OK (MIDFILES), line = 123
   1140
   1141 2D7E AC F0 3B 84 82 AC + 	mwy ADR :bp2
   1142 2D88 A0 01			ldy #$00+$01
@@ -1284,7 +1284,7 @@ Source: MIDICar Player.a65
   1148 				@
   1149 2D93 D0 0D			jne l_02CF
   1150
-  1151 				; optimize OK (MIDFILES), line = 126
+  1151 				; optimize OK (MIDFILES), line = 124
   1152
   1153 2D95 A0 00			ldy #$00
   1154 2D97 98				tya
@@ -1295,7 +1295,7 @@ Source: MIDICar Player.a65
   1159 2D9F 4C 10 2E			jmp l_02DD
   1160 2DA2			l_02CF
   1161
-  1162 				; optimize OK (MIDFILES), line = 127
+  1162 				; optimize OK (MIDFILES), line = 125
   1163
   1164 2DA2 AC F0 3B 84 82 AC + 	mwy ADR :bp2
   1165 2DAC A0 01			ldy #$00+$01
@@ -1307,7 +1307,7 @@ Source: MIDICar Player.a65
   1171 				@
   1172 2DB7 D0 0D			jne l_02EE
   1173
-  1174 				; optimize OK (MIDFILES), line = 128
+  1174 				; optimize OK (MIDFILES), line = 126
   1175
   1176 2DB9 A0 00			ldy #$00
   1177 2DBB 98				tya
@@ -1318,7 +1318,7 @@ Source: MIDICar Player.a65
   1182 2DC3 4C 10 2E			jmp l_02FC
   1183 2DC6			l_02EE
   1184
-  1185 				; optimize OK (MIDFILES), line = 129
+  1185 				; optimize OK (MIDFILES), line = 127
   1186
   1187 2DC6 AC F0 3B 84 82 AC + 	mwy ADR :bp2
   1188 2DD0 A0 01			ldy #$00+$01
@@ -1330,7 +1330,7 @@ Source: MIDICar Player.a65
   1194 				@
   1195 2DDB D0 0D			jne l_030D
   1196
-  1197 				; optimize OK (MIDFILES), line = 130
+  1197 				; optimize OK (MIDFILES), line = 128
   1198
   1199 2DDD A0 00			ldy #$00
   1200 2DDF 98				tya
@@ -1341,7 +1341,7 @@ Source: MIDICar Player.a65
   1205 2DE7 4C 10 2E			jmp l_031B
   1206 2DEA			l_030D
   1207
-  1208 				; optimize OK (MIDFILES), line = 131
+  1208 				; optimize OK (MIDFILES), line = 129
   1209
   1210 2DEA AC F0 3B 84 82 AC + 	mwy ADR :bp2
   1211 2DF4 A0 01			ldy #$00+$01
@@ -1353,7 +1353,7 @@ Source: MIDICar Player.a65
   1217 				@
   1218 2DFF D0 0F			jne l_032C
   1219
-  1220 				; optimize FAIL ('@print', MIDFILES), line = 133
+  1220 				; optimize FAIL ('@print', MIDFILES), line = 131
   1221
   1222 					@printSTRING #CODEORIGIN+$000D
   1222 				 LDY> CODEORIGIN+$000D\ LDA< CODEORIGIN+$000D\ JSR @PRINTSTRING
@@ -1395,7 +1395,7 @@ Source: MIDICar Player.a65
   1255
   1256 				; BlockRead
   1257
-  1258 				; optimize OK (MIDFILES), line = 154
+  1258 				; optimize OK (MIDFILES), line = 152
   1259
   1260 2E14 AC 23 33 84 82 AC + 	mwy F :bp2
   1261 2E1E A0 06			ldy #s@file.buffer
@@ -1421,7 +1421,7 @@ Source: MIDICar Player.a65
   1276 2E41 20 3B 1F		 JSR @READFILE
   1277 2E44 68 AA			pla:tax
   1278
-  1279 				; optimize OK (MIDFILES), line = 155
+  1279 				; optimize OK (MIDFILES), line = 153
   1280
   1281 2E46 AD 8D 38			lda BI
   1282 2E49 8D E1 3B			sta WORDBI.BI
@@ -1444,7 +1444,7 @@ Source: MIDICar Player.a65
   1299
   1300 				; BlockRead
   1301
-  1302 				; optimize OK (MIDFILES), line = 160
+  1302 				; optimize OK (MIDFILES), line = 158
   1303
   1304 2E62 AC 23 33 84 82 AC + 	mwy F :bp2
   1305 2E6C A0 06			ldy #s@file.buffer
@@ -1470,7 +1470,7 @@ Source: MIDICar Player.a65
   1320 2E8F 20 3B 1F		 JSR @READFILE
   1321 2E92 68 AA			pla:tax
   1322
-  1323 				; optimize OK (MIDFILES), line = 161
+  1323 				; optimize OK (MIDFILES), line = 159
   1324
   1325 2E94 AD 8D 38			lda BI
   1326 2E97 8D E7 3B			sta LONGBI.BI
@@ -1494,14 +1494,14 @@ Source: MIDICar Player.a65
   1344 				.endl
   1345 2EBC			l_0338
   1346
-  1347 				; optimize OK (MIDFILES), line = 165
+  1347 				; optimize OK (MIDFILES), line = 163
   1348
   1349 2EBC AD 8B 38			lda MIDTRACKS
   1350 2EBF 8D 14 3C			sta NTRKREC
   1351 2EC2 AD 8C 38			lda MIDTRACKS+1
   1352 2EC5 8D 15 3C			sta NTRKREC+1
   1353
-  1354 				; optimize FAIL ('@print', MIDFILES), line = 166
+  1354 				; optimize FAIL ('@print', MIDFILES), line = 164
   1355
   1356 					@printSTRING #CODEORIGIN+$0022
   1356 				 LDY> CODEORIGIN+$0022\ LDA< CODEORIGIN+$0022\ JSR @PRINTSTRING
@@ -1516,7 +1516,7 @@ Source: MIDICar Player.a65
   1358 2ED8 20 8F 28			@printEOL
   1359 				; AssignFile
   1360
-  1361 				; optimize OK (MIDFILES), line = 168
+  1361 				; optimize OK (MIDFILES), line = 166
   1362
   1363 2EDB AC 23 33 84 82 AC + 	mwy F :bp2
   1364 2EE5 A0 00			ldy #s@file.pfname
@@ -1530,7 +1530,7 @@ Source: MIDICar Player.a65
   1372 2EF6 91 82			sta (:bp2),y
   1373 				; Reset
   1374
-  1375 				; optimize OK (MIDFILES), line = 169
+  1375 				; optimize OK (MIDFILES), line = 167
   1376
   1377 2EF8 A0 02			ldy #s@file.record
   1378 2EFA A9 01			lda #$01
@@ -1549,12 +1549,12 @@ Source: MIDICar Player.a65
   1386 2F0F 20 6C 1E		 JSR @OPENFILE
   1387 2F12 68 AA			pla:tax
   1388
-  1389 				; optimize OK (MIDFILES), line = 170
+  1389 				; optimize OK (MIDFILES), line = 168
   1390
   1391 2F14 AD 7F 3A			lda SYSTEM.IORESULT
   1392 2F17 10 2B			jpl l_038B
   1393
-  1394 				; optimize FAIL ('@print', MIDFILES), line = 172
+  1394 				; optimize FAIL ('@print', MIDFILES), line = 170
   1395
   1396 					@print #$9B
   1396 				 LDY# $9B\ JSR @PRINT
@@ -1579,14 +1579,14 @@ Source: MIDICar Player.a65
   1405 2F37 20 08 1F		 JSR @CLOSEFILE
   1406 2F3A 68 AA			pla:tax
   1407
-  1408 				; optimize OK (MIDFILES), line = 174
+  1408 				; optimize OK (MIDFILES), line = 172
   1409
   1410 2F3C A9 00			lda #$00
   1411 2F3E 8D F4 3B			sta RESULT
   1412 2F41 4C 22 33			jmp @exit					; exit
   1413 2F44			l_038B
   1414
-  1415 				; optimize OK (MIDFILES), line = 176
+  1415 				; optimize OK (MIDFILES), line = 174
   1416
   1417 2F44 A9 00			lda #$00
   1418 2F46 8D 01 3C			sta TRACKCOUNT
@@ -1601,7 +1601,7 @@ Source: MIDICar Player.a65
   1427 2F59			l_03A8
   1428 				; BlockRead
   1429
-  1430 				; optimize OK (MIDFILES), line = 179
+  1430 				; optimize OK (MIDFILES), line = 177
   1431
   1432 2F59 AC 23 33 84 82 AC + 	mwy F :bp2
   1433 2F63 A0 06			ldy #s@file.buffer
@@ -1633,7 +1633,7 @@ Source: MIDICar Player.a65
   1454 2F8F 20 3B 1F		 JSR @READFILE
   1455 2F92 68 AA			pla:tax
   1456
-  1457 				; optimize OK (MIDFILES), line = 180
+  1457 				; optimize OK (MIDFILES), line = 178
   1458
   1459 2F94 AD 08 3C			lda V+1
   1460 2F97 D0 05			bne @+
@@ -1644,7 +1644,7 @@ Source: MIDICar Player.a65
   1465 2FA0 4C 0F 33			jmp b_03A8					; break
   1466 2FA3			l_03C5
   1467
-  1468 				; optimize FAIL ('READLONGBI', MIDFILES), line = 181
+  1468 				; optimize FAIL ('READLONGBI', MIDFILES), line = 179
   1469
   1470 2FA3 20 62 2E			jsr READLONGBI
   1471 2FA6 AD 18 3C			lda READLONGBI.RESULT
@@ -1656,7 +1656,7 @@ Source: MIDICar Player.a65
   1477 2FB8 AD 1B 3C			lda READLONGBI.RESULT+3
   1478 2FBB 8D 12 3C			sta LEN+3
   1479
-  1480 				; optimize OK (MIDFILES), line = 182
+  1480 				; optimize OK (MIDFILES), line = 180
   1481
   1482 2FBE AD 06 3C			lda CHUNKTAG+3
   1483 2FC1 49 64			eor #$64
@@ -1671,7 +1671,7 @@ Source: MIDICar Player.a65
   1492 2FDF 49 4D			eor #$4D
   1493 2FE1 F0 03 4C 64 30		jne l_03DC
   1494
-  1495 				; optimize FAIL ('READWORDBI', MIDFILES), line = 184
+  1495 				; optimize FAIL ('READWORDBI', MIDFILES), line = 182
   1496
   1497 2FE6 20 14 2E			jsr READWORDBI
   1498 2FE9 AD 16 3C			lda READWORDBI.RESULT
@@ -1679,7 +1679,7 @@ Source: MIDICar Player.a65
   1500 2FEF AD 17 3C			lda READWORDBI.RESULT+1
   1501 2FF2 8D CA 3B			sta FORMAT+1
   1502
-  1503 				; optimize FAIL ('READWORDBI', MIDFILES), line = 185
+  1503 				; optimize FAIL ('READWORDBI', MIDFILES), line = 183
   1504
   1505 2FF5 20 14 2E			jsr READWORDBI
   1506 2FF8 AD 16 3C			lda READWORDBI.RESULT
@@ -1687,7 +1687,7 @@ Source: MIDICar Player.a65
   1508 2FFE AD 17 3C			lda READWORDBI.RESULT+1
   1509 3001 8D CC 3B			sta NTRACKS+1
   1510
-  1511 				; optimize FAIL ('READWORDBI', MIDFILES), line = 186
+  1511 				; optimize FAIL ('READWORDBI', MIDFILES), line = 184
   1512
   1513 3004 20 14 2E			jsr READWORDBI
   1514 3007 AD 16 3C			lda READWORDBI.RESULT
@@ -1695,23 +1695,23 @@ Source: MIDICar Player.a65
   1516 300D AD 17 3C			lda READWORDBI.RESULT+1
   1517 3010 8D 08 3C			sta V+1
   1518
-  1519 				; optimize OK (MIDFILES), line = 187
+  1519 				; optimize OK (MIDFILES), line = 185
   1520
   1521 3013 10 3E			jpl l_03FE
   1522
-  1523 				; optimize OK (MIDFILES), line = 189
+  1523 				; optimize OK (MIDFILES), line = 187
   1524
   1525 3015 29 7F			and #$7F
   1526 3017 8D CD 3B			sta FPS
   1527
-  1528 				; optimize OK (MIDFILES), line = 190
+  1528 				; optimize OK (MIDFILES), line = 188
   1529
   1530 301A 8D 1C 3C			sta @CASETMP_0005
   1531 301D C9 E8			cmp #$E8
   1532 301F D0 08			jne l_0417
   1533 				@
   1534
-  1535 				; optimize OK (MIDFILES), line = 191
+  1535 				; optimize OK (MIDFILES), line = 189
   1536
   1537 3021 A9 18			lda #$18
   1538 3023 8D CD 3B			sta FPS
@@ -1722,7 +1722,7 @@ Source: MIDICar Player.a65
   1543 302B D0 08			jne l_0424
   1544 				@
   1545
-  1546 				; optimize OK (MIDFILES), line = 192
+  1546 				; optimize OK (MIDFILES), line = 190
   1547
   1548 302D A9 19			lda #$19
   1549 302F 8D CD 3B			sta FPS
@@ -1733,7 +1733,7 @@ Source: MIDICar Player.a65
   1554 3037 D0 08			jne l_0431
   1555 				@
   1556
-  1557 				; optimize OK (MIDFILES), line = 193
+  1557 				; optimize OK (MIDFILES), line = 191
   1558
   1559 3039 A9 1D			lda #$1D
   1560 303B 8D CD 3B			sta FPS
@@ -1744,7 +1744,7 @@ Source: MIDICar Player.a65
   1565 3043 D0 05			jne l_043E
   1566 				@
   1567
-  1568 				; optimize OK (MIDFILES), line = 194
+  1568 				; optimize OK (MIDFILES), line = 192
   1569
   1570 3045 A9 1E			lda #$1E
   1571 3047 8D CD 3B			sta FPS
@@ -1752,14 +1752,14 @@ Source: MIDICar Player.a65
   1573 304A			l_043E
   1574 304A			a_0005
   1575
-  1576 				; optimize OK (MIDFILES), line = 196
+  1576 				; optimize OK (MIDFILES), line = 194
   1577
   1578 304A AD 07 3C			lda V
   1579 304D 8D CE 3B			sta FSD
   1580 3050 4C 61 30			jmp l_045C
   1581 3053			l_03FE
   1582
-  1583 				; optimize OK (MIDFILES), line = 204
+  1583 				; optimize OK (MIDFILES), line = 202
   1584
   1585 3053 AD 07 3C			lda V
   1586 3056 8D CF 3B			sta TICKDIV
@@ -1770,7 +1770,7 @@ Source: MIDICar Player.a65
   1591 3061 4C B6 32			jmp l_046E
   1592 3064			l_03DC
   1593
-  1594 				; optimize OK (MIDFILES), line = 210
+  1594 				; optimize OK (MIDFILES), line = 208
   1595
   1596 3064 AD 06 3C			lda CHUNKTAG+3
   1597 3067 49 6B			eor #$6B
@@ -1785,13 +1785,13 @@ Source: MIDICar Player.a65
   1606 3085 49 4D			eor #$4D
   1607 3087 F0 03 4C B6 32		jne l_047E
   1608
-  1609 				; optimize FAIL (0, MIDFILES), line = 212
+  1609 				; optimize FAIL (0, MIDFILES), line = 210
   1610
   1611 308C EE 01 3C			inc TRACKCOUNT
   1612 308F D0 03			sne
   1613 3091 EE 02 3C			inc TRACKCOUNT+1
   1614
-  1615 				; optimize FAIL ('@print', MIDFILES), line = 213
+  1615 				; optimize FAIL ('@print', MIDFILES), line = 211
   1616
   1617 					@printSTRING #CODEORIGIN+$003B
   1617 				 LDY> CODEORIGIN+$003B\ LDA< CODEORIGIN+$003B\ JSR @PRINTSTRING
@@ -1814,7 +1814,7 @@ Source: MIDICar Player.a65
   1625 30B4 A9 44		 LDA< CODEORIGIN+$0044
   1625 30B6 20 A3 28		 JSR @PRINTSTRING
   1626
-  1627 				; optimize OK (MIDFILES), line = 215
+  1627 				; optimize OK (MIDFILES), line = 213
   1628
   1629 30B9 AC 14 3C 84 82 AC + 	mwy NTRKREC :bp2
   1630 30C3 A0 00			ldy #$00
@@ -1824,7 +1824,7 @@ Source: MIDICar Player.a65
   1634 30CB AD C7 3B			lda MIDDATA+1
   1635 30CE 91 82			sta (:bp2),y
   1636
-  1637 				; optimize OK (MIDFILES), line = 216
+  1637 				; optimize OK (MIDFILES), line = 214
   1638
   1639 30D0 C8				iny
   1640 30D1 A9 00			lda #$00
@@ -1832,12 +1832,12 @@ Source: MIDICar Player.a65
   1642 30D5 C8				iny
   1643 30D6 91 82			sta (:bp2),y
   1644
-  1645 				; optimize OK (MIDFILES), line = 217
+  1645 				; optimize OK (MIDFILES), line = 215
   1646
   1647 30D8 C8				iny
   1648 30D9 91 82			sta (:bp2),y
   1649
-  1650 				; optimize OK (MIDFILES), line = 218
+  1650 				; optimize OK (MIDFILES), line = 216
   1651
   1652 30DB C8				iny
   1653 30DC 91 82			sta (:bp2),y
@@ -1846,14 +1846,14 @@ Source: MIDICar Player.a65
   1656 30DE 4C 95 32			jmp l_04AA
   1657 30E1			l_04AB
   1658
-  1659 				; optimize OK (MIDFILES), line = 222
+  1659 				; optimize OK (MIDFILES), line = 220
   1660
   1661 30E1 AD C6 3B			lda MIDDATA
   1662 30E4 8D 0B 3C			sta LOADADR
   1663 30E7 AD C7 3B			lda MIDDATA+1
   1664 30EA 8D 0C 3C			sta LOADADR+1
   1665
-  1666 				; optimize OK (MIDFILES), line = 223
+  1666 				; optimize OK (MIDFILES), line = 221
   1667
   1668 30ED A9 0B			lda <LOADADR
   1669 30EF 8D F0 3B			sta MEMBOUNDCHECK.ADR
@@ -1861,14 +1861,14 @@ Source: MIDICar Player.a65
   1671 30F4 8D F1 3B			sta MEMBOUNDCHECK.ADR+1
   1672 30F7 20 7E 2D			jsr MEMBOUNDCHECK
   1673
-  1674 				; optimize OK (MIDFILES), line = 224
+  1674 				; optimize OK (MIDFILES), line = 222
   1675
   1676 30FA AD 0B 3C			lda LOADADR
   1677 30FD 8D C6 3B			sta MIDDATA
   1678 3100 AD 0C 3C			lda LOADADR+1
   1679 3103 8D C7 3B			sta MIDDATA+1
   1680
-  1681 				; optimize OK (MIDFILES), line = 225
+  1681 				; optimize OK (MIDFILES), line = 223
   1682
   1683 3106				.LOCAL
   1684 3106 AD 12 3C			lda LEN+3
@@ -1903,7 +1903,7 @@ Source: MIDICar Player.a65
   1713 3142 8D 13 3C			sta LOADSIZE
   1714 3145			l_04D5
   1715
-  1716 				; optimize OK (MIDFILES), line = 226
+  1716 				; optimize OK (MIDFILES), line = 224
   1717
   1718 3145 AD 0B 3C			lda LOADADR
   1719 3148 18 6D 13 3C			add LOADSIZE
@@ -1912,7 +1912,7 @@ Source: MIDICar Player.a65
   1722 3152 69 00			adc #$00
   1723 3154 8D 0E 3C			sta ENDADR+1
   1724
-  1725 				; optimize OK (MIDFILES), line = 227
+  1725 				; optimize OK (MIDFILES), line = 225
   1726
   1727 3157 C9 9C			cmp #$9C
   1728 3159 90 22			jcc l_0500
@@ -1928,7 +1928,7 @@ Source: MIDICar Player.a65
   1738 				@
   1739 316E B0 0D			jcs l_0500
   1740
-  1741 				; optimize OK (MIDFILES), line = 228
+  1741 				; optimize OK (MIDFILES), line = 226
   1742
   1743 3170 A9 00			lda #$00
   1744 3172 8D 09 3C			sta TOP
@@ -1937,7 +1937,7 @@ Source: MIDICar Player.a65
   1747 317A 4C D7 31			jmp l_050E
   1748 317D			l_0500
   1749
-  1750 				; optimize OK (MIDFILES), line = 229
+  1750 				; optimize OK (MIDFILES), line = 227
   1751
   1752 317D AD 0E 3C			lda ENDADR+1
   1753 3180 C9 D0			cmp #$D0
@@ -1954,7 +1954,7 @@ Source: MIDICar Player.a65
   1764 				@
   1765 3197 B0 0D			jcs l_052A
   1766
-  1767 				; optimize OK (MIDFILES), line = 230
+  1767 				; optimize OK (MIDFILES), line = 228
   1768
   1769 3199 A9 00			lda #$00
   1770 319B 8D 09 3C			sta TOP
@@ -1963,7 +1963,7 @@ Source: MIDICar Player.a65
   1773 31A3 4C D7 31			jmp l_0538
   1774 31A6			l_052A
   1775
-  1776 				; optimize OK (MIDFILES), line = 231
+  1776 				; optimize OK (MIDFILES), line = 229
   1777
   1778 31A6 AD 0E 3C			lda ENDADR+1
   1779 31A9 C9 E0			cmp #$E0
@@ -1980,7 +1980,7 @@ Source: MIDICar Player.a65
   1790 				@
   1791 31C0 B0 0D			jcs l_0554
   1792
-  1793 				; optimize OK (MIDFILES), line = 232
+  1793 				; optimize OK (MIDFILES), line = 230
   1794
   1795 31C2 A9 00			lda #$00
   1796 31C4 8D 09 3C			sta TOP
@@ -1989,7 +1989,7 @@ Source: MIDICar Player.a65
   1799 31CC 4C D7 31			jmp l_0562
   1800 31CF			l_0554
   1801
-  1802 				; optimize OK (MIDFILES), line = 233
+  1802 				; optimize OK (MIDFILES), line = 231
   1803
   1804 31CF A9 00			lda #$00
   1805 31D1 8D 09 3C			sta TOP
@@ -1998,20 +1998,20 @@ Source: MIDICar Player.a65
   1808 31D7			l_0538
   1809 31D7			l_050E
   1810
-  1811 				; optimize OK (MIDFILES), line = 234
+  1811 				; optimize OK (MIDFILES), line = 232
   1812
   1813 31D7 AD 0A 3C			lda TOP+1
   1814 31DA 0D 09 3C			ora TOP
   1815 31DD F0 0A			jeq l_0577
   1816
-  1817 				; optimize OK (MIDFILES), line = 235
+  1817 				; optimize OK (MIDFILES), line = 233
   1818
   1819 31DF AD 09 3C			lda TOP
   1820 31E2 38 ED 0B 3C			sub LOADADR
   1821 31E6 8D 13 3C			sta LOADSIZE
   1822 31E9			l_0577
   1823
-  1824 				; optimize OK (MIDFILES), line = 236
+  1824 				; optimize OK (MIDFILES), line = 234
   1825
   1826 31E9 AD 13 3C			lda LOADSIZE
   1827 31EC D0 03			jne l_0596
@@ -2019,7 +2019,7 @@ Source: MIDICar Player.a65
   1829 31F1			l_0596
   1830 				; BlockRead
   1831
-  1832 				; optimize OK (MIDFILES), line = 239
+  1832 				; optimize OK (MIDFILES), line = 237
   1833
   1834 31F1 AC 23 33 84 82 AC + 	mwy F :bp2
   1835 31FB A0 06			ldy #s@file.buffer
@@ -2051,7 +2051,7 @@ Source: MIDICar Player.a65
   1856 322A 20 3B 1F		 JSR @READFILE
   1857 322D 68 AA			pla:tax
   1858
-  1859 				; optimize OK (MIDFILES), line = 240
+  1859 				; optimize OK (MIDFILES), line = 238
   1860
   1861 322F AD 08 3C			lda V+1
   1862 3232 D0 06			bne @+
@@ -2063,7 +2063,7 @@ Source: MIDICar Player.a65
   1868 323E 4C 5C 3A			jmp @halt
   1869 3241			l_05BB
   1870
-  1871 				; optimize OK (MIDFILES), line = 241
+  1871 				; optimize OK (MIDFILES), line = 239
   1872
   1873 3241 A9 00			lda #$00
   1874 3243 85 88			sta SYSTEM.MOVE_00D0.SOURCE
@@ -2084,7 +2084,7 @@ Macro: MAIN.SYSTEM.MOVE_00D0.M@INLINE [Source: MIDICar Player.a65]
 Source: MIDICar Player.a65
   1887 					.endl
   1888
-  1889 				; optimize OK (MIDFILES), line = 242
+  1889 				; optimize OK (MIDFILES), line = 240
   1890
   1891 325F AD C6 3B			lda MIDDATA
   1892 3262 18 6D 07 3C			add V
@@ -2093,7 +2093,7 @@ Source: MIDICar Player.a65
   1895 326C 6D 08 3C			adc V+1
   1896 326F 8D C7 3B			sta MIDDATA+1
   1897
-  1898 				; optimize OK (MIDFILES), line = 243
+  1898 				; optimize OK (MIDFILES), line = 241
   1899
   1900 3272 AD 0F 3C			lda LEN
   1901 3275 38 ED 07 3C			sub V
@@ -2110,7 +2110,7 @@ Source: MIDICar Player.a65
   1912 3295			c_04AB
   1913 3295			l_04AA
   1914
-  1915 				; optimize OK (MIDFILES), line = 220
+  1915 				; optimize OK (MIDFILES), line = 218
   1916
   1917 3295 AD 12 3C			lda LEN+3
   1918 3298 30 0E			bmi @+
@@ -2120,7 +2120,7 @@ Source: MIDICar Player.a65
   1922 32A3 F0 03 4C E1 30		jne l_04AB
   1923 				@
   1924
-  1925 				; optimize OK (MIDFILES), line = 246
+  1925 				; optimize OK (MIDFILES), line = 244
   1926
   1927 32A8 AD 14 3C			lda NTRKREC
   1928 32AB 18 69 07			add #$07
@@ -2130,7 +2130,7 @@ Source: MIDICar Player.a65
   1932 32B6			l_047E
   1933 32B6			l_046E
   1934
-  1935 				; optimize FAIL ('@print', MIDFILES), line = 248
+  1935 				; optimize FAIL ('@print', MIDFILES), line = 246
   1936
   1937 					@print #$9C
   1937 				 LDY# $9C\ JSR @PRINT
@@ -2138,7 +2138,7 @@ Source: MIDICar Player.a65
   1937 32B8 20 94 28		 JSR @PRINT
   1938 32BB			l_03A7
   1939
-  1940 				; optimize FAIL (1, MIDFILES), line = 177
+  1940 				; optimize FAIL (1, MIDFILES), line = 175
   1941
   1942 32BB E8				inx
   1943 32BC A0 01			ldy #1
@@ -2186,7 +2186,7 @@ Source: MIDICar Player.a65
   1981 3318 20 08 1F		 JSR @CLOSEFILE
   1982 331B 68 AA			pla:tax
   1983
-  1984 				; optimize OK (MIDFILES), line = 251
+  1984 				; optimize OK (MIDFILES), line = 249
   1985
   1986 331D A9 01			lda #$01
   1987 331F 8D F4 3B			sta RESULT
@@ -2220,7 +2220,7 @@ Source: MIDICar Player.a65
   2015 = 3323 F5 3B		F
   2015 				.endl
   2016
-  2017 3325			.local	GETTRACKDATA					; FUNCTION
+  2017 3325			.local	PROCESSTRACK					; FUNCTION
   2018
   2019 				; ------------------------------------------------------------
   2020
@@ -2237,14 +2237,14 @@ Source: MIDICar Player.a65
   2031
   2032 3333			.local	READB						; FUNCTION
   2033
-  2034 				; optimize OK (MIDFILES), line = 264
+  2034 				; optimize OK (MIDFILES), line = 261
   2035
   2036 3333 A5 F7			lda TRACKDATA
   2037 3335 8D 35 3C			sta ADR
   2038 3338 A5 F8			lda TRACKDATA+1
   2039 333A 8D 36 3C			sta ADR+1
   2040
-  2041 				; optimize OK (MIDFILES), line = 265
+  2041 				; optimize OK (MIDFILES), line = 262
   2042
   2043 333D A9 35			lda <ADR
   2044 333F 8D F0 3B			sta MEMBOUNDCHECK.ADR
@@ -2252,20 +2252,20 @@ Source: MIDICar Player.a65
   2046 3344 8D F1 3B			sta MEMBOUNDCHECK.ADR+1
   2047 3347 20 7E 2D			jsr MEMBOUNDCHECK
   2048
-  2049 				; optimize OK (MIDFILES), line = 266
+  2049 				; optimize OK (MIDFILES), line = 263
   2050
   2051 334A AD 35 3C			lda ADR
   2052 334D 85 F7			sta TRACKDATA
   2053 334F AD 36 3C			lda ADR+1
   2054 3352 85 F8			sta TRACKDATA+1
   2055
-  2056 				; optimize OK (MIDFILES), line = 267
+  2056 				; optimize OK (MIDFILES), line = 264
   2057
   2058 3354 A0 00			ldy #$00
   2059 3356 B1 F7			lda (TRACKDATA),y
   2060 3358 8D 37 3C			sta RESULT
   2061
-  2062 				; optimize FAIL (0, MIDFILES), line = 268
+  2062 				; optimize FAIL (0, MIDFILES), line = 265
   2063
   2064 335B E6 F7			inc TRACKDATA
   2065 335D D0 02			sne
@@ -2280,7 +2280,7 @@ Source: MIDICar Player.a65
   2074
   2075 3362			.local	GETDATA						; PROCEDURE
   2076
-  2077 				; optimize OK (MIDFILES), line = 276
+  2077 				; optimize OK (MIDFILES), line = 273
   2078
   2079 3362 A9 00			lda #$00
   2080 3364 8D 3B 3C			sta I
@@ -2289,14 +2289,14 @@ Source: MIDICar Player.a65
   2083 3367 4C AA 33			jmp l_0627
   2084 336A			l_0628
   2085
-  2086 				; optimize OK (MIDFILES), line = 279
+  2086 				; optimize OK (MIDFILES), line = 276
   2087
   2088 336A A5 F7			lda TRACKDATA
   2089 336C 8D 35 3C			sta ADR
   2090 336F A5 F8			lda TRACKDATA+1
   2091 3371 8D 36 3C			sta ADR+1
   2092
-  2093 				; optimize OK (MIDFILES), line = 280
+  2093 				; optimize OK (MIDFILES), line = 277
   2094
   2095 3374 A9 35			lda <ADR
   2096 3376 8D F0 3B			sta MEMBOUNDCHECK.ADR
@@ -2304,14 +2304,14 @@ Source: MIDICar Player.a65
   2098 337B 8D F1 3B			sta MEMBOUNDCHECK.ADR+1
   2099 337E 20 7E 2D			jsr MEMBOUNDCHECK
   2100
-  2101 				; optimize OK (MIDFILES), line = 281
+  2101 				; optimize OK (MIDFILES), line = 278
   2102
   2103 3381 AD 35 3C			lda ADR
   2104 3384 85 F7			sta TRACKDATA
   2105 3386 AD 36 3C			lda ADR+1
   2106 3389 85 F8			sta TRACKDATA+1
   2107
-  2108 				; optimize OK (MIDFILES), line = 282
+  2108 				; optimize OK (MIDFILES), line = 279
   2109
   2110 338B A0 00			ldy #$00
   2111 338D B1 F7			lda (TRACKDATA),y
@@ -2319,22 +2319,22 @@ Source: MIDICar Player.a65
   2113 3399 AC 3B 3C			ldy I
   2114 339C 91 82			sta (:bp2),y
   2115
-  2116 				; optimize FAIL (0, MIDFILES), line = 283
+  2116 				; optimize FAIL (0, MIDFILES), line = 280
   2117
   2118 339E E6 F7			inc TRACKDATA
   2119 33A0 D0 02			sne
   2120 33A2 E6 F8			inc TRACKDATA+1
   2121
-  2122 				; optimize FAIL (0, MIDFILES), line = 284
+  2122 				; optimize FAIL (0, MIDFILES), line = 281
   2123
   2124 33A4 EE 3B 3C			inc I
   2125
-  2126 				; optimize FAIL (0, MIDFILES), line = 285
+  2126 				; optimize FAIL (0, MIDFILES), line = 282
   2127
   2128 33A7 CE 3A 3C			dec SIZE
   2129 33AA			l_0627
   2130
-  2131 				; optimize OK (MIDFILES), line = 277
+  2131 				; optimize OK (MIDFILES), line = 274
   2132
   2133 33AA AD 3A 3C			lda SIZE
   2134 33AD D0 BB			jne l_0628
@@ -2367,14 +2367,14 @@ Source: MIDICar Player.a65
   2161 33B3 4C E0 33			jmp l_065B
   2162 33B6			l_065C
   2163
-  2164 				; optimize OK (MIDFILES), line = 293
+  2164 				; optimize OK (MIDFILES), line = 290
   2165
   2166 33B6 A5 F7			lda TRACKDATA
   2167 33B8 8D 35 3C			sta ADR
   2168 33BB A5 F8			lda TRACKDATA+1
   2169 33BD 8D 36 3C			sta ADR+1
   2170
-  2171 				; optimize OK (MIDFILES), line = 294
+  2171 				; optimize OK (MIDFILES), line = 291
   2172
   2173 33C0 A9 35			lda <ADR
   2174 33C2 8D F0 3B			sta MEMBOUNDCHECK.ADR
@@ -2382,25 +2382,25 @@ Source: MIDICar Player.a65
   2176 33C7 8D F1 3B			sta MEMBOUNDCHECK.ADR+1
   2177 33CA 20 7E 2D			jsr MEMBOUNDCHECK
   2178
-  2179 				; optimize OK (MIDFILES), line = 295
+  2179 				; optimize OK (MIDFILES), line = 292
   2180
   2181 33CD AD 35 3C			lda ADR
   2182 33D0 85 F7			sta TRACKDATA
   2183 33D2 AD 36 3C			lda ADR+1
   2184 33D5 85 F8			sta TRACKDATA+1
   2185
-  2186 				; optimize FAIL (0, MIDFILES), line = 296
+  2186 				; optimize FAIL (0, MIDFILES), line = 293
   2187
   2188 33D7 CE 3C 3C			dec N
   2189
-  2190 				; optimize FAIL (0, MIDFILES), line = 297
+  2190 				; optimize FAIL (0, MIDFILES), line = 294
   2191
   2192 33DA E6 F7			inc TRACKDATA
   2193 33DC D0 02			sne
   2194 33DE E6 F8			inc TRACKDATA+1
   2195 33E0			l_065B
   2196
-  2197 				; optimize OK (MIDFILES), line = 291
+  2197 				; optimize OK (MIDFILES), line = 288
   2198
   2199 33E0 AD 3C 3C			lda N
   2200 33E3 D0 D1			jne l_065C
@@ -2426,7 +2426,7 @@ Source: MIDICar Player.a65
   2220
   2221 33E6			.local	GETVARLONG					; FUNCTION
   2222
-  2223 				; optimize OK (MIDFILES), line = 306
+  2223 				; optimize OK (MIDFILES), line = 300
   2224
   2225 33E6 A9 00			lda #$00
   2226 33E8 8D 3D 3C			sta RESULT
@@ -2435,13 +2435,13 @@ Source: MIDICar Player.a65
   2229 				; --- RepeatUntilProlog
   2230 33EE			l_0685
   2231
-  2232 				; optimize FAIL ('READB', MIDFILES), line = 308
+  2232 				; optimize FAIL ('READB', MIDFILES), line = 302
   2233
   2234 33EE 20 33 33			jsr READB
   2235 33F1 AD 37 3C			lda READB.RESULT
   2236 33F4 8D 32 3C			sta V
   2237
-  2238 				; optimize OK (MIDFILES), line = 309
+  2238 				; optimize OK (MIDFILES), line = 303
   2239
   2240 33F7 AD 3E 3C			lda RESULT+1
   2241 33FA 85 AD			sta :STACKORIGIN+STACKWIDTH+9
@@ -2464,14 +2464,14 @@ Source: MIDICar Player.a65
   2258 3417 A5 AD			lda :STACKORIGIN+STACKWIDTH+9
   2259 3419 8D 3E 3C			sta RESULT+1
   2260
-  2261 				; optimize OK (MIDFILES), line = 310
+  2261 				; optimize OK (MIDFILES), line = 304
   2262
   2263 341C AD 32 3C			lda V
   2264 341F 29 7F			and #$7F
   2265 3421 0D 3D 3C			ora RESULT
   2266 3424 8D 3D 3C			sta RESULT
   2267
-  2268 				; optimize OK (MIDFILES), line = 311
+  2268 				; optimize OK (MIDFILES), line = 305
   2269
   2270 3427 AD 32 3C			lda V
   2271 342A 30 C2			jmi l_0685
@@ -2485,14 +2485,14 @@ Source: MIDICar Player.a65
   2279
   2280 342D			.local	GET24BITVAL					; FUNCTION
   2281
-  2282 				; optimize OK (MIDFILES), line = 320
+  2282 				; optimize OK (MIDFILES), line = 313
   2283
   2284 342D A9 3F			lda <RESULT
   2285 342F 8D 43 3C			sta RESULTPTR
   2286 3432 A9 3C			lda >RESULT
   2287 3434 8D 44 3C			sta RESULTPTR+1
   2288
-  2289 				; optimize OK (MIDFILES), line = 321
+  2289 				; optimize OK (MIDFILES), line = 314
   2290
   2291 3437 AD 8D 38			lda BI
   2292 343A 8D 38 3C			sta GETDATA.BUF
@@ -2502,7 +2502,7 @@ Source: MIDICar Player.a65
   2296 3445 8D 3A 3C			sta GETDATA.SIZE
   2297 3448 20 62 33			jsr GETDATA
   2298
-  2299 				; optimize OK (MIDFILES), line = 322
+  2299 				; optimize OK (MIDFILES), line = 315
   2300
   2301 344B AD DF 3B			lda adr.BI+$02
   2302 344E AC 44 3C 84 81		mvy RESULTPTR+1 :bp+1
@@ -2512,7 +2512,7 @@ Source: MIDICar Player.a65
   2306 345B D0 03			sne
   2307 345D EE 44 3C			inc RESULTPTR+1
   2308
-  2309 				; optimize OK (MIDFILES), line = 323
+  2309 				; optimize OK (MIDFILES), line = 316
   2310
   2311 3460 AD DE 3B			lda adr.BI+$01
   2312 3463 AC 44 3C 84 81		mvy RESULTPTR+1 :bp+1
@@ -2522,7 +2522,7 @@ Source: MIDICar Player.a65
   2316 3470 D0 03			sne
   2317 3472 EE 44 3C			inc RESULTPTR+1
   2318
-  2319 				; optimize OK (MIDFILES), line = 324
+  2319 				; optimize OK (MIDFILES), line = 317
   2320
   2321 3475 AD DD 3B			lda adr.BI+$00
   2322 3478 AC 44 3C 84 81		mvy RESULTPTR+1 :bp+1
@@ -2542,7 +2542,7 @@ Source: MIDICar Player.a65
   2336 				.endl
   2337 3483			l_0604
   2338
-  2339 				; optimize OK (MIDFILES), line = 334
+  2339 				; optimize OK (MIDFILES), line = 321
   2340
   2341 3483 AC 1D 3C 84 82 AC + 	mwy TRACK :bp2
   2342 348D A0 00			ldy #$00
@@ -2552,7 +2552,7 @@ Source: MIDICar Player.a65
   2346 3494 B1 82			lda (:bp2),y
   2347 3496 85 F8			sta TRACKDATA+1
   2348
-  2349 				; optimize OK (MIDFILES), line = 335
+  2349 				; optimize OK (MIDFILES), line = 322
   2350
   2351 3498 A0 06			ldy #$06
   2352 349A B1 82			lda (:bp2),y
@@ -2561,14 +2561,14 @@ Source: MIDICar Player.a65
   2355 				; --- RepeatUntilProlog
   2356 349F			l_06E8
   2357
-  2358 				; optimize OK (MIDFILES), line = 337
+  2358 				; optimize OK (MIDFILES), line = 324
   2359
   2360 349F AC 1D 3C 84 82 AC + 	mwy TRACK :bp2
   2361 34A9 A0 04			ldy #$04
   2362 34AB B1 82			lda (:bp2),y
   2363 34AD D0 1A			jne l_06F7
   2364
-  2365 				; optimize FAIL ('GETVARLONG', MIDFILES), line = 339
+  2365 				; optimize FAIL ('GETVARLONG', MIDFILES), line = 326
   2366
   2367 34AF 20 E6 33			jsr GETVARLONG
   2368 34B2 AD 3D 3C			lda GETVARLONG.RESULT
@@ -2576,7 +2576,7 @@ Source: MIDICar Player.a65
   2370 34B8 AD 3E 3C			lda GETVARLONG.RESULT+1
   2371 34BB 8D 2F 3C			sta DELTATIME+1
   2372
-  2373 				; optimize OK (MIDFILES), line = 340
+  2373 				; optimize OK (MIDFILES), line = 327
   2374
   2375 34BE 0D 2E 3C			ora DELTATIME
   2376 34C1 F0 03			jeq l_070D
@@ -2585,7 +2585,7 @@ Source: MIDICar Player.a65
   2379 34C6 4C D9 34			jmp l_0719
   2380 34C9			l_06F7
   2381
-  2382 				; optimize OK (MIDFILES), line = 344
+  2382 				; optimize OK (MIDFILES), line = 331
   2383
   2384 34C9 AC 1D 3C 84 82 AC + 	mwy TRACK :bp2
   2385 34D3 A0 04			ldy #$04
@@ -2593,20 +2593,20 @@ Source: MIDICar Player.a65
   2387 34D7 91 82			sta (:bp2),y
   2388 34D9			l_0719
   2389
-  2390 				; optimize OK (MIDFILES), line = 346
+  2390 				; optimize OK (MIDFILES), line = 333
   2391
   2392 34D9 A0 00			ldy #$00
   2393 34DB B1 F7			lda (TRACKDATA),y
   2394 34DD 10 09			jpl l_0733
   2395
-  2396 				; optimize FAIL ('READB', MIDFILES), line = 347
+  2396 				; optimize FAIL ('READB', MIDFILES), line = 334
   2397
   2398 34DF 20 33 33			jsr READB
   2399 34E2 AD 37 3C			lda READB.RESULT
   2400 34E5 8D 33 3C			sta EVENT
   2401 34E8			l_0733
   2402
-  2403 				; optimize OK (MIDFILES), line = 349
+  2403 				; optimize OK (MIDFILES), line = 336
   2404
   2405 34E8 AD 33 3C			lda EVENT
   2406 34EB 8D 45 3C			sta @CASETMP_0006
@@ -2621,18 +2621,18 @@ Source: MIDICar Player.a65
   2415 34FD 90 1B			jcc l_0747
   2416 				@
   2417
-  2418 				; optimize OK (MIDFILES), line = 358
+  2418 				; optimize OK (MIDFILES), line = 345
   2419
   2420 34FF AD 33 3C			lda EVENT
   2421 3502 20 CA 2B			jsr MC6850.MC6850_SEND
   2422
-  2423 				; optimize FAIL ('READB', MIDFILES), line = 359
+  2423 				; optimize FAIL ('READB', MIDFILES), line = 346
   2424
   2425 3505 20 33 33			jsr READB
   2426 3508 AD 37 3C			lda READB.RESULT
   2427 350B 20 CA 2B			jsr MC6850.MC6850_SEND
   2428
-  2429 				; optimize FAIL ('READB', MIDFILES), line = 360
+  2429 				; optimize FAIL ('READB', MIDFILES), line = 347
   2430
   2431 350E 20 33 33			jsr READB
   2432 3511 AD 37 3C			lda READB.RESULT
@@ -2647,12 +2647,12 @@ Source: MIDICar Player.a65
   2441 3522 90 12			jcc l_0758
   2442 				@
   2443
-  2444 				; optimize OK (MIDFILES), line = 369
+  2444 				; optimize OK (MIDFILES), line = 356
   2445
   2446 3524 AD 33 3C			lda EVENT
   2447 3527 20 CA 2B			jsr MC6850.MC6850_SEND
   2448
-  2449 				; optimize FAIL ('READB', MIDFILES), line = 370
+  2449 				; optimize FAIL ('READB', MIDFILES), line = 357
   2450
   2451 352A 20 33 33			jsr READB
   2452 352D AD 37 3C			lda READB.RESULT
@@ -2667,7 +2667,7 @@ Source: MIDICar Player.a65
   2461 353E 90 4E			jcc l_0767
   2462 				@
   2463
-  2464 				; optimize FAIL ('GETVARLONG', MIDFILES), line = 375
+  2464 				; optimize FAIL ('GETVARLONG', MIDFILES), line = 362
   2465
   2466 3540 20 E6 33			jsr GETVARLONG
   2467 3543 AD 3D 3C			lda GETVARLONG.RESULT
@@ -2675,7 +2675,7 @@ Source: MIDICar Player.a65
   2469 3549 AD 3E 3C			lda GETVARLONG.RESULT+1
   2470 354C 8D 31 3C			sta MSGLEN+1
   2471
-  2472 				; optimize OK (MIDFILES), line = 379
+  2472 				; optimize OK (MIDFILES), line = 366
   2473
   2474 354F AD 33 3C			lda EVENT
   2475 3552 20 CA 2B			jsr MC6850.MC6850_SEND
@@ -2684,17 +2684,17 @@ Source: MIDICar Player.a65
   2478 3555 4C 6F 35			jmp l_0771
   2479 3558			l_0772
   2480
-  2481 				; optimize FAIL ('READB', MIDFILES), line = 383
+  2481 				; optimize FAIL ('READB', MIDFILES), line = 370
   2482
   2483 3558 20 33 33			jsr READB
   2484 355B AD 37 3C			lda READB.RESULT
   2485 355E 8D 32 3C			sta V
   2486
-  2487 				; optimize OK (MIDFILES), line = 387
+  2487 				; optimize OK (MIDFILES), line = 374
   2488
   2489 3561 20 CA 2B			jsr MC6850.MC6850_SEND
   2490
-  2491 				; optimize FAIL (0, MIDFILES), line = 389
+  2491 				; optimize FAIL (0, MIDFILES), line = 376
   2492
   2493 3564 AD 30 3C			lda MSGLEN
   2494 3567 D0 03			bne @+
@@ -2703,13 +2703,13 @@ Source: MIDICar Player.a65
   2497 356C CE 30 3C			dec MSGLEN
   2498 356F			l_0771
   2499
-  2500 				; optimize OK (MIDFILES), line = 381
+  2500 				; optimize OK (MIDFILES), line = 368
   2501
   2502 356F AD 31 3C			lda MSGLEN+1
   2503 3572 0D 30 3C			ora MSGLEN
   2504 3575 D0 E1			jne l_0772
   2505
-  2506 				; optimize OK (MIDFILES), line = 391
+  2506 				; optimize OK (MIDFILES), line = 378
   2507
   2508 3577 AD 32 3C			lda V
   2509 357A C9 F7			cmp #$F7
@@ -2729,13 +2729,13 @@ Source: MIDICar Player.a65
   2523 3593 F0 03 4C 56 36		jne l_07B6
   2524 				@
   2525
-  2526 				; optimize FAIL ('READB', MIDFILES), line = 395
+  2526 				; optimize FAIL ('READB', MIDFILES), line = 382
   2527
   2528 3598 20 33 33			jsr READB
   2529 359B AD 37 3C			lda READB.RESULT
   2530 359E 8D 34 3C			sta META
   2531
-  2532 				; optimize FAIL ('GETVARLONG', MIDFILES), line = 396
+  2532 				; optimize FAIL ('GETVARLONG', MIDFILES), line = 383
   2533
   2534 35A1 20 E6 33			jsr GETVARLONG
   2535 35A4 AD 3D 3C			lda GETVARLONG.RESULT
@@ -2743,7 +2743,7 @@ Source: MIDICar Player.a65
   2537 35AA AD 3E 3C			lda GETVARLONG.RESULT+1
   2538 35AD 8D 31 3C			sta MSGLEN+1
   2539
-  2540 				; optimize OK (MIDFILES), line = 397
+  2540 				; optimize OK (MIDFILES), line = 384
   2541
   2542 35B0 AD 34 3C			lda META
   2543 35B3 8D 46 3C			sta @CASETMP_0007
@@ -2751,7 +2751,7 @@ Source: MIDICar Player.a65
   2545 35B8 D0 13			jne l_07C9
   2546 				@
   2547
-  2548 				; optimize OK (MIDFILES), line = 400
+  2548 				; optimize OK (MIDFILES), line = 387
   2549
   2550 35BA AC 1D 3C 84 82 AC + 	mwy TRACK :bp2
   2551 35C4 A0 05			ldy #$05
@@ -2764,7 +2764,7 @@ Source: MIDICar Player.a65
   2558 35CF D0 39			jne l_07D6
   2559 				@
   2560
-  2561 				; optimize FAIL ('GET24BITVAL', MIDFILES), line = 404
+  2561 				; optimize FAIL ('GET24BITVAL', MIDFILES), line = 391
   2562
   2563 35D1 20 2D 34			jsr GET24BITVAL
   2564 35D4 AD 3F 3C			lda GET24BITVAL.RESULT
@@ -2776,7 +2776,7 @@ Source: MIDICar Player.a65
   2570 35E6 AD 42 3C			lda GET24BITVAL.RESULT+3
   2571 35E9 8D D4 3B			sta MS_PER_QNOTE+3
   2572
-  2573 				; optimize OK (MIDFILES), line = 405
+  2573 				; optimize OK (MIDFILES), line = 392
   2574
   2575 35EC AD D1 3B			lda MS_PER_QNOTE
   2576 35EF 8D 47 3C			sta SETTEMPO.NTEMPO
@@ -2794,31 +2794,31 @@ Source: MIDICar Player.a65
   2588 360C D0 42			jne l_07E5
   2589 				@
   2590
-  2591 				; optimize FAIL ('READB', MIDFILES), line = 409
+  2591 				; optimize FAIL ('READB', MIDFILES), line = 396
   2592
   2593 360E 20 33 33			jsr READB
   2594 3611 AD 37 3C			lda READB.RESULT
   2595 3614 8D D5 3B			sta TACTNUM
   2596
-  2597 				; optimize FAIL ('READB', MIDFILES), line = 410
+  2597 				; optimize FAIL ('READB', MIDFILES), line = 397
   2598
   2599 3617 20 33 33			jsr READB
   2600 361A AD 37 3C			lda READB.RESULT
   2601 361D 8D D6 3B			sta TACTDENUM
   2602
-  2603 				; optimize FAIL ('READB', MIDFILES), line = 411
+  2603 				; optimize FAIL ('READB', MIDFILES), line = 398
   2604
   2605 3620 20 33 33			jsr READB
   2606 3623 AD 37 3C			lda READB.RESULT
   2607 3626 8D D7 3B			sta TICKS_PER_QNOTE
   2608
-  2609 				; optimize FAIL ('READB', MIDFILES), line = 412
+  2609 				; optimize FAIL ('READB', MIDFILES), line = 399
   2610
   2611 3629 20 33 33			jsr READB
   2612 362C AD 37 3C			lda READB.RESULT
   2613 362F 8D D8 3B			sta TICKS_PER_32ND
   2614
-  2615 				; optimize OK (MIDFILES), line = 413
+  2615 				; optimize OK (MIDFILES), line = 400
   2616
   2617 3632 AD D1 3B			lda MS_PER_QNOTE
   2618 3635 8D 47 3C			sta SETTEMPO.NTEMPO
@@ -2833,7 +2833,7 @@ Source: MIDICar Player.a65
   2627 364D 4C 56 36			jmp a_0007
   2628 3650			l_07E5
   2629
-  2630 				; optimize OK (MIDFILES), line = 416
+  2630 				; optimize OK (MIDFILES), line = 403
   2631
   2632 3650 AD 30 3C			lda MSGLEN
   2633 3653 20 B0 33			jsr SKIP
@@ -2842,7 +2842,7 @@ Source: MIDICar Player.a65
   2636 3656			l_07B6
   2637 3656			a_0006
   2638
-  2639 				; optimize OK (MIDFILES), line = 420
+  2639 				; optimize OK (MIDFILES), line = 407
   2640
   2641 3656 AC 1D 3C 84 82 AC + 	mwy TRACK :bp2
   2642 3660 A0 05			ldy #$05
@@ -2850,7 +2850,7 @@ Source: MIDICar Player.a65
   2644 3664 D0 03 4C 9F 34		jeq l_06E8
   2645 3669			b_06E8
   2646
-  2647 				; optimize OK (MIDFILES), line = 421
+  2647 				; optimize OK (MIDFILES), line = 408
   2648
   2649 3669 AC 1D 3C 84 82 AC + 	mwy TRACK :bp2
   2650 3673 A0 00			ldy #$00
@@ -2860,19 +2860,19 @@ Source: MIDICar Player.a65
   2654 367A A5 F8			lda TRACKDATA+1
   2655 367C 91 82			sta (:bp2),y
   2656
-  2657 				; optimize OK (MIDFILES), line = 422
+  2657 				; optimize OK (MIDFILES), line = 409
   2658
   2659 367E A0 04			ldy #$04
   2660 3680 A9 01			lda #$01
   2661 3682 91 82			sta (:bp2),y
   2662
-  2663 				; optimize OK (MIDFILES), line = 423
+  2663 				; optimize OK (MIDFILES), line = 410
   2664
   2665 3684 A0 06			ldy #$06
   2666 3686 AD 33 3C			lda EVENT
   2667 3689 91 82			sta (:bp2),y
   2668
-  2669 				; optimize OK (MIDFILES), line = 424
+  2669 				; optimize OK (MIDFILES), line = 411
   2670
   2671 368B AD 2E 3C			lda DELTATIME
   2672 368E 8D 2B 3C			sta RESULT
@@ -2907,31 +2907,31 @@ Source: MIDICar Player.a65
   2701
   2702 3698			.local	INT_PLAY					; PROCEDURE | INTERRUPT
   2703
-  2704 				; optimize OK (MIDFILES), line = 430
+  2704 				; optimize OK (MIDFILES), line = 417
   2705
   2706 3698 A5 DF			lda _TIMERSTATUS
   2707 369A 30 20			jmi l_083E
   2708
-  2709 				; optimize FAIL (0, MIDFILES), line = 432
+  2709 				; optimize FAIL (0, MIDFILES), line = 419
   2710
   2711 369C E6 F2			inc _SUBCNT
   2712
-  2713 				; optimize OK (MIDFILES), line = 433
+  2713 				; optimize OK (MIDFILES), line = 420
   2714
   2715 369E A5 F2			lda _SUBCNT
   2716 36A0 C9 02			cmp #$02
   2717 36A2 90 18			jcc l_0855
   2718
-  2719 				; optimize OK (MIDFILES), line = 435
+  2719 				; optimize OK (MIDFILES), line = 422
   2720
   2721 36A4 A9 00			lda #$00
   2722 36A6 85 F2			sta _SUBCNT
   2723
-  2724 				; optimize FAIL (0, MIDFILES), line = 436
+  2724 				; optimize FAIL (0, MIDFILES), line = 423
   2725
   2726 36A8 E6 F3 D0 0A E6 F4 + 	ind TOTALTICKS
   2727
-  2728 				; optimize OK (MIDFILES), line = 437
+  2728 				; optimize OK (MIDFILES), line = 424
   2729
   2730 36B6 A5 DF			lda _TIMERSTATUS
   2731 36B8 09 40			ora #$40
@@ -2948,7 +2948,7 @@ Source: MIDICar Player.a65
   2742
   2743 36BE			.local	SETTEMPO					; PROCEDURE
   2744
-  2745 				; optimize OK (MIDFILES), line = 452
+  2745 				; optimize OK (MIDFILES), line = 439
   2746
   2747 36BE 78				sei
   2748 36BF AD DB 3B 8D 10 02		mva OLDTIMERVEC VTIMR1
@@ -2959,7 +2959,7 @@ Source: MIDICar Player.a65
   2753 36D1 8D 0E D2			sta irqen
   2754 36D4 58				cli
   2755
-  2756 				; optimize FAIL ('@I2F_m', MIDFILES), line = 453
+  2756 				; optimize FAIL ('@I2F_m', MIDFILES), line = 440
   2757
   2758 36D5 E8				inx
   2759 36D6 AD 47 3C 95 94		mva NTEMPO :STACKORIGIN,x
@@ -2983,7 +2983,7 @@ Source: MIDICar Player.a65
   2777 3711 B5 C4			lda :STACKORIGIN+STACKWIDTH*3,x
   2778 3713 8D 4E 3C			sta FREQ+3
   2779
-  2780 				; optimize FAIL ('@I2F', MIDFILES), line = 454
+  2780 				; optimize FAIL ('@I2F', MIDFILES), line = 441
   2781
   2782 3716 AD 4B 3C 95 94		mva FREQ :STACKORIGIN,x
   2783 371B AD 4C 3C 95 A4		mva FREQ+1 :STACKORIGIN+STACKWIDTH,x
@@ -3006,7 +3006,7 @@ Source: MIDICar Player.a65
   2800 3753 B5 C4			lda :STACKORIGIN+STACKWIDTH*3,x
   2801 3755 8D 4E 3C			sta FREQ+3
   2802
-  2803 				; optimize FAIL ('@FDIV', MIDFILES), line = 455
+  2803 				; optimize FAIL ('@FDIV', MIDFILES), line = 442
   2804
   2805 3758 A9 00 95 94			mva #$00 :STACKORIGIN,x
   2806 375C A9 00 95 A4			mva #$00 :STACKORIGIN+STACKWIDTH,x
@@ -3028,7 +3028,7 @@ Source: MIDICar Player.a65
   2822 3790 B5 C4			lda :STACKORIGIN+STACKWIDTH*3,x
   2823 3792 8D 4E 3C			sta FREQ+3
   2824
-  2825 				; optimize FAIL ('@FMUL', MIDFILES), line = 457
+  2825 				; optimize FAIL ('@FMUL', MIDFILES), line = 444
   2826
   2827 3795 A9 00 95 94			mva #$00 :STACKORIGIN,x
   2828 3799 A9 FA 95 A4			mva #$FA :STACKORIGIN+STACKWIDTH,x
@@ -3054,7 +3054,7 @@ Source: MIDICar Player.a65
   2848 37DC B5 94			lda :STACKORIGIN,x
   2849 37DE 8D 4F 3C			sta FDIV
   2850
-  2851 				; optimize FAIL ('divmulINT.DIV', MIDFILES), line = 458
+  2851 				; optimize FAIL ('divmulINT.DIV', MIDFILES), line = 445
   2852
   2853 37E1 A9 00 95 94			mva #$00 :STACKORIGIN,x
   2854 37E5 A9 87 95 A4			mva #$87 :STACKORIGIN+STACKWIDTH,x
@@ -3073,7 +3073,7 @@ Source: MIDICar Player.a65
   2867 3811 8D DA 3B			sta BPM+1
   2868 3814 CA				dex
   2869
-  2870 				; optimize OK (MIDFILES), line = 460
+  2870 				; optimize OK (MIDFILES), line = 447
   2871
   2872 3815 78				sei
   2873 3816 A9 98 8D 10 02		mva <INT_PLAY VTIMR1
@@ -3117,39 +3117,39 @@ Source: MIDICar Player.a65
   2911 				; ------------------------------------------------------------
   2912 3844			@UnitInit
   2913
-  2914 				; optimize OK (MIDFILES), line = 464
+  2914 				; optimize OK (MIDFILES), line = 451
   2915
   2916 3844 A9 00			lda #$00
   2917 3846 8D DB 3B			sta OLDTIMERVEC
   2918 3849 8D DC 3B			sta OLDTIMERVEC+1
   2919
-  2920 				; optimize OK (MIDFILES), line = 465
+  2920 				; optimize OK (MIDFILES), line = 452
   2921
   2922 384C A9 80			lda #$80
   2923 384E 8D CF 3B			sta TICKDIV
   2924 3851 A9 01			lda #$01
   2925 3853 8D D0 3B			sta TICKDIV+1
   2926
-  2927 				; optimize OK (MIDFILES), line = 466
+  2927 				; optimize OK (MIDFILES), line = 453
   2928
   2929 3856 A9 04			lda #$04
   2930 3858 8D D5 3B			sta TACTNUM
   2931
-  2932 				; optimize OK (MIDFILES), line = 467
+  2932 				; optimize OK (MIDFILES), line = 454
   2933
   2934 385B 8D D6 3B			sta TACTDENUM
   2935
-  2936 				; optimize OK (MIDFILES), line = 468
+  2936 				; optimize OK (MIDFILES), line = 455
   2937
   2938 385E A9 18			lda #$18
   2939 3860 8D D7 3B			sta TICKS_PER_QNOTE
   2940
-  2941 				; optimize OK (MIDFILES), line = 469
+  2941 				; optimize OK (MIDFILES), line = 456
   2942
   2943 3863 A9 08			lda #$08
   2944 3865 8D D8 3B			sta TICKS_PER_32ND
   2945
-  2946 				; optimize OK (MIDFILES), line = 470
+  2946 				; optimize OK (MIDFILES), line = 457
   2947
   2948 3868 A9 20			lda #$20
   2949 386A 8D D1 3B			sta MS_PER_QNOTE
@@ -3160,7 +3160,7 @@ Source: MIDICar Player.a65
   2954 3877 A9 00			lda #$00
   2955 3879 8D D4 3B			sta MS_PER_QNOTE+3
   2956
-  2957 				; optimize OK (MIDFILES), line = 471
+  2957 				; optimize OK (MIDFILES), line = 458
   2958
   2959 387C 85 DF			sta _TIMERSTATUS
   2960
@@ -3426,15 +3426,15 @@ Source: MIDICar Player.a65
   3213 39CC ED 56 3C			sbc TRACKTIME+1
   3214 39CF 8D 58 3C			sta DTM+1
   3215
-  3216 				; optimize FAIL ('MIDFILES.GETTRACKDATA', MIDICar Player.pas), line = 78
+  3216 				; optimize FAIL ('MIDFILES.PROCESSTRACK', MIDICar Player.pas), line = 78
   3217
   3218 39D2 E8				inx
   3219 39D3 AD 52 3C 95 94		mva TRACK :STACKORIGIN,x
   3220 39D8 AD 53 3C 95 A4		mva TRACK+1 :STACKORIGIN+STACKWIDTH,x
-  3221 39DD 20 25 33			jsr MIDFILES.GETTRACKDATA
-  3222 39E0 AD 2B 3C			lda MIDFILES.GETTRACKDATA.RESULT
+  3221 39DD 20 25 33			jsr MIDFILES.PROCESSTRACK
+  3222 39E0 AD 2B 3C			lda MIDFILES.PROCESSTRACK.RESULT
   3223 39E3 8D 55 3C			sta TRACKTIME
-  3224 39E6 AD 2C 3C			lda MIDFILES.GETTRACKDATA.RESULT+1
+  3224 39E6 AD 2C 3C			lda MIDFILES.PROCESSTRACK.RESULT+1
   3225 39E9 8D 56 3C			sta TRACKTIME+1
   3226
   3227 				; optimize OK (MIDICar Player.pas), line = 79
@@ -3476,7 +3476,7 @@ Source: MIDICar Player.a65
   3263 3A29 F0 03 4C 46 39		jne l_093C
   3264 3A2E			l_0949
   3265
-  3266 				; optimize OK (MIDICar Player.pas), line = 103
+  3266 				; optimize OK (MIDICar Player.pas), line = 99
   3267
   3268 3A2E AD 5A 3C			lda PLAYINGTRACKS
   3269 3A31 F0 0A			jeq l_0929x
@@ -3485,18 +3485,18 @@ Source: MIDICar Player.a65
   3272 3A38 D0 03 4C 36 39		jeq l_0929
   3273 3A3D			l_0929x
   3274
-  3275 				; optimize FAIL ('@print', MIDICar Player.pas), line = 105
+  3275 				; optimize FAIL ('@print', MIDICar Player.pas), line = 101
   3276
   3277 					@print #$9C
   3277 				 LDY# $9C\ JSR @PRINT
   3277 3A3D A0 9C		 LDY# $9C
   3277 3A3F 20 94 28		 JSR @PRINT
   3278
-  3279 				; optimize FAIL ('RESET_MIDI', MIDICar Player.pas), line = 112
+  3279 				; optimize FAIL ('RESET_MIDI', MIDICar Player.pas), line = 108
   3280
   3281 3A42 20 91 38			jsr RESET_MIDI
   3282
-  3283 				; optimize OK (MIDICar Player.pas), line = 118
+  3283 				; optimize OK (MIDICar Player.pas), line = 114
   3284
   3285 3A45 78				sei
   3286 3A46 AD DB 3B 8D 10 02		mva MIDFILES.OLDTIMERVEC VTIMR1

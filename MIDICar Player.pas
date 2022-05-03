@@ -75,7 +75,7 @@ begin
           _timerStatus:=_timerStatus or f_counter;     // pause ticking
           {$IFDEF DEBUG} poke($d01a,8); {$ENDIF}
           dTm:=totalTicks-trackTime;                   // time correction
-          trackTime:=GetTrackData(Track);
+          trackTime:=ProcessTrack(Track);
           Track^.deltaTime:=totalTicks+trackTime-dTm;  // time correction
           {$IFDEF DEBUG} poke($d01a,0); {$ENDIF}
           _timerStatus:=_timerStatus and (not f_counter);  // resume ticking
@@ -89,15 +89,11 @@ begin
 
 {$IFDEF USE_FIFO}
   _timerStatus:=_timerStatus and (not f_tick);    // reset tick flag
-  While FIFO_ReadByte(ZP_Data) do   // flush FIFO buffer
+  While FIFO_ReadByte(ZP_Data) do                 // flush FIFO buffer
   begin
     MC6850_Send(ZP_Data);
-    if (_timerStatus and f_tick)<>0 then break;            // interrupt immediately, if a new tick occurs
+    if (_timerStatus and f_tick)<>0 then break;   // interrupt immediately, if a new tick occurs
   end;
-  //   _pauseCount:=true;
-  // // if FIFO_ReadByte(ZP_Data) then MC6850_Send(ZP_Data);
-  //   FIFO_Flush;
-  //   _pauseCount:=false;
 {$ENDIF}
 
   until (PlayingTracks=0) or (peek(764)<>255);
