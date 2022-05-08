@@ -1,70 +1,62 @@
-{
-  Implementation based on code from the website
-  https://blog.stratifylabs.dev/device/2013-10-02-A-FIFO-Buffer-Implementation/
-}
 unit MIDI_FIFO;
 
 interface
 
 var
-  ZP_Data:Byte absolute $ff;
-  FIFO_Head:Byte absolute $F0;
-  FIFO_Tail:Byte absolute $F1;
+  FIFO_Head:Byte absolute $fd;
+  FIFO_Tail:Byte absolute $fe;
+  FIFO_Byte:Byte absolute $ff;
 
-procedure FIFO_Reset();
-function FIFO_ReadByte(var data:Byte):boolean;
-function FIFO_WriteByte(data:byte):boolean;
-function FIFO_Send(var data; len:byte):boolean;
+procedure FIFO_Reset;
+procedure FIFO_ReadByte;
+procedure FIFO_WriteByte; Assembler; Inline;
+procedure FIFO_Send(var data; len:byte);
 procedure FIFO_Flush();
 
 implementation
 uses mc6850, SysUtils;
 
 const
-  FIFO_SIZE = 255;
   FIFO_ADDR = $0600;
 
 var
-  FIFO_Buf:Array[0..FIFO_SIZE] of byte absolute FIFO_ADDR;
+  FIFO_Buf:Array[0..255] of byte absolute FIFO_ADDR;
 
 procedure FIFO_Reset;
 begin
   FIFO_Head:=0;
   FIFO_Tail:=0;
-  FillChar(@FIFO_Buf,FIFO_SIZE,0);
+  FillChar(@FIFO_Buf,256,0);
 end;
 
-function FIFO_ReadByte(var data:Byte):boolean;
+procedure FIFO_ReadByte;
 begin
   if (FIFO_Tail<>FIFO_Head) then
   begin
-    data:=FIFO_Buf[FIFO_Tail];
+    FIFO_Byte:=FIFO_Buf[FIFO_Tail];
     Inc(FIFO_Tail);
-    if (FIFO_Tail=FIFO_SIZE) then FIFO_TAIL:=0;
-    result:=true;
-  end
-  else
-    result:=false;
-end;
-
-function FIFO_WriteByte(data:byte):boolean;
-begin
-  if ((FIFO_Head+1)=FIFO_Tail) or
-     (((FIFO_Head+1)=FIFO_SIZE) and (FIFO_Tail=0)) then
-       exit(false) // no more room
-  else
-  begin
-    FIFO_Buf[FIFO_Head]:=data;
-{$IFDEF FIFO_DEBUG}
-    Write(IntToHex(data,2));
-{$ENDIF}
-    inc(FIFO_Head);
-    if (FIFO_Head=FIFO_Size) then FIFO_Head:=0;
   end;
-  result:=true;
 end;
 
-function FIFO_Send(var data; len:byte):boolean;
+procedure FIFO_WriteByte; Assembler; Inline;
+asm
+  lda FIFO_Head
+  clc
+  adc #1
+  cmp FIFO_Tail
+  bne storeInFIFO
+  rts
+
+storeInFIFO:
+  ldy FIFO_Head
+  lda FIFO_Byte
+  sta FIFO_ADDR,y
+  iny
+  sty FIFO_Head
+exitWrite:
+end;
+
+procedure FIFO_Send(var data; len:byte);
 var
   p:^Byte;
 
@@ -72,18 +64,19 @@ begin
   p:=@data;
   while len>0 do
   begin
-    if not FIFO_WriteByte(p^) then exit(false);
+    FIFO_Byte:=p^;   FIFO_WriteByte;
     inc(p); dec(len);
   end;
-  result:=true;
 end;
 
 procedure FIFO_Flush;
 begin
-  While FIFO_ReadByte(ZP_Data) do
+  While FIFO_Tail<>FIFO_Head do
   begin
-    poke($d01a,ZP_Data);
-    MC6850_Send(ZP_Data);
+    FIFO_Byte:=FIFO_Buf[FIFO_Tail];
+    poke($d01a,FIFO_Byte);
+  MC6850_Send(FIFO_Byte);
+  Inc(FIFO_Tail);
   end;
   poke($d01a,0);
 end;

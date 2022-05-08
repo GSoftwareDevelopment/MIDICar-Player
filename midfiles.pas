@@ -2,54 +2,58 @@ unit MIDFiles;
 
 interface
 const
-  freq_ratio=2;
   f_counter = %10000000; // prevents counting
   f_tick    = %01000000; // tic indicator
+  f_flags   = %11000000; // flags mask
+  f_ratio   = %00001111; // timer divider mask
+
+  _trkRegs  = $e0;       // buffer for trach processing
 
 type
-  TDeltaTime = word;
-  TByteArray = Array[0..0] of byte;
-  TBigIndian = Array[0..3] of byte;
+  TDeltaTime = Longint;
+  TByteArray = Array[0..0] of Byte;
+  TBigIndian = Array[0..3] of Byte;
 
   PMIDTrack = ^TMIDTrack;
   TMIDTrack = record
     ptr:Pointer;
-    deltaTime:TDeltaTime;
-    skipDelta,
-    EOT:Boolean;
-    _event:byte;
+    trackTime:TDeltaTime;
+    skipDelta:boolean;
+    _event:Byte;
   end;
 
 var
   MIDData:Pointer;
   MIDTracks:TByteArray;
-  format:word;
-  nTracks:word;
-  fps:byte;
-  fsd:byte;
-  tickDiv:word;
+  format:Word;
+  nTracks:Word;
+  fps:Byte;
+  fsd:Byte;
+  tickDiv:Word;
   ms_per_qnote:longint;
-  tactNum:byte;
-  tactDenum:byte;
-  ticks_per_qnote:byte;
-  ticks_per_32nd:byte;
+  tactNum:Byte;
+  tactDenum:Byte;
+  ticks_per_qnote:Byte;
+  ticks_per_32nd:Byte;
   BPM:Word;
 
   oldTimerVec:Pointer;
 
-  _timerStatus:byte absolute $df;
-{ 76543210
-  ||
-  |+-- tick flag (f_tick)
-  +--- counter flag (f_counter)
-}
+  _totalTicks:TDeltaTime  absolute $f0; {f0, f1, f2, f3}
+  _subCnt:Byte            absolute $f4;
+  _timerStatus:Byte       absolute $f5;
+  _tmp:Byte               absolute $f6;
 
-  _subCnt:byte absolute $f2;
-  totalTicks:longint absolute $f3;
+// the order of the registers MUST be the same as in the TMIDTrack record!!!
+  _ptr:^Byte              absolute _trkRegs;   {16-bits}
+  _adr:Word               absolute _trkRegs;   // must be the same address as _ptr!!
+  _trackTime:TDeltaTime   absolute _trkRegs+2; {32-bits}
+  _skipDelta:Boolean      absolute _trkRegs+6;
+  _event:Byte             absolute _trkRegs+7;
 
 function LoadMID(fn:PString):Boolean;
-function ProcessTrack(track:PMIDTrack):TDeltaTime;
-procedure setTempo(nTempo:longint);
+function ProcessTrack:TDeltaTime;
+procedure setTempo;
 
 implementation
 Uses
@@ -68,9 +72,8 @@ const
 var
   BI:TBigIndian;
   RBuf:TByteArray absolute $600;
-  TrackData:^Byte absolute $f7;
 
-function wordBI(var bi:TByteArray):word;
+function wordBI(var bi:TByteArray):Word;
 var
   ResultPTR:^Byte;
 
@@ -83,7 +86,7 @@ end;
 function longBI(var bi:TByteArray):longint;
 var
   ResultPTR:^Byte;
-  i:byte;
+  i:Byte;
 
 begin
   ResultPTR:=@Result;
@@ -118,20 +121,7 @@ end;
   total free: AF00 (44800)
 }
 
-procedure memBoundCheck(var adr:word);
-begin
-  if adr=$9c00 then
-    adr:=$A000
-  else if adr=$d000 then
-    adr:=$d800
-  else if adr=$E000 then
-    adr:=$e400
-  else if adr=$FF00 then
-  begin
-    WriteLn('Not enought memory.');
-    halt(2);
-  end;
-end;
+{$I memboundcheck.inc}
 
 //
 //
@@ -140,14 +130,14 @@ end;
 function LoadMID(fn:PString):boolean;
 var
   f:File;
-  trackCount:word;
+  trackCount:Word;
   chunkTag:TTag;
-  v,top,loadAdr,endAdr:word;
+  v,top,endAdr:Word;
   Len:Longint;
-  loadSize:byte;
+  loadSize:Byte;
   nTrkRec:PMIDTrack;
 
-  function ReadWordBI:word;
+  function ReadWordBI:Word;
   begin
     blockRead(f,BI,2);
     result:=wordBI(BI);
@@ -181,6 +171,10 @@ begin
     begin
       format:=readWordBI;
       nTracks:=readWordBI;
+{$IFDEF DEBUG}
+      WriteLn('Format: ',format);
+      WriteLn('Tracks: ',nTracks);
+{$ENDIF}
       v:=readWordBI;
       if (v and $8000)<>0 then
       begin
@@ -211,31 +205,29 @@ begin
       Write('Track: ',trackCount,'/',nTracks,'...');
 
       nTrkRec^.ptr:=MIDData;
-      nTrkRec^.deltaTime:=0;
+      nTrkRec^.trackTime:=0;
       nTrkRec^.skipDelta:=false;
-      nTrkRec^.EOT:=false;
 
       while Len>0 do
       begin
-        loadAdr:=word(MIDData);
-        memBoundCheck(loadAdr);
-        MIDData:=pointer(loadAdr);
+        _adr:=Word(MIDData);
+        memBoundCheck;
+        MIDData:=Pointer(_adr);
         if len>128 then loadSize:=128 else loadSize:=len;
-        endAdr:=loadAdr+loadSize;
+        endAdr:=_adr+loadSize;
         if (endAdr>=$9c00) and (endAdr<$A000) then
-          top:=$9c00
+          loadSize:=$9c00-_adr
         else if (endAdr>=$d000) and (endAdr<$d800) then
-          top:=$d000
+          loadSize:=$d000-_adr
         else if (endAdr>=$e000) and (endAdr<$e400) then
-          top:=$e000
-        else top:=0;
-        if top<>0 then
-          loadSize:=top-loadAdr;
+          loadSize:=$e000-_adr
+        else if (endAdr>=$ff00) then
+          loadSize:=$ff00-_adr;
         if loadSize=0 then continue;
-        // WriteLn(intToHex(loadAdr,4),' ',intToHex(loadSize,4));
 
         BlockRead(f,RBuf,loadSize,v);
-        if v<>loadSize then halt(1);
+        if v<>loadSize then exit(false);
+
         move(@RBuf,MIDData,loadSize);
         inc(MIDData,v);
         Dec(Len,v);
@@ -249,63 +241,62 @@ begin
   result:=true;
 end;
 
-function ProcessTrack(track:PMIDTrack):TDeltaTime;
+function ProcessTrack:TDeltaTime;
 var
   flagSysEx:Boolean;
-  DeltaTime,msgLen:TDeltaTime;
-  v,Event,Meta:Byte;
-  adr:word;
+  deltaTime:TDeltaTime;
+  msgLen:Byte;
+  nTempo:Longint;
 
-  function ReadB:Byte;
+  procedure readB; Inline;
   begin
-    adr:=word(TrackData);
-    memBoundCheck(adr);
-    TrackData:=pointer(adr);
-    result:=TrackData^;
-    inc(TrackData);
+    _tmp:=_ptr^;
+    inc(_adr);
+    memBoundCheck;
   end;
 
-  procedure getData(var buf:TByteArray; size:byte);
-  var
-    i:byte;
-
+{$IFDEF USE_FIFO}
+  procedure readB2FB; Inline;
   begin
-    i:=0;
+    FIFO_Byte:=_ptr^;
+    inc(_adr);
+    memBoundCheck;
+  end;
+{$ELSE}
+  procedure readB2FB; Inline;
+  begin
+    MC_Byte:=_ptr^;
+    inc(_adr);
+    memBoundCheck;
+  end;
+{$ENDIF}
+
+  procedure getData(p:PByte; size:Byte);
+  begin
     while size>0 do
     begin
-      adr:=word(TrackData);
-      memBoundCheck(adr);
-      TrackData:=pointer(adr);
-      buf[i]:=TrackData^;
-      inc(TrackData);
-      inc(i);
+      p^:=_ptr^;
+      inc(_adr);
+      memBoundCheck;
+      inc(p);
       dec(size);
     end;
   end;
 
-  procedure skip(n:byte);
-  begin
-    while n>0 do
-    begin
-      adr:=word(TrackData);
-      memBoundCheck(adr);
-      TrackData:=pointer(adr);
-      dec(n);
-      inc(TrackData);
-    end;
-  end;
+{$I readVarL.inc}
 
-  function getVarLong:TDeltaTime;
-  begin
-    result:=0;
-    repeat
-      v:=ReadB;
-      result:=result shl 7;
-      result:=result or (v and $7f);
-    until (v and $80=0);
-  end;
+  // function readVarL:TDeltaTime;
+  // begin
+  //   result:=0;
+  //   repeat
+  //     ReadB;
+  //     result:=result shl 7;
+  //     result:=result or (_tmp and $7f);
+  //   until (_tmp and $80=0);
+  // end;
 
-  function get24bitVal:longint;
+
+  function readT:longint;
   var
     ResultPTR:^Byte;
 
@@ -318,134 +309,194 @@ var
   end;
 
 begin
-  trackData:=Track^.ptr;
-  event:=Track^._event;
+  deltaTime:=0;
   repeat
-    if not Track^.skipDelta then
+    if not _skipDelta then
     begin
-      deltaTime:=getVarLong;
-      if deltaTime>0 then
-        break;
+      deltaTime:=readVarL;
+      if deltaTime>0 then break;
     end
     else
-      Track^.skipDelta:=false;
+      _skipDelta:=false;
 
-    if TrackData^ and $80<>0 then
-      event:=ReadB;
+    if _ptr^ and $80<>0 then
+    begin
+      ReadB; _event:=_tmp;
+    end;
 
-    case event of
+    case _event of
       $80..$BF,
       $E0..$EF: // two parameters for event
         begin
 {$IFDEF USE_FIFO}
-          FIFO_WriteByte(event);
-          FIFO_WriteByte(ReadB);
-          FIFO_WriteByte(ReadB);
+          FIFO_Byte:=_event; FIFO_WriteByte;
+          readB2FB; FIFO_WriteByte;
+          readB2FB; FIFO_WriteByte;
 {$ELSE}
-          MC6850_Send(event);
-          MC6850_Send(ReadB);
-          MC6850_Send(ReadB);
+          MC_Byte:=_event; MC6850_Send2;
+          readB2FB; MC6850_Send2;
+          readB2FB; MC6850_Send2;
 {$ENDIF}
         end;
       $C0..$DF: // one parameter for event
         begin
 {$IFDEF USE_FIFO}
-          FIFO_WriteByte(event);
-          FIFO_WriteByte(ReadB);
+          FIFO_Byte:=_event; FIFO_WriteByte;
+          readB2FB; FIFO_WriteByte;
 {$ELSE}
-          MC6850_Send(event);
-          MC6850_Send(ReadB);
+          MC_Byte:=_event; MC6850_Send2;
+          readB2FB; MC6850_Send2;
 {$ENDIF}
         end;
       $F0..$F7: // SysEx Event
         begin
-          msgLen:=getVarLong;
+          _tmp:=readVarL;
 {$IFDEF USE_FIFO}
-          FIFO_WriteByte(event);
+          FIFO_Byte:=_event; FIFO_WriteByte;
 {$ELSE}
-          MC6850_Send(event);
+          MC_Byte:=_event; MC6850_Send2;
 {$ENDIF}
-          while msgLen>0 do
+          while _tmp>0 do
           begin
-            v:=ReadB;
+            readB2FB;
 {$IFDEF USE_FIFO}
-            FIFO_WriteByte(v);
+            FIFO_WriteByte;
 {$ELSE}
-            MC6850_Send(v);
+            MC6850_Send2;
 {$ENDIF}
-            dec(msgLen);
+            dec(_tmp);
           end;
-          if v=$F7 then flagSysEx:=false else flagSysEx:=true;
+{$IFDEF USE_FIFO}
+          if FIFO_Byte=$F7 then flagSysEx:=false else flagSysEx:=true;
+{$ELSE}
+          if MC_Byte=$F7 then flagSysEx:=false else flagSysEx:=true;
+{$ENDIF}
         end;
       $FF: // Meta events
         begin
-          meta:=ReadB;
-          msgLen:=getVarLong;
-          case meta of
+          readB2FB;
+          msgLen:=readVarL;
+{$IFDEF USE_FIFO}
+          case FIFO_Byte of
+{$ELSE}
+          case MC_Byte of
+{$ENDIF}
             $2f: // end of track
-              begin
-                Track^.EOT:=true;
-              end;
+              deltaTime:=-1;
             $51: // tempo
               begin
-                ms_per_qnote:=get24bitVal;
-                setTempo(ms_per_qnote);
+                nTempo:=readT;
+                if nTempo<>ms_per_qnote then
+                begin
+                  ms_per_qnote:=nTempo;
+                  setTempo;
+                end;
               end;
             $58: // time signature
               begin
-                tactNum:=ReadB;
-                tactDenum:=ReadB;
-                ticks_per_qnote:=ReadB;
-                ticks_per_32nd:=ReadB;
-                setTempo(ms_per_qnote);
+                readB; tactNum:=_tmp;
+                readB; tactDenum:=_tmp;
+                readB; ticks_per_qnote:=_tmp;
+                readB; ticks_per_32nd:=_tmp;
+                setTempo;
               end;
           else
-            skip(msgLen);
+            _tmp:=msgLen;
+            while _tmp>0 do
+            begin
+              dec(_tmp);
+              inc(_adr);
+              memBoundCheck;
+            end;
           end;
         end;
     end;
-  until Track^.EOT;
-  Track^.ptr:=Pointer(TrackData);
-  Track^.skipDelta:=true;
-  Track^._event:=event;
+  until deltaTime=-1;
+  _skipDelta:=true;
   result:=deltaTime;
 end;
 
 
-procedure int_play; Interrupt;
-begin
-  if (_timerStatus and f_counter)=0 then
-  begin
-    inc(_subCnt);
-    if _subCnt>=freq_ratio then
-    begin
-      _subCnt:=0;
-      inc(totalTicks);
-      _timerStatus:=_timerStatus or f_tick;
-    end;
-  end;
-  asm
-    pla
-  end;
+procedure int_play; Interrupt; Assembler;
+asm
+    lda _timerStatus
+    bmi skip
+
+    and #f_ratio
+    cmp _subCnt
+    bne incSubCounter
+
+    lda _timerStatus
+    ora #f_tick
+    sta _timerStatus
+
+    lda #1
+    sta _subCnt
+
+    inc _totalTicks
+    bne skip
+    inc _totalTicks+1
+    bne skip
+    inc _totalTicks+2
+    bne skip
+    inc _totalTicks+3
+    bne skip
+
+incSubCounter:
+    inc _subCnt
+
+skip:
+
+  pla
 end;
 
-procedure setTempo(nTempo:longint);
+procedure setTempo;
 var
   freq:single;
-  fdiv:byte;
+  _freq:longint;
+  fdiv:Byte;
+  ratio:Single;
+  _ratio:Byte;
 
 begin
-  setIntVec(iTim1,oldTimerVec);
-  freq:=nTempo/1000000;
-  freq:=freq/tickDiv;
+  _freq:=ms_per_qnote div tickDiv;
+  freq:=_freq/1000000;
   freq:=1/freq;
   // freq:=1/((tickDiv*ticks_per_qnote)/1000000)*8;
-  fdiv:=round(64000/(freq*freq_ratio));
-  BPM:=60000000 div nTempo;
-  // writeLn(tickDiv,#127,nTempo,#127,ticks_per_qnote,#127,BPM,#127,round(freq));
+
+  ratio:=250.9803/freq;
+  _ratio:=1+trunc(ratio); //ratio-frac(ratio));
+  if _ratio>15 then ratio:=15;
+
+  // set timer ratio
+  _timerStatus:=(_timerStatus and f_flags) or _ratio;
+
+  // calc frequency divider for base timer
+  fdiv:=round(64000/(freq*_ratio));
+
+  // calc tempo (Beats Per Minutes)
+  BPM:=60000000 div ms_per_qnote;
+
+// {$IFDEF DEBUG}
+//   writeLn();
+// {$ENDIF}
+
+  setIntVec(iTim1,oldTimerVec);
   setIntVec(iTim1,@int_play,0,fdiv);
 end;
-
+{
+asm
+  sei
+  lda FDIV
+  sta $d200
+  lda $10
+  ora #$01
+  sta $10
+  sta $d20e
+  sta $d209
+  cli
+end;
+}
 initialization
   oldTimerVec:=nil;
   tickDiv:=384;
@@ -455,6 +506,6 @@ initialization
   ticks_per_32nd:=8;
   ms_per_qnote:=500000;
   _timerStatus:=0;
-
+  inc(ms_per_qnote);
   getIntVec(iTim1,oldTimerVec);
 end.

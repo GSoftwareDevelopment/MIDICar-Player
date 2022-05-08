@@ -55,11 +55,13 @@ var
     MC6850_CNTRREG  : byte absolute ADDR_MC6850_CNTRREG;
     MC6850_BUFFER   : byte absolute ADDR_MC6850_BUFFER;
     MC6850_STATREG  : byte absolute ADDR_MC6850_CNTRREG;
+    MC_Byte         : byte absolute $ff;
 
 procedure MC6850_Reset;
 procedure MC6850_Init(setup:byte);
 function  MC6850_Receive:byte;
 procedure MC6850_Send(data:byte);
+procedure MC6850_Send2; inline;
 
 implementation
 
@@ -81,10 +83,15 @@ end;
 
 procedure MC6850_Send(data:byte);
 begin
-{$IFDEF DEBUG} poke($d01a,0); {$ENDIF}
+{$IFDEF DEBUG} poke($d01a,4); {$ENDIF}
     repeat until (MC6850_CNTRReg and TDRE)<>0;
     MC6850_BUFFER:=data;
-{$IFDEF DEBUG} poke($d01a,data); {$ENDIF}
+{$IFDEF DEBUG} poke($d01a,15); {$ENDIF}
 end;
 
+procedure MC6850_Send2; inline;
+begin
+    repeat until (MC6850_CNTRReg and TDRE)<>0;
+    MC6850_BUFFER:=MC_Byte;
+end;
 end.

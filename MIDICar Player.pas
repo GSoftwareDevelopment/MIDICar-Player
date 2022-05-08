@@ -10,9 +10,9 @@ const
 
 var
   fn:PString;
-  Track:PMIDTrack;
+  trkPtr:PMIDTrack;
   curTrackOfs:Byte;
-  trackTime:word;
+  deltaTime:TDeltaTime;
   dTm:word;
   cTrk,PlayingTracks:Byte;
 
@@ -26,12 +26,18 @@ begin
 end;
 
 begin
+{$IFDEF DEBUG}
+  WriteLn('Debug mode is On');
+{$ENDIF}
 {$IFDEF USE_FIFO}
+  WriteLn('FIFO: On');
   FIFO_Reset;
+{$ELSE}
+  WriteLn('FIFO: Off');
 {$ENDIF}
 
-  MIDTracks:=Pointer($4200);
-  MIDData:=Pointer($4300);
+  MIDTracks:=Pointer($4400);
+  MIDData:=Pointer($4500);
 
   if paramCount=1 then
     fn:=ParamStr(1)
@@ -53,47 +59,60 @@ begin
   // initialize IRQ for MC6850
   // oldIRQ:=VIMIRQ; asm SEI end; VIMIRQ:=@MC6850_IRQ; asm CLI end;
 
-  totalTicks:=0;    // reset song ticks
-  setTempo(500000); // set song tempo
-  Reset_MIDI;       // reset MIDI
-
-// Player loop
   Write('Playing...');
 
+  Reset_MIDI;        // reset MIDI
+  _totalTicks:=0;    // reset song ticks
+  // setIntVec(iTim1,@int_play,0,255);
+  setTempo;          // set song tempo
+
+// Player loop
+
+  cTrk:=nTracks;
   Repeat
-    PlayingTracks:=nTracks;
-    curTrackOfs:=0;
-    for cTrk:=1 to nTracks do
+
+    if cTrk=nTracks then
     begin
-      Track:=@MIDTracks[curTrackOfs];
+      curTrackOfs:=0; cTrk:=1;
+      PlayingTracks:=nTracks;
+    end
+    else
+    begin
       inc(curTrackOfs,sizeOf(TMIDTrack));
-      if not Track^.EOT then
-      begin
-        trackTime:=Track^.DeltaTime;
-        if totalTicks>=trackTime then
-        begin
-          _timerStatus:=_timerStatus or f_counter;     // pause ticking
-          {$IFDEF DEBUG} poke($d01a,8); {$ENDIF}
-          dTm:=totalTicks-trackTime;                   // time correction
-          trackTime:=ProcessTrack(Track);
-          Track^.deltaTime:=totalTicks+trackTime-dTm;  // time correction
-          {$IFDEF DEBUG} poke($d01a,0); {$ENDIF}
-          _timerStatus:=_timerStatus and (not f_counter);  // resume ticking
-        end;
-      end
-      else
-      begin
-        Dec(PlayingTracks); continue;
-      end;
+      inc(cTrk);
     end;
 
+    move(@MIDTracks[curTrackOfs],pointer(_trkRegs),sizeOf(TMIDTrack)); // copy current track data
+
+    if _trackTime>=0 then
+    begin
+      if _totalTicks>=_trackTime then
+      begin
+        _timerStatus:=_timerStatus or f_counter;     // pause ticking
+        {$IFDEF DEBUG} poke($d01a,15); {$ENDIF}
+        dTm:=_totalTicks-_trackTime;                 // time correction
+        deltaTime:=ProcessTrack;
+        if deltaTime>0 then
+          _trackTime:=_totalTicks+deltaTime-dTm      // calculate new track time with time correction
+        else
+          _trackTime:=-1;
+        {$IFDEF DEBUG} poke($d01a,0); {$ENDIF}
+        _timerStatus:=_timerStatus and (not f_counter);  // resume ticking
+      end;
+    end
+    else
+      Dec(PlayingTracks);
+    move(pointer(_trkRegs),@MIDTracks[curTrackOfs],sizeOf(TMIDTrack)); // copy current track data
+
 {$IFDEF USE_FIFO}
-  _timerStatus:=_timerStatus and (not f_tick);    // reset tick flag
-  While FIFO_ReadByte(ZP_Data) do                 // flush FIFO buffer
-  begin
-    MC6850_Send(ZP_Data);
-    if (_timerStatus and f_tick)<>0 then break;   // interrupt immediately, if a new tick occurs
-  end;
+    if (MC6850_CNTRReg and TDRE)<>0 then
+      if FIFO_Tail<>FIFO_Head then
+      begin
+{$IFDEF DEBUG} poke($d01a,4); {$ENDIF}
+        FIFO_ReadByte;
+        MC6850_BUFFER:=FIFO_Byte;
+{$IFDEF DEBUG} poke($d01a,0); {$ENDIF}
+      end;
 {$ENDIF}
 
   until (PlayingTracks=0) or (peek(764)<>255);
