@@ -4,7 +4,9 @@ interface
 const
   f_counter = %10000000; // prevents counting
   f_tick    = %01000000; // tic indicator
-  f_flags   = %11000000; // flags mask
+  f_note    = %00100000; //
+  f_tempo   = %00010000; //
+  f_flags   = %11110000; // flags mask
   f_ratio   = %00001111; // timer divider mask
 
   _trkRegs  = $e0;       // buffer for trach processing
@@ -42,7 +44,8 @@ var
   _totalTicks:TDeltaTime  absolute $f0; {f0, f1, f2, f3}
   _subCnt:Byte            absolute $f4;
   _timerStatus:Byte       absolute $f5;
-  _tmp:Byte               absolute $f6;
+  _delta:Longint          absolute $f6; {f7, f8, f9, fa}
+  _tmp:Byte               absolute $f6; // must by the same address as _delta!!
 
 // the order of the registers MUST be the same as in the TMIDTrack record!!!
   _ptr:^Byte              absolute _trkRegs;   {16-bits}
@@ -96,30 +99,6 @@ begin
     inc(ResultPTR);
   end;
 end;
-
-{
-  memory under XDOS 2.43N:
-
-  $0700..$1df0 XDOS
-  $4000..$7fff Free mem - extended memory bank
-  $8000..$9c1f Free mem
-  $9c20..$9c3f Display List
-  $9c40..$9fff Screen
-  $a000..$bfff Free mem
-  $c000..$d7ff Free mem (under ROM)
-  $d800..$dfff Free mem (under ROM)
-  $e000..$e3ff Font set
-  $e400..$fffd Free mem (under ROM)
-
-  free memory gaps in page align:
-
-  $4000..$9bff
-  $a000..$bfff
-  $c000..$d7ff
-  $e400..$ff00
-
-  total free: AF00 (44800)
-}
 
 {$I memboundcheck.inc}
 
@@ -244,9 +223,7 @@ end;
 function ProcessTrack:TDeltaTime;
 var
   flagSysEx:Boolean;
-  deltaTime:TDeltaTime;
   msgLen:Byte;
-  nTempo:Longint;
 
   procedure readB; Inline;
   begin
@@ -271,50 +248,39 @@ var
   end;
 {$ENDIF}
 
-  procedure getData(p:PByte; size:Byte);
-  begin
-    while size>0 do
-    begin
-      p^:=_ptr^;
-      inc(_adr);
-      memBoundCheck;
-      inc(p);
-      dec(size);
-    end;
-  end;
-
 {$I readVarL.inc}
 
-  // function readVarL:TDeltaTime;
-  // begin
-  //   result:=0;
-  //   repeat
-  //     ReadB;
-  //     result:=result shl 7;
-  //     result:=result or (_tmp and $7f);
-  //   until (_tmp and $80=0);
-  // end;
+  procedure readT; Assembler;
+  asm
+    .local +MAIN.MIDFILES.PROCESSTRACK.READB
+    m@INLINE
+    .endl
+    lda _TMP
+    sta _delta+2
 
+    .local +MAIN.MIDFILES.PROCESSTRACK.READB
+    m@INLINE
+    .endl
+    lda _TMP
+    sta _delta+1
 
-  function readT:longint;
-  var
-    ResultPTR:^Byte;
+    .local +MAIN.MIDFILES.PROCESSTRACK.READB
+    m@INLINE
+    .endl
+    lda _TMP
+    sta _delta+0
 
-  begin
-    ResultPTR:=@Result;
-    getData(BI,3);
-    ResultPTR^:=BI[2]; inc(ResultPTR);
-    ResultPTR^:=BI[1]; inc(ResultPTR);
-    ResultPTR^:=BI[0];
+    lda #0
+    sta _delta+3
   end;
 
 begin
-  deltaTime:=0;
+  _delta:=0;
   repeat
     if not _skipDelta then
     begin
-      deltaTime:=readVarL;
-      if deltaTime>0 then break;
+      readVarL;
+      if _delta>0 then break;
     end
     else
       _skipDelta:=false;
@@ -350,7 +316,8 @@ begin
         end;
       $F0..$F7: // SysEx Event
         begin
-          _tmp:=readVarL;
+          readVarL;
+          // _tmp:=_delta;
 {$IFDEF USE_FIFO}
           FIFO_Byte:=_event; FIFO_WriteByte;
 {$ELSE}
@@ -375,20 +342,20 @@ begin
       $FF: // Meta events
         begin
           readB2FB;
-          msgLen:=readVarL;
+          readVarL;
 {$IFDEF USE_FIFO}
           case FIFO_Byte of
 {$ELSE}
           case MC_Byte of
 {$ENDIF}
             $2f: // end of track
-              deltaTime:=-1;
+              _delta:=-1;
             $51: // tempo
               begin
-                nTempo:=readT;
-                if nTempo<>ms_per_qnote then
+                readT;
+                if _delta<>ms_per_qnote then
                 begin
-                  ms_per_qnote:=nTempo;
+                  ms_per_qnote:=_delta;
                   setTempo;
                 end;
               end;
@@ -401,7 +368,7 @@ begin
                 setTempo;
               end;
           else
-            _tmp:=msgLen;
+            // _tmp:=_delta;
             while _tmp>0 do
             begin
               dec(_tmp);
@@ -411,9 +378,9 @@ begin
           end;
         end;
     end;
-  until deltaTime=-1;
+  until _delta=-1;
   _skipDelta:=true;
-  result:=deltaTime;
+  result:=_delta;
 end;
 
 
@@ -477,11 +444,6 @@ begin
   // calc tempo (Beats Per Minutes)
   BPM:=60000000 div ms_per_qnote;
 
-// {$IFDEF DEBUG}
-//   writeLn();
-// {$ENDIF}
-
-  setIntVec(iTim1,oldTimerVec);
   setIntVec(iTim1,@int_play,0,fdiv);
 end;
 {

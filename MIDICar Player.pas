@@ -36,8 +36,8 @@ begin
   WriteLn('FIFO: Off');
 {$ENDIF}
 
-  MIDTracks:=Pointer($4400);
-  MIDData:=Pointer($4500);
+  MIDTracks:=Pointer($4000);
+  MIDData:=Pointer($4100);
 
   if paramCount=1 then
     fn:=ParamStr(1)

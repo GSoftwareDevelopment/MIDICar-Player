@@ -11,27 +11,38 @@ The value occurs ONLY in the MID file - it is not part of the MIDI protocol.
 It is *important* that it is as __fast as possible__.
 }
 
-function readVarL:TDeltaTime; Assembler;
+procedure readVarL; Assembler;
 asm
-A equ result;
-B equ result+1;
-C equ result+2;
-D equ result+3;
+A equ _delta;
+B equ _delta+1;
+C equ _delta+2;
+D equ _delta+3;
 
-  lda #0
-  sta A
-  sta B
-  sta C
-  sta D
+  .MACRO m@read2A
+    lda (_PTR),y
+    sta A
+    inc _ADR
+    sne
+    inc _ADR+1
+    jsr MEMBOUNDCHECK
+    lda A
+  .ENDM
+
+  ldy #$00
+  sty A
+  sty B
+  sty C
+  sty D
 
 // read block
 
 // read 1st byte
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB
-	m@INLINE
-	.endl
-	lda _TMP
-	sta A
+	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
+	// m@INLINE
+	// .endl
+	// lda _TMP
+	// sta A
+  m@read2A
 
   bpl endRead
 
@@ -40,11 +51,13 @@ D equ result+3;
 	sta B
 
 // read 2nd byte
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB
-	m@INLINE
-	.endl
-	lda _TMP
-	sta A
+	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
+	// m@INLINE
+	// .endl
+	// lda _TMP
+	// sta A
+
+  m@read2A
 
   bpl endRead
 
@@ -56,11 +69,13 @@ D equ result+3;
 	sta B
 
 // read 3rd
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB
-	m@INLINE
-	.endl
-	lda _TMP
-	sta A
+	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
+	// m@INLINE
+	// .endl
+	// lda _TMP
+	// sta A
+
+  m@read2A
 
   bpl endRead
 
@@ -74,12 +89,15 @@ D equ result+3;
 	sta B
 
 // read 4th
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB
-	m@INLINE
-	.endl
-	lda _TMP
-	sta A
+	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
+	// m@INLINE
+	// .endl
+	// lda _TMP
+	// sta A
 
+  m@read2A
+
+// end read block
 endRead:
 
 // decode block
