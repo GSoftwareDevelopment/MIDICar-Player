@@ -65,8 +65,9 @@ check4bound
   rts
 
 outOfMem:
-  lda #2
-  jmp @halt
+  lda #ERR_NOT_ENOUGHT_MEMORY
+  sta SYSTEM.IOResult
+  // jmp @halt
 end;
 
 {

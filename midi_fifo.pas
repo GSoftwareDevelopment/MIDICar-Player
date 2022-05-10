@@ -74,11 +74,15 @@ begin
   While FIFO_Tail<>FIFO_Head do
   begin
     FIFO_Byte:=FIFO_Buf[FIFO_Tail];
+{$IFDEF DEBUG}
     poke($d01a,FIFO_Byte);
-  MC6850_Send(FIFO_Byte);
-  Inc(FIFO_Tail);
+{$ENDIF}
+    MC6850_Send(FIFO_Byte);
+    Inc(FIFO_Tail);
   end;
+{$IFDEF DEBUG}
   poke($d01a,0);
+{$ENDIF}
 end;
 
 end.

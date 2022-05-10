@@ -6,6 +6,12 @@ Uses
 {$I-}
 
 const
+  TRACK_DATA_ADDR = $4000;
+  MIDI_DATA_ADDR  = $4100;
+
+{$r selftest.rc}
+
+const
   GM_RESET: array[0..5] of byte = ($f0, $7e, $7f, $09, $01, $f7);
 
 var
@@ -14,11 +20,10 @@ var
   curTrackOfs:Byte;
   deltaTime:TDeltaTime;
   dTm:word;
-  cTrk,PlayingTracks:Byte;
+  cTrk,PlayingTracks,v:Byte;
 
 
 // {$I mc6850_irq.inc}
-
 
 procedure reset_MIDI;
 begin
@@ -30,25 +35,37 @@ begin
   WriteLn('Debug mode is On');
 {$ENDIF}
 {$IFDEF USE_FIFO}
-  WriteLn('FIFO: On');
+  // WriteLn('FIFO: On');
   FIFO_Reset;
 {$ELSE}
   WriteLn('FIFO: Off');
 {$ENDIF}
 
-  MIDTracks:=Pointer($4000);
-  MIDData:=Pointer($4100);
+  WriteLn('MID Player for MIDICar RC1 2022 GSD');
+  MIDTracks:=Pointer(TRACK_DATA_ADDR);
+  MIDData:=Pointer(MIDI_DATA_ADDR);
 
   if paramCount=1 then
-    fn:=ParamStr(1)
+  begin
+    fn:=ParamStr(1);
+    v:=LoadMid(fn);
+    write(#155);
+    if v<>0 then
+    begin
+      case v of
+        ERR_UNSUPPORTED_FORMAT: writeLn('Unsupported format');
+        ERR_NOT_ENOUGHT_MEMORY: writeLn('Not enought memory');
+        128..255: WriteLn('I/O Error #',v);
+      end;
+      halt;
+    end;
+  end
   else
   begin
-      // writeLn('Use: P device:filename.ext');
-      // halt(0);
-    fn:='D2:SELFTEST.MID';
+    writeLn('Type "P device:filename.MID" to play file.');
+    nTracks:=1;
+    writeLn('Selftest...');
   end;
-
-  if not LoadMID(fn) then halt(1);
 
 //
 

@@ -37,11 +37,6 @@ D equ _delta+3;
 // read block
 
 // read 1st byte
-	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
-	// m@INLINE
-	// .endl
-	// lda _TMP
-	// sta A
   m@read2A
 
   bpl endRead
@@ -51,12 +46,6 @@ D equ _delta+3;
 	sta B
 
 // read 2nd byte
-	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
-	// m@INLINE
-	// .endl
-	// lda _TMP
-	// sta A
-
   m@read2A
 
   bpl endRead
@@ -69,12 +58,6 @@ D equ _delta+3;
 	sta B
 
 // read 3rd
-	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
-	// m@INLINE
-	// .endl
-	// lda _TMP
-	// sta A
-
   m@read2A
 
   bpl endRead
@@ -89,12 +72,6 @@ D equ _delta+3;
 	sta B
 
 // read 4th
-	// .local +MAIN.MIDFILES.PROCESSTRACK.READB
-	// m@INLINE
-	// .endl
-	// lda _TMP
-	// sta A
-
   m@read2A
 
 // end read block

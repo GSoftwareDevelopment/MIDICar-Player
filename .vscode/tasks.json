@@ -11,6 +11,7 @@
 				"MIDICar Player.pas",
 				"-ipath:./",
 				"-define:USE_FIFO",
+				// "-define:USE_SUPPORT_VARS",
 				// "-define:DEBUG",
 				"-code:2000",
 				"-o:./asm/MIDICar Player.a65"
