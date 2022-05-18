@@ -1,2 +1,3 @@
-TRACK_DATA_ADDR rcdata 'selftest.mti';
-MIDI_DATA_ADDR rcdata 'selftest.rmd';
+TRACK_DATA_ADDR rcdata 'resources/selftest.mti';
+MIDI_DATA_ADDR rcdata 'resources/selftest.rmd';
+DLIST_ADDR rcasm 'resources/dlist.asm';
