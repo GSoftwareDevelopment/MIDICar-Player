@@ -18,8 +18,8 @@ var
   l:byte;
 
 begin
-  l:=byte(s[0]);
-  move(s[1],pointer(scradr),l);
+  l:=byte(s[0]); inc(s,1);
+  move(s,pointer(scradr),l);
   inc(scradr,l);
 end;
 
@@ -80,9 +80,21 @@ end;
 //   inc(scradr,zeros);
 // End;
 
+{
+  the following procedure is based on code from this page
+  https://unfinishedbitness.info/2014/09/26/6502-string-to-integer-and-reverse/
+  It is modified to avoid leading zeros.
+}
 procedure putInt(value:smallint); assembler;
 asm
 EOL = 0
+
+    lda scradr
+    sta screen1
+    sta screen2
+    lda scradr+1
+    sta screen1+1
+    sta screen2+1
 
 INT2STR:
     ldy #0
@@ -115,7 +127,8 @@ ITSADD:
     cmp #$10
     beq skipDigit
 storeDigit:
-    sta _str,X
+    ora puttextinvert
+    sta screen1:$f000,X
     inc _cnt
 skipDigit:
     iny
@@ -125,26 +138,11 @@ skipDigit:
     lda value
     ora #$10
     ldx _cnt
-    sta _str,X
+    ora puttextinvert
+    sta screen2:$f000,X
     inx
 
-put2screen:
-    lda scradr
-    sta screen+1
-    lda scradr+1
-    sta screen+2
-
-    txa
-    tay
-putloop:
-    dey
-    lda _str,y
-    ora puttextinvert
-screen:
-    sta $ffff,y
-    cpy #0
-    bne putloop
-
+// set screen addres to the end of value
     txa
     clc
     adc scradr
@@ -155,8 +153,8 @@ screen:
 stop:
     rts
 
-_cnt .by $00
-_str .by 0,0,0,0,0,0
+_cnt
+    .by 0
 Pow10Tab
     .wo 10000
     .wo 1000
