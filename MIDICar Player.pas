@@ -86,7 +86,7 @@ begin
   if paramCount=1 then
   begin
     fn:=ParamStr(1);
-    scradr:=SCREEN_STATUS+1; PutText('Loading ../..'~*);
+    scradr:=SCREEN_STATUS+1; PutText('Loading'~*);
     puttextinvert:=128;
     loadProcess:=@loadPrc;
     err:=LoadMid(fn);
