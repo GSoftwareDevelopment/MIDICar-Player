@@ -1,0 +1,78 @@
+EOL = 0
+
+    lda scradr
+    sta screen1
+    sta screen2
+    lda scradr+1
+    sta screen1+1
+    sta screen2+1
+
+INT2STR:
+    ldy #0
+    sty _cnt
+ITSNEXT:
+    ldx #0
+ITSSLP:
+    lda value
+    sec
+    sbc Pow10Tab,Y
+    sta value
+    lda value+1
+    iny
+    sbc Pow10Tab,Y
+    bcc ITSADD
+    sta value+1
+    inx
+    dey
+    clc
+    bcc ITSSLP
+ITSADD:
+    dey
+    lda value
+    adc Pow10Tab,Y
+    sta value
+    txa
+    ora #$10
+
+; skip lead zeros
+    ldx _cnt
+    bne storeDigit
+    cmp #$10
+    beq skipDigit
+
+storeDigit:
+    ora puttextinvert
+    sta screen1:$f000,X
+    inc _cnt
+skipDigit:
+    iny
+    iny
+    cpy #8
+    bcc ITSNEXT
+
+; last digit
+    lda value
+    ora #$10
+    ldx _cnt
+    ora puttextinvert
+    sta screen2:$f000,X
+    inx
+
+; set screen addres to the end of value
+    txa
+    clc
+    adc scradr
+    sta scradr
+    bcc stop
+    inc scradr+1
+
+stop:
+    rts
+
+_cnt
+    .by 0
+Pow10Tab
+    .wo 10000
+    .wo 1000
+    .wo 100
+    .wo 10

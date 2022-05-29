@@ -1,0 +1,69 @@
+RTCLOK = $12
+KBCODE = $d209
+SKSTAT = $d20f
+NMIRES = $d40f
+
+SRTIMR = $022b
+KEYDIS = $026d
+KEYREP = $02da
+KEYDEL = $02f1
+CH     = $02fc
+PCOLR0 = $02c0
+COLPM0 = $d012
+
+// systemowa procedure obsługi RTClock ($C0E2)
+    cld
+    sta rega
+    stx regx
+    sty regy
+    STA NMIRES
+
+    inc RTCLOK+2
+    bne end_rtclk
+    inc RTCLOK+1
+    bne end_rtclk
+    inc RTCLOK
+
+end_rtclk:
+
+// fragment systemowej procedury kopiowania rejestrów kolorów
+//    ldx #$08
+//colloop:
+//    lda PCOLR0,x
+//    sta COLPM0,x
+//    dex
+//    bpl colloop
+
+// systemowa procedura obsługi klawiatry ($C1A1)
+    lda SKSTAT
+    and #$04
+    beq skip_keyDelay
+    lda KEYDEL
+    beq skip_keyDelay
+    dec KEYDEL
+skip_keyDelay:
+    lda SRTIMR
+    beq end_key
+
+    lda SKSTAT
+    and #$04
+    bne skip_key
+
+    dec SRTIMR
+    bne end_key
+    lda KEYREP
+    sta SRTIMR
+
+    lda KBCODE
+    sta CH
+    jmp end_key
+
+skip_key:
+    lda #$00
+    sta SRTIMR
+
+end_key:
+
+    lda rega:#0
+    ldx regx:#0
+    ldy regy:#0

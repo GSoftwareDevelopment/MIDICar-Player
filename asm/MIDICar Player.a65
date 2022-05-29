@@ -106,9 +106,12 @@ FPEXP	.ds 1
 	?EXTDETECT = 0
 	?VBXDETECT = 0
 
+	RCDATA 'resources/font_s.fnt' CHARS_ADDR 0 0 0 0 0 0 0 0
+	RCASM 'resources/dlist.asm' DLIST_ADDR 0 0 0 0 0 0 0 0
+	RCDATA 'resources/header.obj' SCREEN_ADDR 0 0 0 0 0 0 0 0
+	RCDATA 'resources/uvmeter.obj' UVMETER_ADDR 0 0 0 0 0 0 0 0
 	RCDATA 'resources/selftest.mti' TRACK_DATA_ADDR 0 0 0 0 0 0 0 0
 	RCDATA 'resources/selftest.rmd' MIDI_DATA_ADDR 0 0 0 0 0 0 0 0
-	RCASM 'resources/dlist.asm' DLIST_ADDR 0 0 0 0 0 0 0 0
 .endl
 
 ; ------------------------------------------------------------
@@ -173,7 +176,7 @@ VADR	= DATAORIGIN+VARINITSIZE
 
 .local	MAIN						; PROCEDURE
 
-	jmp l_0088
+	jmp l_009F
 
 ; ------------------------------------------------------------
 
@@ -466,7 +469,7 @@ VALUE	= :ECX
 	eif
 .endl
 
-.local	FILLCHAR_00EB					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+.local	FILLCHAR_0102					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
 
 	.MACRO m@INLINE
 
@@ -484,29 +487,11 @@ VALUE	= :EAX
 @exit
 .endl
 
-.local	MOVE_00EC					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+.local	MOVE_0103					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
 
 	.MACRO m@INLINE
 
 ; -------------------  ASM Block 00000028  -------------------
-
-	jsr @move
-
-	.ENDM
-
-; ------------------------------------------------------------
-
-SOURCE	= :EDX
-DEST	= :ECX
-COUNT	= :EAX
-@exit
-.endl
-
-.local	MOVE_00ED					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
-
-	.MACRO m@INLINE
-
-; -------------------  ASM Block 00000030  -------------------
 
 	jsr @move
 
@@ -734,67 +719,18 @@ MC_BYTE	= $FF
 
 ; ------------------------------------------------------------
 
-.local	DOS						; UNIT
-
-; ------------------------------------------------------------
-
-PALNTSC	= $D014
-
-.endl							; UNIT DOS
-
-; ------------------------------------------------------------
-
-.local	STRUTILS					; UNIT
-
-; ------------------------------------------------------------
-
-.endl							; UNIT STRUTILS
-
-; ------------------------------------------------------------
-
-.local	SYSUTILS					; UNIT
-
-; ------------------------------------------------------------
-
-FAREADONLY	= $01
-FAHIDDEN	= $02
-FASYSFILE	= $04
-FAVOLUMEID	= $08
-FADIRECTORY	= $10
-FAARCHIVE	= $20
-FAANYFILE	= $3F
-
-.endl							; UNIT SYSUTILS
-
-; ------------------------------------------------------------
-
 .local	MIDI_FIFO					; UNIT
 
 .local	FIFO_RESET					; PROCEDURE
 
-; optimize OK (MIDI_FIFO), line = 28
+; optimize OK (MIDI_FIFO), line = 30
 
 	lda #$00
 	sta FIFO_HEAD
 
-; optimize OK (MIDI_FIFO), line = 29
+; optimize OK (MIDI_FIFO), line = 31
 
 	sta FIFO_TAIL
-
-; optimize OK (MIDI_FIFO), line = 30
-
-	sta SYSTEM.FILLCHAR_00EB.A
-	lda #$06
-	sta SYSTEM.FILLCHAR_00EB.A+1
-	lda #$00
-	sta SYSTEM.FILLCHAR_00EB.COUNT
-	lda #$01
-	sta SYSTEM.FILLCHAR_00EB.COUNT+1
-	lda #$00
-	sta SYSTEM.FILLCHAR_00EB.VALUE
-	.local +MAIN.SYSTEM.FILLCHAR_00EB
-	m@INLINE
-	.endl
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -807,63 +743,84 @@ FAANYFILE	= $3F
 	eif
 .endl
 
-.local	FIFO_PUSHDIRECT2MC6850				; PROCEDURE | INLINE
-
-	.MACRO m@INLINE
-
-; optimize OK (MIDI_FIFO), line = 35
-
-	lda MC6850.MC6850_CNTRREG
-	and #$02
-	jeq l_0189
+.local	FIFO_PUSHDIRECT2MC6850				; PROCEDURE
 
 ; optimize OK (MIDI_FIFO), line = 36
 
+	lda MC6850.MC6850_CNTRREG
+	and #$02
+	jeq l_0169
+
+; optimize OK (MIDI_FIFO), line = 37
+
 	ldy FIFO_TAIL
 	cpy FIFO_HEAD
-	jeq l_019E
+	jeq l_017E
 
-; optimize OK (MIDI_FIFO), line = 38
+; optimize OK (MIDI_FIFO), line = 39
 
 	lda adr.FIFO_BUF,y
 	sta MC6850.MC6850_BUFFER
 
-; optimize FAIL (0, MIDI_FIFO), line = 39
+; optimize FAIL (0, MIDI_FIFO), line = 40
 
 	inc FIFO_TAIL
-l_019E
-l_0189
-	.ENDM
+l_017E
+l_0169
 @exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
 .endl
 
-.local	FIFO_WRITEBYTE					; PROCEDURE | ASSEMBLER | INLINE
+.local	FIFO_WRITEBYTE					; PROCEDURE | ASSEMBLER
 
-	.MACRO m@INLINE
-
-; -------------------  ASM Block 00000070  -------------------
+; -------------------  ASM Block 00000052  -------------------
 
   lda FIFO_Head
   clc
   adc #1
   cmp FIFO_Tail
   bne storeInFIFO
+
+  lda $d01a
+  eor #$47
+  sta $d01a
   jsr FIFO_Flush
+  lda $d01a
+  eor #$47
+  sta $d01a
 
 storeInFIFO:
   ldy FIFO_Head
   lda FIFO_Byte
   sta FIFO_ADDR,y
   inc FIFO_Head
+
+  jsr FIFO_PushDirect2MC6850
 exitWrite:
 
-	.ENDM
 @exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
 .endl
 
 .local	FIFO_SEND					; PROCEDURE
 
-; optimize OK (MIDI_FIFO), line = 75
+; optimize OK (MIDI_FIFO), line = 85
 
 	lda DATA
 	sta P
@@ -871,37 +828,35 @@ exitWrite:
 	sta P+1
 
 ; --- WhileProlog
-	jmp l_01BD
-l_01BE
+	jmp l_019D
+l_019E
 
-; optimize OK (MIDI_FIFO), line = 78
+; optimize OK (MIDI_FIFO), line = 88
 
 	mwy P :bp2
 	ldy #$00
 	lda (:bp2),y
 	sta FIFO_BYTE
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
+	jsr FIFO_WRITEBYTE
 
-; optimize FAIL (0, MIDI_FIFO), line = 79
+; optimize FAIL (0, MIDI_FIFO), line = 89
 
 	inc P
 	sne
 	inc P+1
 	dec LEN
-l_01BD
+l_019D
 
-; optimize OK (MIDI_FIFO), line = 76
+; optimize OK (MIDI_FIFO), line = 86
 
 	lda LEN
-	jne l_01BE
+	jne l_019E
 
 ; ------------------------------------------------------------
 
-DATA	= DATAORIGIN+$0142
-LEN	= DATAORIGIN+$0144
-P	= DATAORIGIN+$0145
+DATA	= DATAORIGIN+$0143
+LEN	= DATAORIGIN+$0145
+P	= DATAORIGIN+$0146
 
 @VarData	= DATA
 @VarDataSize	= 5
@@ -920,33 +875,45 @@ P	= DATAORIGIN+$0145
 
 .local	FIFO_FLUSH					; PROCEDURE
 
-; --- WhileProlog
-	jmp l_01DF
-l_01E0
+; optimize OK (MIDI_FIFO), line = 126
 
-; optimize OK (MIDI_FIFO), line = 87
+	lda _TIMERSTATUS
+	eor #$80
+	sta _TIMERSTATUS
+
+; --- WhileProlog
+	jmp l_01C9
+l_01CA
+
+; optimize OK (MIDI_FIFO), line = 129
 
 	lda MC6850.MC6850_CNTRREG
 	and #$02
-	jeq l_01F6
+	jeq l_01E0
 
-; optimize OK (MIDI_FIFO), line = 89
+; optimize OK (MIDI_FIFO), line = 131
 
 	ldy FIFO_TAIL
 	lda adr.FIFO_BUF,y
 	sta MC6850.MC6850_BUFFER
 
-; optimize FAIL (0, MIDI_FIFO), line = 90
+; optimize FAIL (0, MIDI_FIFO), line = 132
 
 	inc FIFO_TAIL
-l_01F6
-l_01DF
+l_01E0
+l_01C9
 
-; optimize OK (MIDI_FIFO), line = 85
+; optimize OK (MIDI_FIFO), line = 127
 
 	lda FIFO_TAIL
 	cmp FIFO_HEAD
-	jne l_01E0
+	jne l_01CA
+
+; optimize OK (MIDI_FIFO), line = 135
+
+	lda _TIMERSTATUS
+	eor #$80
+	sta _TIMERSTATUS
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -964,9 +931,11 @@ l_01DF
 FIFO_HEAD	= $FD
 FIFO_TAIL	= $FE
 FIFO_BYTE	= $FF
+FIFO2NULL	= DATAORIGIN+$0142
 FIFO_ADDR	= $0600
 adr.FIFO_BUF	= $0600
 .var FIFO_BUF	= adr.FIFO_BUF .word
+_TIMERSTATUS	= $F5
 
 .endl							; UNIT MIDI_FIFO
 
@@ -976,12 +945,10 @@ adr.FIFO_BUF	= $0600
 
 .local	INT_TIMER					; PROCEDURE | ASSEMBLER | INTERRUPT
 
-; -------------------  ASM Block 00000071  -------------------
+; -------------------  ASM Block 00000053  -------------------
 
     lda _timerStatus
-    bpl doSubTick
-    pla
-    rti
+    bmi skip
 
 doSubTick:
     and #f_ratio
@@ -989,23 +956,43 @@ doSubTick:
     beq doMainTick
 
     inc _subCnt
-    pla
-    rti
+    bvs skip
 
 doMainTick:
     lda #1
     sta _subCnt
+
+    lda _timerStatus
+    ora #f_tick
+    sta _timerStatus
 
     inc _totalTicks
     bne skip
     inc _totalTicks+1
     bne skip
     inc _totalTicks+2
-    bne skip
-    inc _totalTicks+3
-    bne skip
+    // bne skip
+    // inc _totalTicks+3
 
 skip:
+
+//   sty regy
+
+//   ldy MIDI_FIFO.FIFO_Tail
+//   cpy MIDI_FIFO.FIFO_Head
+//   beq fifo_end
+
+//   lda MC6850.MC6850_CNTRREG
+//   and #MC6850.TDRE
+//   beq fifo_end
+
+//   lda MIDI_FIFO.FIFO_ADDR,y
+//   sta MC6850.MC6850_BUFFER
+
+//   inc MIDI_FIFO.FIFO_Tail
+
+// fifo_end:
+//   ldy regy:#$00
 
   pla
 
@@ -1014,7 +1001,7 @@ skip:
 
 .local	MEMBOUNDCHECK					; PROCEDURE | ASSEMBLER
 
-; -------------------  ASM Block 00000072  -------------------
+; -------------------  ASM Block 00000054  -------------------
 
   lda _adr            // get LSB of address
   beq checkMemType    // zero means, we crossing the page. Check block bounds
@@ -1096,13 +1083,13 @@ outOfMem:
 
 .local	LOADMID						; FUNCTION
 
-	jmp l_021A
+	jmp l_020E
 
 .local	READWORDBI					; FUNCTION
 
 ; BlockRead
 
-; optimize OK (bigindian.inc), line = 3
+; optimize OK (bigendian.inc), line = 3
 
 	mwy F :bp2
 	ldy #s@file.buffer
@@ -1123,7 +1110,7 @@ outOfMem:
 	@readfile F, #7
 	pla:tax
 
-; -------------------  ASM Block 00000073  -------------------
+; -------------------  ASM Block 00000055  -------------------
 
     ldx result
     ldy result+1
@@ -1134,7 +1121,7 @@ outOfMem:
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0181
+RESULT	= DATAORIGIN+$018C
 	rts						; ret
 .endl
 
@@ -1142,7 +1129,7 @@ RESULT	= DATAORIGIN+$0181
 
 ; BlockRead
 
-; optimize OK (bigindian.inc), line = 15
+; optimize OK (bigendian.inc), line = 15
 
 	mwy F :bp2
 	ldy #s@file.buffer
@@ -1163,7 +1150,7 @@ RESULT	= DATAORIGIN+$0181
 	@readfile F, #7
 	pla:tax
 
-; -------------------  ASM Block 00000074  -------------------
+; -------------------  ASM Block 00000056  -------------------
 
     ldx result
     ldy result+3
@@ -1179,10 +1166,10 @@ RESULT	= DATAORIGIN+$0181
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0183
+RESULT	= DATAORIGIN+$018E
 	rts						; ret
 .endl
-l_021A
+l_020E
 ; AssignFile
 
 ; optimize OK (loadmid.inc), line = 18
@@ -1216,7 +1203,7 @@ l_021A
 ; optimize OK (loadmid.inc), line = 20
 
 	lda SYSTEM.IORESULT
-	jpl l_0251
+	jpl l_0245
 
 ; optimize OK (loadmid.inc), line = 22
 
@@ -1229,7 +1216,7 @@ l_021A
 	pla:tax
 
 	jmp @exit					; exit
-l_0251
+l_0245
 
 ; optimize OK (loadmid.inc), line = 27
 
@@ -1261,8 +1248,8 @@ l_0251
 	sta TOTALTRACKS
 
 ; --- WhileProlog
-	jmp l_0272
-l_0273
+	jmp l_0266
+l_0267
 ; BlockRead
 
 ; optimize OK (loadmid.inc), line = 35
@@ -1299,9 +1286,9 @@ l_0273
 	lda V
 	cmp #$04
 @
-	jeq l_0290
-	jmp b_0273					; break
-l_0290
+	jeq l_0284
+	jmp b_0267					; break
+l_0284
 
 ; optimize FAIL ('READLONGBI', loadmid.inc), line = 37
 
@@ -1319,16 +1306,16 @@ l_0290
 
 	lda CHUNKTAG+3
 	eor #$64
-	jne l_02A7
+	jne l_029B
 	lda CHUNKTAG+2
 	eor #$68
-	jne l_02A7
+	jne l_029B
 	lda CHUNKTAG+1
 	eor #$54
-	jne l_02A7
+	jne l_029B
 	lda CHUNKTAG
 	eor #$4D
-	jne l_02A7
+	jne l_029B
 
 ; optimize FAIL ('READWORDBI', loadmid.inc), line = 40
 
@@ -1338,13 +1325,13 @@ l_0290
 
 ; optimize OK (loadmid.inc), line = 41
 
-	jeq l_02CA
+	jeq l_02BE
 	cmp #$01
-	jeq l_02CA
+	jeq l_02BE
 	lda #$64
 	sta RESULT
 	jmp @exit					; exit
-l_02CA
+l_02BE
 
 ; optimize FAIL ('READWORDBI', loadmid.inc), line = 42
 
@@ -1362,7 +1349,7 @@ l_02CA
 
 ; optimize OK (loadmid.inc), line = 44
 
-	jmi l_02EE
+	jmi l_02E2
 
 ; optimize OK (loadmid.inc), line = 45
 
@@ -1370,45 +1357,39 @@ l_02CA
 	sta TICKDIV
 	lda V+1
 	sta TICKDIV+1
-l_02EE
-	jmp l_02FF
-l_02A7
+l_02E2
+	jmp l_02F3
+l_029B
 
 ; optimize OK (loadmid.inc), line = 60
 
 	lda CHUNKTAG+3
 	eor #$6B
-	jne l_030F
+	jne l_0303
 	lda CHUNKTAG+2
 	eor #$72
-	jne l_030F
+	jne l_0303
 	lda CHUNKTAG+1
 	eor #$54
-	jne l_030F
+	jne l_0303
 	lda CHUNKTAG
 	eor #$4D
-	jne l_030F
+	jne l_0303
 
 ; optimize FAIL (0, loadmid.inc), line = 62
 
 	inc TRACKCOUNT
 
-; optimize FAIL (':TMP', loadmid.inc), line = 63
-
-	lda LOADPROCESS
-	sta :TMP+1
-	lda LOADPROCESS+1
-	sta :TMP+2
-	lda #$4C
-	sta :TMP
-	inx
-	mva TRACKCOUNT :STACKORIGIN,x
-	jsr :TMP
-
-; optimize OK (loadmid.inc), line = 65
+; optimize OK (loadmid.inc), line = 64
 
 	mwy TRKDATA :bp2
 	ldy #$00
+	tya
+	sta (:bp2),y
+
+; optimize OK (loadmid.inc), line = 65
+
+	ldy #$01
 	lda _BANK
 	sta (:bp2),y
 
@@ -1433,25 +1414,32 @@ l_02A7
 	iny
 	sta (:bp2),y
 
-; optimize OK (loadmid.inc), line = 68
-
-	iny
-	sta (:bp2),y
-
 ; --- WhileProlog
-	jmp l_032D
-l_032E
+	jmp l_031D
+l_031E
+
+; optimize FAIL (':TMP', loadmid.inc), line = 71
+
+	lda LOADPROCESS
+	sta :TMP+1
+	lda LOADPROCESS+1
+	sta :TMP+2
+	lda #$4C
+	sta :TMP
+	inx
+	mva TRACKCOUNT :STACKORIGIN,x
+	jsr :TMP
 
 ; optimize FAIL ('MEMBOUNDCHECK', loadmid.inc), line = 72
 
 	jsr MEMBOUNDCHECK
 	lda SYSTEM.IORESULT
 	cmp #$01
-	jeq l_0341
+	jeq l_0335
 	lda #$65
 	sta RESULT
 	jmp @exit					; exit
-l_0341
+l_0335
 
 ; optimize OK (loadmid.inc), line = 74
 
@@ -1478,15 +1466,15 @@ L4	bvc L5
 	ora #$01
 L5
 	.ENDL
-	jmi l_0358
-	jeq l_0358
+	jmi l_034C
+	jeq l_034C
 	lda #$FF
 	sta LOADSIZE
-	jmp l_0366
-l_0358
+	jmp l_035A
+l_034C
 	lda LEN
 	sta LOADSIZE
-l_0366
+l_035A
 
 ; optimize OK (loadmid.inc), line = 75
 
@@ -1500,75 +1488,75 @@ l_0366
 ; optimize OK (loadmid.inc), line = 76
 
 	lda _BANK
-	jne l_0387
+	jne l_037B
 
 ; optimize OK (loadmid.inc), line = 78
 
 	lda ENDADR+1
-	jpl l_03A4
+	jpl l_0398
 	cmp #$A4
-	jcs l_03A4
+	jcs l_0398
 
 ; optimize OK (loadmid.inc), line = 79
 
 	lda #$00
 	sub _ADR
 	sta LOADSIZE
-	jmp l_03B7
-l_03A4
+	jmp l_03AB
+l_0398
 
 ; optimize OK (loadmid.inc), line = 80
 
 	lda ENDADR+1
 	cmp #$D0
-	jcc l_03D3
+	jcc l_03C7
 	cmp #$D8
-	jcs l_03D3
+	jcs l_03C7
 
 ; optimize OK (loadmid.inc), line = 81
 
 	lda #$00
 	sub _ADR
 	sta LOADSIZE
-	jmp l_03E6
-l_03D3
+	jmp l_03DA
+l_03C7
 
 ; optimize OK (loadmid.inc), line = 82
 
 	lda ENDADR+1
 	cmp #$FF
-	jcc l_03F7
+	jcc l_03EB
 
 ; optimize OK (loadmid.inc), line = 83
 
 	lda #$00
 	sub _ADR
 	sta LOADSIZE
-l_03F7
-l_03E6
-l_03B7
-	jmp l_040C
-l_0387
+l_03EB
+l_03DA
+l_03AB
+	jmp l_0400
+l_037B
 
 ; optimize OK (loadmid.inc), line = 86
 
 	lda ENDADR+1
-	jpl l_041D
+	jpl l_0411
 
 ; optimize OK (loadmid.inc), line = 87
 
 	lda #$00
 	sub _ADR
 	sta LOADSIZE
-l_041D
-l_040C
+l_0411
+l_0400
 
 ; optimize OK (loadmid.inc), line = 89
 
 	lda LOADSIZE
-	jne l_043B
-	jmp c_032E					; continue
-l_043B
+	jne l_042F
+	jmp c_031E					; continue
+l_042F
 ; BlockRead
 
 ; optimize OK (loadmid.inc), line = 91
@@ -1605,27 +1593,27 @@ l_043B
 	lda V
 	cmp LOADSIZE
 @
-	jeq l_0460
+	jeq l_0454
 	lda SYSTEM.IORESULT
 	sta RESULT
 	jmp @exit					; exit
-l_0460
+l_0454
 
 ; optimize OK (loadmid.inc), line = 94
 
 	lda #$00
-	sta SYSTEM.MOVE_00EC.SOURCE
+	sta SYSTEM.MOVE_0103.SOURCE
 	lda #$06
-	sta SYSTEM.MOVE_00EC.SOURCE+1
+	sta SYSTEM.MOVE_0103.SOURCE+1
 	lda _PTR
-	sta SYSTEM.MOVE_00EC.DEST
+	sta SYSTEM.MOVE_0103.DEST
 	lda _PTR+1
-	sta SYSTEM.MOVE_00EC.DEST+1
+	sta SYSTEM.MOVE_0103.DEST+1
 	lda LOADSIZE
-	sta SYSTEM.MOVE_00EC.COUNT
+	sta SYSTEM.MOVE_0103.COUNT
 	lda #$00
-	sta SYSTEM.MOVE_00EC.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_00EC
+	sta SYSTEM.MOVE_0103.COUNT+1
+	.local +MAIN.SYSTEM.MOVE_0103
 	m@INLINE
 	.endl
 
@@ -1652,17 +1640,17 @@ l_0460
 	lda LEN+3
 	sbc #$00
 	sta LEN+3
-c_032E
-l_032D
+c_031E
+l_031D
 
-; optimize OK (loadmid.inc), line = 70
+; optimize OK (loadmid.inc), line = 69
 
 	lda LEN+3
 	bmi @+
 	ora LEN+2
 	ora LEN+1
 	ora LEN
-	jne l_032E
+	jne l_031E
 @
 
 ; optimize OK (loadmid.inc), line = 99
@@ -1672,9 +1660,9 @@ l_032D
 	sta TRKDATA
 	scc
 	inc TRKDATA+1
-l_030F
-l_02FF
-l_0272
+l_0303
+l_02F3
+l_0266
 
 ; optimize FAIL (1, loadmid.inc), line = 33
 
@@ -1706,8 +1694,8 @@ l_0272
 	tya
 	and :STACKORIGIN+1,x
 	sta :STACKORIGIN+1,x
-	jne l_0273
-b_0273
+	jne l_0267
+b_0267
 ; CloseFile
 
 	txa:pha
@@ -1723,838 +1711,39 @@ b_0273
 
 ; ------------------------------------------------------------
 
-FN	= DATAORIGIN+$0160
-RESULT	= DATAORIGIN+$0162
+FN	= DATAORIGIN+$016B
+RESULT	= DATAORIGIN+$016D
 LOADBUF_SIZE	= $FF
-.var F	= DATAORIGIN+$0163 .word
-TRACKCOUNT	= DATAORIGIN+$016F
-CHUNKTAG	= DATAORIGIN+$0170
-V	= DATAORIGIN+$0174
-TOP	= DATAORIGIN+$0176
-ENDADR	= DATAORIGIN+$0178
-LEN	= DATAORIGIN+$017A
-LOADSIZE	= DATAORIGIN+$017E
-TRKDATA	= DATAORIGIN+$017F
-TRKDATA.BANK	= DATAORIGIN+$0000
-TRKDATA.PTR	= DATAORIGIN+$0001
-TRKDATA.TRACKTIME	= DATAORIGIN+$0003
-TRKDATA.STATUS	= DATAORIGIN+$0007
+.var F	= DATAORIGIN+$016E .word
+TRACKCOUNT	= DATAORIGIN+$017A
+CHUNKTAG	= DATAORIGIN+$017B
+V	= DATAORIGIN+$017F
+TOP	= DATAORIGIN+$0181
+ENDADR	= DATAORIGIN+$0183
+LEN	= DATAORIGIN+$0185
+LOADSIZE	= DATAORIGIN+$0189
+TRKDATA	= DATAORIGIN+$018A
+TRKDATA.STATUS	= DATAORIGIN+$0000
+TRKDATA.BANK	= DATAORIGIN+$0001
+TRKDATA.PTR	= DATAORIGIN+$0002
+TRKDATA.TRACKTIME	= DATAORIGIN+$0004
 TRKDATA._EVENT	= DATAORIGIN+$0008
 
 @VarData	= FN
-@VarDataSize	= 32
+@VarDataSize	= 30
 
 	rts						; ret
-.endl
-
-.local	PROCESSTRACK					; PROCEDURE
-
-	jmp l_04AC
-
-.local	READB						; PROCEDURE | INLINE
-
-	.MACRO m@INLINE
-
-; optimize OK (processtrack.inc), line = 12
-
-	ldy #$00
-	lda (_PTR),y
-	sta _TMP
-
-; optimize FAIL (0, processtrack.inc), line = 13
-
-	inc _ADR
-	sne
-	inc _ADR+1
-
-; optimize FAIL ('MEMBOUNDCHECK', processtrack.inc), line = 14
-
-	jsr MEMBOUNDCHECK
-	.ENDM
-@exit
-.endl
-
-.local	READB2FB					; PROCEDURE | INLINE
-
-	.MACRO m@INLINE
-
-; optimize OK (processtrack.inc), line = 20
-
-	ldy #$00
-	lda (_PTR),y
-	sta MIDI_FIFO.FIFO_BYTE
-
-; optimize FAIL (0, processtrack.inc), line = 24
-
-	inc _ADR
-	sne
-	inc _ADR+1
-
-; optimize FAIL ('MEMBOUNDCHECK', processtrack.inc), line = 25
-
-	jsr MEMBOUNDCHECK
-	.ENDM
-@exit
-.endl
-
-.local	READVARL					; PROCEDURE | ASSEMBLER
-
-; -------------------  ASM Block 00000075  -------------------
-
-A equ _delta;
-B equ _delta+1;
-C equ _delta+2;
-D equ _delta+3;
-
-  .MACRO m@read2A
-    ldy #0
-    lda (_PTR),y
-    sta A
-    inc _ADR
-    sne
-    inc _ADR+1
-    jsr MEMBOUNDCHECK
-    lda A
-  .ENDM
-
-  ldy #0
-  sty A
-  sty B
-  sty C
-  sty D
-
-// read block
-
-// read 1st byte to A
-  m@read2A
-
-  bpl endRead
-
-// move A to B and read 2nd byte to A
-// B <- A = 4th readed byte
-	and #$7F
-	sta B
-
-// read 2nd byte
-  m@read2A
-
-  bpl endRead
-
-// mova B to C, A to B and read 3rd byte to A
-// C <- B <- A = 4th readed byte
-	lda B
-	sta C
-	lda A
-	and #$7F
-	sta B
-
-// read 3rd
-  m@read2A
-
-  bpl endRead
-
-// move C to D, B to C, A to B and read 4th byte to A
-// D <- C <- B <- A = 4th readed byte
-	lda C
-	sta D
-	lda B
-	sta C
-	lda A
-	and #$7F
-	sta B
-
-// read 4th
-  m@read2A
-
-// end read block
-endRead:
-
-// decode block
-// 'A' stays as it is
-
-// 'B' if geather than zero, lets decode
-  lda B
-  beq decodeC
-
-// 76543210
-// 0bbbbbbb and %1
-// 0000000b
-//        |
-// +------+ 7:asl
-// v
-// b0000000 ora A
-// baaaaaaa
-
-  lsr B
-  bcc decodeC
-
-  lda A
-  ora #$80
-  sta A
-
-decodeC:
-// 'C' if geather than zero, lets decode
-  lda C
-  beq decodeD
-
-// 76543210
-// 0ccccccc and %11
-// 000000cc
-//       ||
-// +-----+| 6:asl
-// |+-----+
-// vv
-// cc000000 ora B
-// ccbbbbbb
-  and #%11    // 2
-  beq noOrC   // 2**
-  tay         // 2
-  lda OrC,y   // 4*
-  ora B       // 3
-  sta B       // 3
-
-noOrC:
-  lda C       // 3
-  lsr @       // 2
-  lsr @       // 2
-  sta C       // 3
-              //=26*+**
-
-decodeD:
-// 'D' if geather than zero, lets decode
-  lda D
-  beq endDecode
-
-// 76543210
-// 0ddddddd and %111
-// 00000ddd
-//      |||
-// +----+||
-// |+----+| 5:asl
-// ||+----+
-// vvv
-// ddd00000 ora C
-// dddccccc
-
-  and #%111   // 2
-  beq noOrD   // 2**
-  tay         // 2
-  lda OrD,y   // 4*
-  ora C       // 3
-  sta C       // 3
-
-noOrD:
-  lda D       // 3
-  lsr @       // 2
-  lsr @       // 2
-  lsr @       // 2
-  sta D       // 3
-              //=28*+**
-endDecode:
-  rts
-
-OrC:
-  dta %00000000
-  dta %01000000
-  dta %10000000
-  dta %11000000
-
-OrD:
-  dta %00000000
-  dta %00100000
-  dta %01000000
-  dta %01100000
-  dta %10000000
-  dta %10100000
-  dta %11000000
-  dta %11100000
-
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-
-.local	READ24						; PROCEDURE | ASSEMBLER
-
-; -------------------  ASM Block 00000076  -------------------
-
-  .MACRO m@readByte
-    ldy #0
-    lda (_PTR),y
-    sta _TMP
-    inc _ADR
-    sne
-    inc _ADR+1
-    jsr MEMBOUNDCHECK
-    lda _TMP
-  .ENDM
-
-  m@readByte
-  sta _delta+2
-
-  m@readByte
-  sta _delta+1
-
-  m@readByte
-  sta _delta+0
-
-  lda #0
-  sta _delta+3
-
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-
-.local	EVENTMIDI3					; PROCEDURE
-
-; optimize OK (events.inc), line = 4
-
-	lda _EVENT
-	sta MIDI_FIFO.FIFO_BYTE
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-
-; optimize FAIL ('m@INLINE', events.inc), line = 5
-
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB2FB
-	m@INLINE
-	.endl
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-
-; optimize FAIL ('m@INLINE', events.inc), line = 6
-
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB2FB
-	m@INLINE
-	.endl
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-
-.local	EVENTMIDI2					; PROCEDURE
-
-; optimize OK (events.inc), line = 17
-
-	lda _EVENT
-	sta MIDI_FIFO.FIFO_BYTE
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-
-; optimize FAIL ('m@INLINE', events.inc), line = 18
-
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB2FB
-	m@INLINE
-	.endl
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-
-.local	EVENTSYSEX					; PROCEDURE
-
-; optimize FAIL ('READVARL', events.inc), line = 27
-
-	jsr READVARL
-
-; optimize OK (events.inc), line = 29
-
-	lda _EVENT
-	sta MIDI_FIFO.FIFO_BYTE
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-
-; --- WhileProlog
-	jmp l_04F5
-l_04F6
-
-; optimize FAIL ('m@INLINE', events.inc), line = 35
-
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB2FB
-	m@INLINE
-	.endl
-
-; optimize FAIL ('m@INLINE', events.inc), line = 37
-
-	.local +MAIN.MIDI_FIFO.FIFO_WRITEBYTE
-	m@INLINE
-	.endl
-
-; optimize FAIL (0, events.inc), line = 41
-
-	dec _TMP
-l_04F5
-
-; optimize OK (events.inc), line = 33
-
-	lda _TMP
-	jne l_04F6
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-
-.local	EVENTMETA					; PROCEDURE
-
-; optimize FAIL ('m@INLINE', events.inc), line = 53
-
-	.local +MAIN.MIDFILES.PROCESSTRACK.READB2FB
-	m@INLINE
-	.endl
-
-; optimize FAIL ('READVARL', events.inc), line = 54
-
-	jsr READVARL
-
-; optimize OK (events.inc), line = 59
-
-	lda MIDI_FIFO.FIFO_BYTE
-	cmp #$2F
-	jne l_0520
-
-; optimize OK (events.inc), line = 61
-
-	lda _STATUS
-	ora #$40
-	sta _STATUS
-	jmp l_0534
-l_0520
-
-; optimize OK (events.inc), line = 63
-
-	lda MIDI_FIFO.FIFO_BYTE
-	cmp #$51
-	jne l_0546
-
-; optimize FAIL ('READ24', events.inc), line = 65
-
-	jsr READ24
-
-; optimize OK (events.inc), line = 66
-
-	lda _DELTA+3
-	cmp MS_PER_QNOTE+3
-	bne @+
-	lda _DELTA+2
-	cmp MS_PER_QNOTE+2
-	bne @+
-	lda _DELTA+1
-	cmp MS_PER_QNOTE+1
-	bne @+
-	lda _DELTA
-	cmp MS_PER_QNOTE
-	jeq l_0558
-@
-
-; optimize OK (events.inc), line = 68
-
-	lda _DELTA
-	sta MS_PER_QNOTE
-	lda _DELTA+1
-	sta MS_PER_QNOTE+1
-	lda _DELTA+2
-	sta MS_PER_QNOTE+2
-	lda _DELTA+3
-	sta MS_PER_QNOTE+3
-
-; optimize FAIL ('SETTEMPO', events.inc), line = 69
-
-	jsr SETTEMPO
-l_0558
-	jmp l_0569
-l_0546
-
-; --- WhileProlog
-	jmp l_056B
-l_056C
-
-; optimize FAIL (0, events.inc), line = 85
-
-	dec _TMP
-
-; optimize FAIL (0, events.inc), line = 86
-
-	inc _ADR
-	sne
-	inc _ADR+1
-
-; optimize FAIL ('MEMBOUNDCHECK', events.inc), line = 87
-
-	jsr MEMBOUNDCHECK
-l_056B
-
-; optimize OK (events.inc), line = 83
-
-	lda _TMP
-	jne l_056C
-l_0569
-l_0534
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-l_04AC
-
-; optimize OK (processtrack.inc), line = 33
-
-	lda _TIMERSTATUS
-	eor #$80
-	sta _TIMERSTATUS
-
-; optimize OK (processtrack.inc), line = 34
-
-	lda _TOTALTICKS
-	sub _TRACKTIME
-	sta DTM
-	lda _TOTALTICKS+1
-	sbc _TRACKTIME+1
-	sta DTM+1
-
-; -------------------  ASM Block 00000077  -------------------
-
- ldy _bank \ lda $100,y \ sta PORTB 
-; optimize OK (processtrack.inc), line = 37
-
-	lda #$00
-	sta _DELTA
-	sta _DELTA+1
-	sta _DELTA+2
-	sta _DELTA+3
-
-; --- RepeatUntilProlog
-l_0599
-
-; optimize OK (processtrack.inc), line = 39
-
-	lda _STATUS
-	jmi l_05AF
-
-; optimize FAIL ('READVARL', processtrack.inc), line = 41
-
-	jsr READVARL
-
-; optimize OK (processtrack.inc), line = 42
-
-	lda _DELTA+3
-	jmi l_05C1
-	ora _DELTA+2
-	ora _DELTA+1
-	ora _DELTA
-	jeq l_05C1
-
-; optimize OK (processtrack.inc), line = 44
-
-	lda _TOTALTICKS
-	add _DELTA
-	sta :STACKORIGIN+9
-	lda _TOTALTICKS+1
-	adc _DELTA+1
-	sta :STACKORIGIN+STACKWIDTH+9
-	lda _TOTALTICKS+2
-	adc _DELTA+2
-	sta :STACKORIGIN+STACKWIDTH*2+9
-	lda _TOTALTICKS+3
-	adc _DELTA+3
-	sta :STACKORIGIN+STACKWIDTH*3+9
-	lda :STACKORIGIN+9
-	sub DTM
-	sta _TRACKTIME
-	lda :STACKORIGIN+STACKWIDTH+9
-	sbc DTM+1
-	sta _TRACKTIME+1
-	lda :STACKORIGIN+STACKWIDTH*2+9
-	sbc #$00
-	sta _TRACKTIME+2
-	lda :STACKORIGIN+STACKWIDTH*3+9
-	sbc #$00
-	sta _TRACKTIME+3
-	jmp b_0599					; break
-l_05C1
-	jmp l_05DA
-l_05AF
-
-; optimize OK (processtrack.inc), line = 49
-
-	lda _STATUS
-	and #$7F
-	sta _STATUS
-l_05DA
-
-; optimize OK (processtrack.inc), line = 51
-
-	ldy #$00
-	lda (_PTR),y
-	jpl l_05FD
-
-; optimize FAIL ('m@INLINE', processtrack.inc), line = 53
-
-	.local READB
-	m@INLINE
-	.endl
-	lda _TMP
-	sta _EVENT
-l_05FD
-
-; optimize OK (processtrack.inc), line = 56
-
-	lda #$BF
-	cmp _EVENT
-	jcc l_0619
-
-; optimize FAIL ('EVENTMIDI3', processtrack.inc), line = 58
-
-	jsr EVENTMIDI3
-	jmp l_0624
-l_0619
-	lda #$DF
-	cmp _EVENT
-	jcc l_0636
-
-; optimize FAIL ('EVENTMIDI2', processtrack.inc), line = 60
-
-	jsr EVENTMIDI2
-	jmp l_0641
-l_0636
-	lda #$EF
-	cmp _EVENT
-	jcc l_0653
-
-; optimize FAIL ('EVENTMIDI3', processtrack.inc), line = 62
-
-	jsr EVENTMIDI3
-	jmp l_065E
-l_0653
-	lda #$F7
-	cmp _EVENT
-	jcc l_0670
-
-; optimize FAIL ('EVENTSYSEX', processtrack.inc), line = 64
-
-	jsr EVENTSYSEX
-	jmp l_067B
-l_0670
-	lda _EVENT
-	cmp #$FF
-	jne l_068D
-
-; optimize FAIL ('EVENTMETA', processtrack.inc), line = 65
-
-	jsr EVENTMETA
-l_068D
-l_067B
-l_065E
-l_0641
-l_0624
-
-; optimize OK (processtrack.inc), line = 67
-
-	lda _STATUS
-	and #$40
-	jeq l_0599
-b_0599
-
-; optimize OK (processtrack.inc), line = 69
-
-	lda _STATUS
-	ora #$80
-	sta _STATUS
-
-; optimize OK (processtrack.inc), line = 70
-
-	lda _TIMERSTATUS
-	eor #$80
-	sta _TIMERSTATUS
-
-; ------------------------------------------------------------
-
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-
-.local	PROCESSMIDI					; PROCEDURE
-
-; optimize OK (processmidi.inc), line = 7
-
-	lda CTRK
-	cmp TOTALTRACKS
-	jne l_06CE
-
-; optimize OK (processmidi.inc), line = 9
-
-	lda #$01
-	sta CTRK
-
-; optimize OK (processmidi.inc), line = 10
-
-	lda MIDTRACKS
-	sta CURTRACKPTR
-	lda MIDTRACKS+1
-	sta CURTRACKPTR+1
-
-; optimize OK (processmidi.inc), line = 11
-
-	lda TOTALTRACKS
-	sta PLAYINGTRACKS
-	jmp l_06E7
-l_06CE
-
-; optimize FAIL (0, processmidi.inc), line = 15
-
-	inc CTRK
-
-; optimize OK (processmidi.inc), line = 16
-
-	lda CURTRACKPTR
-	add #$09
-	sta CURTRACKPTR
-	scc
-	inc CURTRACKPTR+1
-l_06E7
-
-; optimize OK (processmidi.inc), line = 19
-
-	lda CURTRACKPTR
-	sta :bp2
-	lda CURTRACKPTR+1
-	sta :bp2+1
-	ldy #$08
-	mva:rpl (:bp2),y $00E0,y-
-
-; optimize OK (processmidi.inc), line = 21
-
-	lda _STATUS
-	and #$40
-	jne l_0707
-
-; optimize OK (processmidi.inc), line = 23
-
-	.LOCAL
-	lda _TOTALTICKS+3
-	sub _TRACKTIME+3
-	bne L4
-	lda _TOTALTICKS+2
-	cmp _TRACKTIME+2
-	bne L1
-	lda _TOTALTICKS+1
-	cmp _TRACKTIME+1
-	bne L1
-	lda _TOTALTICKS
-	cmp _TRACKTIME
-L1	beq L5
-	bcs L3
-	lda #$FF
-	bne L5
-L3	lda #$01
-	bne L5
-L4	bvc L5
-	eor #$FF
-	ora #$01
-L5
-	.ENDL
-	jmi l_0718
-	jsr PROCESSTRACK
-l_0718
-	jmp l_0725
-l_0707
-
-; optimize FAIL (0, processmidi.inc), line = 26
-
-	dec PLAYINGTRACKS
-l_0725
-
-; optimize OK (processmidi.inc), line = 28
-
-	lda #$E0
-	sta SYSTEM.MOVE_00EC.SOURCE
-	lda #$00
-	sta SYSTEM.MOVE_00EC.SOURCE+1
-	lda CURTRACKPTR
-	sta SYSTEM.MOVE_00EC.DEST
-	lda CURTRACKPTR+1
-	sta SYSTEM.MOVE_00EC.DEST+1
-	lda #$09
-	sta SYSTEM.MOVE_00EC.COUNT
-	lda #$00
-	sta SYSTEM.MOVE_00EC.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_00EC
-	m@INLINE
-	.endl
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
 .endl
 
 .local	SETTEMPO					; PROCEDURE
 
-; optimize FAIL ('divmulINT.DIV', settempo.inc), line = 10
+; optimize OK (settempo.inc), line = 10
+
+	lda _TIMERSTATUS
+	eor #$80
+	sta _TIMERSTATUS
+
+; optimize FAIL ('divmulINT.DIV', settempo.inc), line = 13
 
 	inx
 	mva MS_PER_QNOTE :STACKORIGIN,x
@@ -2562,6 +1751,11 @@ l_0725
 	mva MS_PER_QNOTE+2 :STACKORIGIN+STACKWIDTH*2,x
 	mva MS_PER_QNOTE+3 :STACKORIGIN+STACKWIDTH*3,x
 	inx
+	mva TEMPOSHIFT :STACKORIGIN,x
+	mva TEMPOSHIFT+1 :STACKORIGIN+STACKWIDTH,x
+	mva TEMPOSHIFT+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva TEMPOSHIFT+3 :STACKORIGIN+STACKWIDTH*3,x
+	jsr addEAX_ECX
 	mva TICKDIV :STACKORIGIN,x
 	mva TICKDIV+1 :STACKORIGIN+STACKWIDTH,x
 	mva #$00 :STACKORIGIN+STACKWIDTH*2,x
@@ -2577,7 +1771,7 @@ l_0725
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	sta _FREQ+3
 
-; optimize FAIL ('@I2F_m', settempo.inc), line = 11
+; optimize FAIL ('@I2F_m', settempo.inc), line = 14
 
 	mva _FREQ :STACKORIGIN,x
 	mva _FREQ+1 :STACKORIGIN+STACKWIDTH,x
@@ -2600,7 +1794,7 @@ l_0725
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	sta FREQ+3
 
-; optimize FAIL ('@FDIV', settempo.inc), line = 12
+; optimize FAIL ('@FDIV', settempo.inc), line = 15
 
 	mva #$00 :STACKORIGIN,x
 	mva #$00 :STACKORIGIN+STACKWIDTH,x
@@ -2622,7 +1816,7 @@ l_0725
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	sta FREQ+3
 
-; optimize FAIL ('@FDIV', settempo.inc), line = 15
+; optimize FAIL ('@FDIV', settempo.inc), line = 24
 
 	mva #$F5 :STACKORIGIN,x
 	mva #$FA :STACKORIGIN+STACKWIDTH,x
@@ -2644,7 +1838,7 @@ l_0725
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	sta RATIO+3
 
-; optimize FAIL ('@F2I', settempo.inc), line = 16
+; optimize FAIL ('@F2I', settempo.inc), line = 25
 
 	mva #$01 :STACKORIGIN,x
 	inx
@@ -2662,11 +1856,11 @@ l_0725
 	dex
 	dex
 
-; optimize OK (settempo.inc), line = 17
+; optimize OK (settempo.inc), line = 26
 
 	lda _RATIO
 	cmp #$10
-	jcc l_0778
+	jcc l_04F4
 	lda #$00
 	sta RATIO
 	sta RATIO+1
@@ -2674,16 +1868,21 @@ l_0725
 	sta RATIO+2
 	lda #$41
 	sta RATIO+3
-l_0778
+l_04F4
 
-; optimize OK (settempo.inc), line = 20
+; optimize OK (settempo.inc), line = 29
 
 	lda _TIMERSTATUS
 	and #$C0
 	ora _RATIO
 	sta _TIMERSTATUS
 
-; optimize FAIL ('@I2F', settempo.inc), line = 23
+; optimize OK (settempo.inc), line = 30
+
+	lda #$01
+	sta _SUBCNT
+
+; optimize FAIL ('@I2F', settempo.inc), line = 32
 
 	inx
 	mva #$00 :STACKORIGIN,x
@@ -2712,36 +1911,661 @@ l_0778
 	sta FDIV
 	dex
 
-; optimize OK (settempo.inc), line = 29
+; optimize OK (settempo.inc), line = 39
 
-	sei
-	mva <INT_TIMER VTIMR1
-	mva >INT_TIMER VTIMR1+1
-	lda #$00
-	ldy #$03
-	sta AUDCTL
-	sta AUDC1
-	sty SKCTL
-	sta AUDCTL
-	mva FDIV AUDF1
-	lda irqens
-	ora #$01
-	sta irqens
-	sta irqen
-	sta stimer
-	cli
+	lda _TIMERSTATUS
+	eor #$80
+	sta _TIMERSTATUS
 
+; -------------------  ASM Block 00000057  -------------------
+
+    sei  // disable IRQ
+  // reset POKEY
+    lda #$00
+    ldy #$03
+    sta AUDCTL
+    sta AUDC1
+    sty SKCTL
+  // setup TIMER1
+    sta AUDCTL
+    mva FDIV AUDF1
+  // initialize IRQ for TIMER1
+    // lda irqens
+    // ora #$01
+    // sta irqens
+    // sta irqen
+  // start timer strobe
+    sta stimer
+
+    cli  // enable IRQ
+  
 ; ------------------------------------------------------------
 
-FREQ	= DATAORIGIN+$0187
-_FREQ	= DATAORIGIN+$018B
-FDIV	= DATAORIGIN+$018F
-RATIO	= DATAORIGIN+$0190
-_RATIO	= DATAORIGIN+$0194
+FREQ	= DATAORIGIN+$0192
+_FREQ	= DATAORIGIN+$0196
+FDIV	= DATAORIGIN+$019A
+RATIO	= DATAORIGIN+$019B
+_RATIO	= DATAORIGIN+$019F
 
 @VarData	= FREQ
 @VarDataSize	= 14
 
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	PROCESSTRACK					; PROCEDURE | KEEP
+
+	jmp l_052E
+
+.local	READB						; PROCEDURE | INLINE
+
+	.MACRO m@INLINE
+
+; optimize OK (processtrack.inc), line = 11
+
+	ldy #$00
+	lda (_PTR),y
+	sta EVENT
+
+; optimize FAIL (0, processtrack.inc), line = 12
+
+	inc _ADR
+	sne
+	inc _ADR+1
+
+; optimize FAIL ('MEMBOUNDCHECK', processtrack.inc), line = 13
+
+	jsr MEMBOUNDCHECK
+	.ENDM
+@exit
+.endl
+
+.local	READVARL					; PROCEDURE | ASSEMBLER
+
+; -------------------  ASM Block 00000058  -------------------
+
+    icl 'midfile/asms/readvar.asm'
+  
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	READ24						; PROCEDURE | ASSEMBLER
+
+; -------------------  ASM Block 00000059  -------------------
+
+    icl 'midfile/asms/read24bigendian.pas'
+  
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	EVENTMIDI3					; PROCEDURE
+
+; optimize FAIL ('MIDI_FIFO.FIFO_WRITEBYTE', events.inc), line = 4
+
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+
+; optimize FAIL ('m@INLINE', events.inc), line = 5
+
+	.local +MAIN.MIDFILES.PROCESSTRACK.READB
+	m@INLINE
+	.endl
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+
+; optimize FAIL ('m@INLINE', events.inc), line = 6
+
+	.local +MAIN.MIDFILES.PROCESSTRACK.READB
+	m@INLINE
+	.endl
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+
+; optimize OK (events.inc), line = 15
+
+	lda EVENT
+	jeq l_0569
+	lda _EVENT
+	and #$F0
+	cmp #$90
+	jne l_0569
+
+; optimize OK (events.inc), line = 16
+
+	lda _EVENT
+	and #$0F
+	tay
+	lda MC6850.MC_BYTE
+	sta adr.CHNVOLUME,y
+l_0569
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	EVENTMIDI2					; PROCEDURE
+
+; optimize FAIL ('MIDI_FIFO.FIFO_WRITEBYTE', events.inc), line = 22
+
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+
+; optimize FAIL ('m@INLINE', events.inc), line = 23
+
+	.local +MAIN.MIDFILES.PROCESSTRACK.READB
+	m@INLINE
+	.endl
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	EVENTSYSEX					; PROCEDURE
+
+; optimize FAIL ('READVARL', events.inc), line = 32
+
+	jsr READVARL
+
+; optimize FAIL ('MIDI_FIFO.FIFO_WRITEBYTE', events.inc), line = 34
+
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+
+; --- WhileProlog
+	jmp l_0588
+l_0589
+
+; optimize FAIL ('m@INLINE', events.inc), line = 40
+
+	.local +MAIN.MIDFILES.PROCESSTRACK.READB
+	m@INLINE
+	.endl
+
+; optimize FAIL ('MIDI_FIFO.FIFO_WRITEBYTE', events.inc), line = 42
+
+	jsr MIDI_FIFO.FIFO_WRITEBYTE
+
+; optimize FAIL (0, events.inc), line = 46
+
+	dec _TMP
+l_0588
+
+; optimize OK (events.inc), line = 38
+
+	lda _TMP
+	jne l_0589
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	EVENTMETA					; PROCEDURE
+
+; optimize FAIL ('m@INLINE', events.inc), line = 58
+
+	.local +MAIN.MIDFILES.PROCESSTRACK.READB
+	m@INLINE
+	.endl
+
+; optimize FAIL ('READVARL', events.inc), line = 59
+
+	jsr READVARL
+
+; optimize OK (events.inc), line = 61
+
+	lda EVENT
+	cmp #$2F
+	jne l_05B3
+
+; optimize FAIL (0, events.inc), line = 63
+
+	dec PLAYINGTRACKS
+
+; optimize OK (events.inc), line = 64
+
+	lda _STATUS
+	ora #$40
+	sta _STATUS
+	jmp l_05CB
+l_05B3
+
+; optimize OK (events.inc), line = 66
+
+	lda EVENT
+	cmp #$51
+	jne l_05DD
+
+; optimize FAIL ('READ24', events.inc), line = 68
+
+	jsr READ24
+
+; optimize OK (events.inc), line = 69
+
+	lda _DELTA
+	sta MS_PER_QNOTE
+	lda _DELTA+1
+	sta MS_PER_QNOTE+1
+	lda _DELTA+2
+	sta MS_PER_QNOTE+2
+	lda _DELTA+3
+	sta MS_PER_QNOTE+3
+
+; optimize FAIL ('SETTEMPO', events.inc), line = 70
+
+	jsr SETTEMPO
+	jmp l_05ED
+l_05DD
+
+; --- WhileProlog
+	jmp l_05EF
+l_05F0
+
+; optimize FAIL (0, events.inc), line = 85
+
+	dec _TMP
+
+; optimize FAIL (0, events.inc), line = 86
+
+	inc _ADR
+	sne
+	inc _ADR+1
+
+; optimize FAIL ('MEMBOUNDCHECK', events.inc), line = 87
+
+	jsr MEMBOUNDCHECK
+l_05EF
+
+; optimize OK (events.inc), line = 83
+
+	lda _TMP
+	jne l_05F0
+l_05ED
+l_05CB
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+l_052E
+
+; -------------------  ASM Block 00000060  -------------------
+
+ ldy _bank \ lda $100,y \ sta PORTB 
+; --- RepeatUntilProlog
+l_0607
+
+; optimize OK (processtrack.inc), line = 33
+
+	lda _STATUS
+	jmi l_061D
+
+; optimize FAIL ('READVARL', processtrack.inc), line = 35
+
+	jsr READVARL
+
+; optimize OK (processtrack.inc), line = 36
+
+	lda _DELTA+3
+	jmi l_062F
+	ora _DELTA+2
+	ora _DELTA+1
+	ora _DELTA
+	jeq l_062F
+
+; optimize OK (processtrack.inc), line = 38
+
+	lda _TRACKTIME
+	add _DELTA
+	sta _TRACKTIME
+	lda _TRACKTIME+1
+	adc _DELTA+1
+	sta _TRACKTIME+1
+	lda _TRACKTIME+2
+	adc _DELTA+2
+	sta _TRACKTIME+2
+	lda _TRACKTIME+3
+	adc _DELTA+3
+	sta _TRACKTIME+3
+	jmp b_0607					; break
+l_062F
+	jmp l_0643
+l_061D
+
+; optimize OK (processtrack.inc), line = 43
+
+	lda _STATUS
+	and #$7F
+	sta _STATUS
+l_0643
+
+; optimize OK (processtrack.inc), line = 45
+
+	ldy #$00
+	lda (_PTR),y
+	jpl l_0666
+
+; optimize FAIL ('m@INLINE', processtrack.inc), line = 47
+
+	.local READB
+	m@INLINE
+	.endl
+	lda EVENT
+	sta _EVENT
+	jmp l_0677
+l_0666
+
+; optimize OK (processtrack.inc), line = 50
+
+	lda _EVENT
+	sta EVENT
+l_0677
+
+; optimize OK (processtrack.inc), line = 52
+
+	lda #$BF
+	cmp _EVENT
+	jcc l_068F
+
+; optimize FAIL ('EVENTMIDI3', processtrack.inc), line = 54
+
+	jsr EVENTMIDI3
+	jmp l_069A
+l_068F
+	lda #$DF
+	cmp _EVENT
+	jcc l_06AC
+
+; optimize FAIL ('EVENTMIDI2', processtrack.inc), line = 56
+
+	jsr EVENTMIDI2
+	jmp l_06B7
+l_06AC
+	lda #$EF
+	cmp _EVENT
+	jcc l_06C9
+
+; optimize FAIL ('EVENTMIDI3', processtrack.inc), line = 58
+
+	jsr EVENTMIDI3
+	jmp l_06D4
+l_06C9
+	lda #$F7
+	cmp _EVENT
+	jcc l_06E6
+
+; optimize FAIL ('EVENTSYSEX', processtrack.inc), line = 60
+
+	jsr EVENTSYSEX
+	jmp l_06F1
+l_06E6
+	lda _EVENT
+	cmp #$FF
+	jne l_0703
+
+; optimize FAIL ('EVENTMETA', processtrack.inc), line = 61
+
+	jsr EVENTMETA
+l_0703
+l_06F1
+l_06D4
+l_06B7
+l_069A
+
+; optimize OK (processtrack.inc), line = 63
+
+	lda _STATUS
+	and #$40
+	jeq l_0607
+b_0607
+
+; optimize OK (processtrack.inc), line = 65
+
+	lda _STATUS
+	ora #$80
+	sta _STATUS
+
+; ------------------------------------------------------------
+
+EVENT	= $FF
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	PROCESSMIDI					; PROCEDURE
+
+; optimize FAIL ('MIDI_FIFO.FIFO_PUSHDIRECT2MC6850', processmidi.inc), line = 29
+
+	jsr MIDI_FIFO.FIFO_PUSHDIRECT2MC6850
+
+; optimize OK (processmidi.inc), line = 31
+
+	lda _TIMERSTATUS
+	jpl l_073D
+	jmp @exit					; exit
+l_073D
+
+; optimize OK (processmidi.inc), line = 32
+
+	lda CTRK
+	cmp TOTALTRACKS
+	jne l_0754
+
+; optimize OK (processmidi.inc), line = 34
+
+	lda #$01
+	sta CTRK
+
+; optimize OK (processmidi.inc), line = 35
+
+	lda MIDTRACKS
+	sta CURTRACKPTR
+	lda MIDTRACKS+1
+	sta CURTRACKPTR+1
+	jmp l_0767
+l_0754
+
+; optimize FAIL (0, processmidi.inc), line = 39
+
+	inc CTRK
+
+; optimize OK (processmidi.inc), line = 40
+
+	lda CURTRACKPTR
+	add #$09
+	sta CURTRACKPTR
+	scc
+	inc CURTRACKPTR+1
+l_0767
+
+; -------------------  ASM Block 00000061  -------------------
+
+// if _status and f_stop=0 then
+    ldy #0
+    lda (curTrackPtr),y
+    and #f_stop
+    bne skipProcessTrack
+
+// if _totalTicks>=_trackTime then ProcessTrack;
+    ldy #7
+    lda _totalTicks+3
+    sub (curTrackPtr),y
+    bne L4
+    lda _totalTicks+2
+    dey
+    sub (curTrackPtr),y
+    bne L1
+    lda _totalTicks+1
+    dey
+    sub (curTrackPtr),y
+    bne L1
+    lda _totalTicks
+    dey
+    sub (curTrackPtr),y
+  L1:
+    beq L5
+    bcs L3
+    lda #$ff
+    bne L5
+  L3:
+    lda #$01
+    bne L5
+  L4:
+    bvc L5
+    eor #$ff
+    ora #$01
+  L5:
+    jmi skipProcessTrack
+
+  // copy current track data to work registers
+    ldy #sizeOf_TMIDTrack-1
+  loop:
+    lda (curTrackPtr),y
+    sta _trkRegs,y
+    dey
+    bpl loop
+
+  
+; optimize FAIL ('PROCESSTRACK', processmidi.inc), line = 92
+
+	jsr PROCESSTRACK
+
+; -------------------  ASM Block 00000062  -------------------
+
+// store work registers in track data
+    ldy #sizeOf_TMIDTrack-1
+  loop2:
+    lda _trkRegs,y
+    sta (curTrackPtr),y
+    dey
+    bpl loop2
+
+  skipProcessTrack:
+  
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	INITTIMER					; PROCEDURE
+
+; optimize OK (MIDFILES), line = 77
+
+	lda #$00
+	sta _TOTALTICKS
+	sta _TOTALTICKS+1
+	sta _TOTALTICKS+2
+	sta _TOTALTICKS+3
+
+; optimize OK (MIDFILES), line = 78
+
+	sta TEMPOSHIFT
+	sta TEMPOSHIFT+1
+	sta TEMPOSHIFT+2
+	sta TEMPOSHIFT+3
+
+; optimize OK (MIDFILES), line = 79
+
+	lda #$01
+	sta _TIMERSTATUS
+
+; optimize OK (MIDFILES), line = 80
+
+	lda TOTALTRACKS
+	sta CTRK
+
+; optimize OK (MIDFILES), line = 81
+
+	sta PLAYINGTRACKS
+
+; -------------------  ASM Block 00000063  -------------------
+
+    sei
+    mva <INT_TIMER VTIMR1
+    mva >INT_TIMER VTIMR1+1
+  // reset POKEY
+    lda #$00
+    ldy #$03
+    sta AUDCTL
+    sta AUDC1
+    sty SKCTL
+  // setup TIMER1
+    sta AUDCTL
+    mva 83 AUDF1
+  // initialize IRQ for TIMER1
+    lda irqens
+    ora #$01
+    sta irqens
+    sta irqen
+  // start timer strobe
+    sta stimer
+
+    cli  // enable IRQ
+  
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -2772,27 +2596,27 @@ _RATIO	= DATAORIGIN+$0194
 ; ------------------------------------------------------------
 @UnitInit
 
-; optimize OK (MIDFILES), line = 79
+; optimize OK (MIDFILES), line = 114
 
 	lda #$00
 	sta OLDTIMERVEC
 	sta OLDTIMERVEC+1
 
-; optimize OK (MIDFILES), line = 80
+; optimize OK (MIDFILES), line = 115
 
 	lda <NULLLOADPRCS
 	sta LOADPROCESS
 	lda >NULLLOADPRCS
 	sta LOADPROCESS+1
 
-; optimize OK (MIDFILES), line = 81
+; optimize OK (MIDFILES), line = 116
 
 	lda #$80
 	sta TICKDIV
 	lda #$01
 	sta TICKDIV+1
 
-; optimize OK (MIDFILES), line = 82
+; optimize OK (MIDFILES), line = 117
 
 	lda #$20
 	sta MS_PER_QNOTE
@@ -2802,10 +2626,6 @@ _RATIO	= DATAORIGIN+$0194
 	sta MS_PER_QNOTE+2
 	lda #$00
 	sta MS_PER_QNOTE+3
-
-; optimize OK (MIDFILES), line = 89
-
-	sta _TIMERSTATUS
 
 	lda VTIMR1
 	sta OLDTIMERVEC
@@ -2829,31 +2649,33 @@ ERR_UNSUPPORTED_FORMAT	= $64
 ERR_NOT_ENOUGHT_MEMORY	= $65
 TAG_MTHD	= $6468544D
 TAG_MTRK	= $6B72544D
+SIZEOF_TMIDTRACK	= $09
+CURTRACKPTR	= $DC
+CTRK	= $DE
+PLAYINGTRACKS	= $DF
 _TOTALTICKS	= $F0
 _SUBCNT	= $F4
 _TIMERSTATUS	= $F5
 _DELTA	= $F6
 _TMP	= $F6
-_BANK	= $E0
-_PTR	= $E1
-_ADR	= $E1
-_TRACKTIME	= $E3
-_STATUS	= $E7
+_STATUS	= $E0
+_BANK	= $E1
+_PTR	= $E2
+_ADR	= $E2
+_TRACKTIME	= $E4
 _EVENT	= $E8
-MIDDATA	= DATAORIGIN+$0147
-adr.MIDTRACKS	= [DATAORIGIN+$0149] .array [1]
+MIDDATA	= DATAORIGIN+$0148
+adr.MIDTRACKS	= [DATAORIGIN+$014A] .array [1]
 .var MIDTRACKS	= adr.MIDTRACKS .word
-FORMAT	= DATAORIGIN+$014A
-TOTALTRACKS	= DATAORIGIN+$014B
-TICKDIV	= DATAORIGIN+$014C
-MS_PER_QNOTE	= DATAORIGIN+$014E
-OLDTIMERVEC	= DATAORIGIN+$0152
-CURTRACKPTR	= DATAORIGIN+$0154
-DELTATIME	= DATAORIGIN+$0156
-DTM	= DATAORIGIN+$015A
-CTRK	= DATAORIGIN+$015C
-PLAYINGTRACKS	= DATAORIGIN+$015D
-LOADPROCESS	= DATAORIGIN+$015E
+FORMAT	= DATAORIGIN+$014B
+TOTALTRACKS	= DATAORIGIN+$014C
+TICKDIV	= DATAORIGIN+$014D
+MS_PER_QNOTE	= DATAORIGIN+$014F
+adr.CHNVOLUME	= [DATAORIGIN+$0153] .array [16]
+.var CHNVOLUME	= adr.CHNVOLUME .word
+OLDTIMERVEC	= DATAORIGIN+$0163
+LOADPROCESS	= DATAORIGIN+$0165
+TEMPOSHIFT	= DATAORIGIN+$0167
 adr.RBUF	= $0600
 .var RBUF	= adr.RBUF .word
 
@@ -2865,7 +2687,7 @@ adr.RBUF	= $0600
 
 .local	DETECTMEM					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000085  -------------------
+; -------------------  ASM Block 00000071  -------------------
 
 	txa:pha
 
@@ -2985,7 +2807,7 @@ stop	pla:tax
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0195
+RESULT	= DATAORIGIN+$01A0
 	rts						; ret
 .endl
 
@@ -3003,7 +2825,7 @@ DETECTOS	= $FFF7
 
 .local	OPN						; PROCEDURE | ASSEMBLER
 
-; -------------------  ASM Block 00000088  -------------------
+; -------------------  ASM Block 00000074  -------------------
 
 	txa:pha
 
@@ -3035,10 +2857,10 @@ DETECTOS	= $FFF7
 
 ; ------------------------------------------------------------
 
-CHN	= DATAORIGIN+$0196
-AX1	= DATAORIGIN+$0197
-AX2	= DATAORIGIN+$0198
-DEVICE	= DATAORIGIN+$0199
+CHN	= DATAORIGIN+$01A1
+AX1	= DATAORIGIN+$01A2
+AX2	= DATAORIGIN+$01A3
+DEVICE	= DATAORIGIN+$01A4
 
 @VarData	= CHN
 @VarDataSize	= 5
@@ -3058,7 +2880,7 @@ DEVICE	= DATAORIGIN+$0199
 .local	CLS						; PROCEDURE | ASSEMBLER
 	sta CHN
 
-; -------------------  ASM Block 00000089  -------------------
+; -------------------  ASM Block 00000075  -------------------
 
 	txa:pha
 
@@ -3077,7 +2899,7 @@ DEVICE	= DATAORIGIN+$0199
 
 ; ------------------------------------------------------------
 
-CHN	= DATAORIGIN+$019B
+CHN	= DATAORIGIN+$01A6
 
 @VarData	= CHN
 @VarDataSize	= 1
@@ -3098,50 +2920,174 @@ CHN	= DATAORIGIN+$019B
 
 .endl							; UNIT CIO
 
+.local	SETCOLORS					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 35
+
+	lda PLAYERSTATUS
+	and #$01
+	sta :STACKORIGIN+9
+	ldy #1
+	lda :STACKORIGIN+9
+	cmp #$01
+	beq @+
+	dey
+@
+	sty :STACKORIGIN+9
+	lda #$05
+	sta :ecx
+	lda :STACKORIGIN+9
+	sta :eax
+	.ifdef fmulinit
+	fmulu_8
+	els
+	imulCL
+	eif
+	lda <adr.COLORS
+	add :eax
+	sta P
+	lda >adr.COLORS
+	adc :eax+1
+	sta P+1
+
+; optimize OK (helpers.inc), line = 36
+
+	lda P
+	sta :bp2
+	lda P+1
+	sta :bp2+1
+	ldy #$04
+	mva:rpl (:bp2),y $D016,y-
+
+; optimize OK (helpers.inc), line = 37
+
+	lda P
+	sta :bp2
+	lda P+1
+	sta :bp2+1
+	ldy #$04
+	mva:rpl (:bp2),y $02C4,y-
+
+; ------------------------------------------------------------
+
+P	= DATAORIGIN+$01D9
+
+@VarData	= P
+@VarDataSize	= 2
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
 .local	PUTTEXT						; PROCEDURE
 
-; optimize OK (helpers.inc), line = 21
+; optimize OK (helpers.inc), line = 45
 
 	mwy S :bp2
 	ldy #$00
 	lda (:bp2),y
 	sta L
+
+; --- WhileProlog
+	jmp l_07D6
+l_07D7
+
+; optimize OK (helpers.inc), line = 48
+
 	inc S
 	sne
 	inc S+1
 
-; optimize OK (helpers.inc), line = 22
+; optimize OK (helpers.inc), line = 49
 
-	lda S
-	sta SYSTEM.MOVE_00ED.SOURCE
-	lda S+1
-	sta SYSTEM.MOVE_00ED.SOURCE+1
-	lda SCRADR
-	sta SYSTEM.MOVE_00ED.DEST
-	lda SCRADR+1
-	sta SYSTEM.MOVE_00ED.DEST+1
-	lda L
-	sta SYSTEM.MOVE_00ED.COUNT
-	lda #$00
-	sta SYSTEM.MOVE_00ED.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_00ED
-	m@INLINE
-	.endl
+	mwy S :bp2
+	ldy #$00
+	lda (:bp2),y
+	sta C
 
-; optimize OK (helpers.inc), line = 23
+; optimize OK (helpers.inc), line = 50
 
-	lda SCRADR
-	add L
-	sta SCRADR
-	scc
+	cmp #$20
+	jcs l_07F0
+	add #$40
+	sta C
+	jmp l_07FB
+l_07F0
+
+; optimize OK (helpers.inc), line = 51
+
+	lda C
+	cmp #$60
+	jcs l_080D
+	sub #$20
+	sta C
+l_080D
+l_07FB
+
+; optimize OK (helpers.inc), line = 52
+
+	ldy SCRADR+1
+	sty :bp+1
+	ldy SCRADR
+	lda C
+	sta (:bp),y
+
+; optimize FAIL (0, helpers.inc), line = 53
+
+	inc SCRADR
+	sne
 	inc SCRADR+1
+
+; optimize FAIL (0, helpers.inc), line = 54
+
+	dec L
+l_07D6
+
+; optimize OK (helpers.inc), line = 46
+
+	jne l_07D7
 
 ; ------------------------------------------------------------
 
-S	= DATAORIGIN+$01EF
-L	= DATAORIGIN+$01F1
+S	= DATAORIGIN+$01DB
+L	= DATAORIGIN+$01DD
+C	= DATAORIGIN+$01DE
 
 @VarData	= S
+@VarDataSize	= 4
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	PUTHEX						; PROCEDURE | ASSEMBLER
+
+; -------------------  ASM Block 00000084  -------------------
+
+  icl 'asms/puthex.a65'
+
+; ------------------------------------------------------------
+
+V	= DATAORIGIN+$01DF
+N	= DATAORIGIN+$01E1
+
+@VarData	= V
 @VarDataSize	= 3
 
 @exit
@@ -3158,85 +3104,13 @@ L	= DATAORIGIN+$01F1
 
 .local	PUTINT						; PROCEDURE | ASSEMBLER
 
-; -------------------  ASM Block 00000098  -------------------
+; -------------------  ASM Block 00000085  -------------------
 
-EOL = 0
-
-    lda scradr
-    sta screen1
-    sta screen2
-    lda scradr+1
-    sta screen1+1
-    sta screen2+1
-
-INT2STR:
-    ldy #0
-    sty _cnt
-ITSNEXT:
-    ldx #0
-ITSSLP:
-    lda value
-    sec
-    sbc Pow10Tab,Y
-    sta value
-    lda value+1
-    iny
-    sbc Pow10Tab,Y
-    bcc ITSADD
-    sta value+1
-    inx
-    dey
-    clc
-    bcc ITSSLP
-ITSADD:
-    dey
-    lda value
-    adc Pow10Tab,Y
-    sta value
-    txa
-    ora #$10
-    ldx _cnt
-    bne storeDigit
-    cmp #$10
-    beq skipDigit
-storeDigit:
-    ora puttextinvert
-    sta screen1:$f000,X
-    inc _cnt
-skipDigit:
-    iny
-    iny
-    cpy #8
-    bcc ITSNEXT
-    lda value
-    ora #$10
-    ldx _cnt
-    ora puttextinvert
-    sta screen2:$f000,X
-    inx
-
-// set screen addres to the end of value
-    txa
-    clc
-    adc scradr
-    sta scradr
-    bcc stop
-    inc scradr+1
-
-stop:
-    rts
-
-_cnt
-    .by 0
-Pow10Tab
-    .wo 10000
-    .wo 1000
-    .wo 100
-    .wo 10
+  icl 'asms/int2str.a65'
 
 ; ------------------------------------------------------------
 
-VALUE	= DATAORIGIN+$01F2
+VALUE	= DATAORIGIN+$01E2
 
 @VarData	= VALUE
 @VarDataSize	= 2
@@ -3255,7 +3129,7 @@ VALUE	= DATAORIGIN+$01F2
 
 .local	RESET_MIDI					; PROCEDURE
 
-; optimize OK (helpers.inc), line = 168
+; optimize OK (helpers.inc), line = 77
 
 	lda GM_RESET
 	sta MIDI_FIFO.FIFO_SEND.DATA
@@ -3277,25 +3151,68 @@ VALUE	= DATAORIGIN+$01F2
 	eif
 .endl
 
-.local	EXIT2DOS					; PROCEDURE
+.local	CLEARWORKAREA					; PROCEDURE
 
-; optimize OK (helpers.inc), line = 173
+; optimize OK (helpers.inc), line = 82
 
+	lda #$72
+	sta SYSTEM.FILLCHAR_0102.A
+	lda #$34
+	sta SYSTEM.FILLCHAR_0102.A+1
+	lda #$48
+	sta SYSTEM.FILLCHAR_0102.COUNT
+	lda #$03
+	sta SYSTEM.FILLCHAR_0102.COUNT+1
 	lda #$00
-	jsr CIO.CLS
-	lda #$00
-	sta CIO.OPN.CHN
-	lda #$0C
-	sta CIO.OPN.AX1
-	lda #$00
-	sta CIO.OPN.AX2
-	lda #$0F
-	sta CIO.OPN.DEVICE
+	sta SYSTEM.FILLCHAR_0102.VALUE
+	.local +MAIN.SYSTEM.FILLCHAR_0102
+	m@INLINE
+	.endl
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	ISLOOPED					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 87
+
+	lda #$BA
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (helpers.inc), line = 88
+
+	lda PLAYERSTATUS
+	and #$04
+	jeq l_085C
+
+; optimize OK (helpers.inc), line = 89
+
+	lda #$02
+	sta PUTTEXT.S
 	lda #$80
-	sta CIO.OPN.DEVICE+1
-	jsr CIO.OPN
-	lda #$00
-	jmp @halt
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+	jmp l_0868
+l_085C
+
+; optimize OK (helpers.inc), line = 91
+
+	lda #$08
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+l_0868
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3310,11 +3227,45 @@ VALUE	= DATAORIGIN+$01F2
 
 .local	CLEARSTATUS					; PROCEDURE
 
-; optimize OK (MIDICar Player.pas), line = 31
+; optimize OK (helpers.inc), line = 96
 
-	lda #$80
-	ldy #$27
-	sta:rpl $3818,y-
+	lda #$00
+	ldy #$3B
+	sta:rpl $37BA,y-
+
+; optimize FAIL ('ISLOOPED', helpers.inc), line = 97
+
+	jsr ISLOOPED
+
+; optimize OK (helpers.inc), line = 98
+
+	ldy FN+1
+	sty :bp+1
+	ldy FN
+	lda (:bp),y
+	cmp #$11
+	jcc l_0882
+	mwy FN :bp2
+	ldy #$00
+	lda #$10
+	sta (:bp2),y
+l_0882
+
+; optimize OK (helpers.inc), line = 99
+
+	mwy FN :bp2
+	ldy #$00
+	lda #$F6
+	sub (:bp2),y
+	sta SCRADR
+	lda #$37
+	sbc #$00
+	sta SCRADR+1
+	lda FN
+	sta PUTTEXT.S
+	lda FN+1
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3327,190 +3278,468 @@ VALUE	= DATAORIGIN+$01F2
 	eif
 .endl
 
+.local	CLEARUVMETERS					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 104
+
+	lda PLAYERSTATUS
+	and #$02
+	jeq l_08B6
+
+; optimize OK (helpers.inc), line = 106
+
+	lda #$00
+	sta CHN
+
+; --- RepeatUntilProlog
+l_08BC
+
+; optimize OK (helpers.inc), line = 108
+
+	lda CHN
+	asl @
+	tay
+	lda adr.CHANNELSCRADR,y
+	sta SCRADR
+	lda adr.CHANNELSCRADR+1,y
+	sta SCRADR+1
+
+; optimize OK (helpers.inc), line = 109
+
+	lda SCRADR
+	sta :bp2
+	lda SCRADR+1
+	sta :bp2+1
+	lda #$40
+	ldy #$03
+	sta:rpl (:bp2),y-
+
+; optimize FAIL (0, helpers.inc), line = 110
+
+	inc CHN
+
+; optimize OK (helpers.inc), line = 111
+
+	lda CHN
+	cmp #$10
+	jne l_08BC
+l_08B6
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	STATUSPLAYING					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 117
+
+	lda #$CF
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (helpers.inc), line = 118
+
+	lda #$0E
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+; optimize OK (helpers.inc), line = 119
+
+	lda ISSTOPPED
+	jeq l_08F2
+
+; optimize FAIL ('MIDFILES.INITTIMER', helpers.inc), line = 121
+
+	jsr MIDFILES.INITTIMER
+
+; optimize OK (helpers.inc), line = 122
+
+	lda #$00
+	sta ISSTOPPED
+	jmp l_0901
+l_08F2
+
+; optimize OK (helpers.inc), line = 125
+
+	lda MIDFILES._TIMERSTATUS
+	and #$7F
+	sta MIDFILES._TIMERSTATUS
+l_0901
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	STATUSPAUSE					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 130
+
+	lda ISSTOPPED
+	jeq l_091E
+	jmp @exit					; exit
+l_091E
+
+; optimize OK (helpers.inc), line = 131
+
+	lda #$CF
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (helpers.inc), line = 132
+
+	lda #$17
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+; optimize OK (helpers.inc), line = 133
+
+	lda MIDFILES._TIMERSTATUS
+	ora #$80
+	sta MIDFILES._TIMERSTATUS
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	STATUSSTOPPED					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 138
+
+	lda #$01
+	sta ISSTOPPED
+
+; optimize OK (helpers.inc), line = 139
+
+	lda #$CF
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (helpers.inc), line = 140
+
+	lda #$20
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+; optimize OK (helpers.inc), line = 141
+
+	lda MIDFILES._TIMERSTATUS
+	ora #$80
+	sta MIDFILES._TIMERSTATUS
+
+; optimize OK (helpers.inc), line = 142
+
+	lda #$00
+	sta MIDFILES._TOTALTICKS
+	sta MIDFILES._TOTALTICKS+1
+	sta MIDFILES._TOTALTICKS+2
+	sta MIDFILES._TOTALTICKS+3
+	lda #$01
+	sta MIDFILES._SUBCNT
+
+; optimize OK (helpers.inc), line = 143
+
+	sei
+	mva MIDFILES.OLDTIMERVEC VTIMR1
+	mva MIDFILES.OLDTIMERVEC+1 VTIMR1+1
+	lda irqens
+	and #$fe
+	sta irqens
+	sta irqen
+	cli
+
+; optimize FAIL ('RESET_MIDI', helpers.inc), line = 144
+
+	jsr RESET_MIDI
+
+; optimize OK (helpers.inc), line = 145
+
+	lda #$00
+	sta SYSTEM.MOVE_0103.SOURCE
+	lda #$3C
+	sta SYSTEM.MOVE_0103.SOURCE+1
+	lda #$00
+	sta SYSTEM.MOVE_0103.DEST
+	lda #$3E
+	sta SYSTEM.MOVE_0103.DEST+1
+	lda #$00
+	sta SYSTEM.MOVE_0103.COUNT
+	lda #$02
+	sta SYSTEM.MOVE_0103.COUNT+1
+	.local +MAIN.SYSTEM.MOVE_0103
+	m@INLINE
+	.endl
+
+; optimize OK (helpers.inc), line = 146
+
+	lda #$00
+	sta CHN
+
+; optimize FAIL ('CLEARUVMETERS', helpers.inc), line = 147
+
+	jsr CLEARUVMETERS
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	STATUSLOADING					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 152
+
+	lda #$D0
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (helpers.inc), line = 153
+
+	lda #$29
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	EXIT2DOS					; PROCEDURE
+
+; optimize OK (helpers.inc), line = 164
+
+	lda #$00
+	jsr CIO.CLS
+	lda #$00
+	sta CIO.OPN.CHN
+	lda #$0C
+	sta CIO.OPN.AX1
+	lda #$00
+	sta CIO.OPN.AX2
+	lda #$42
+	sta CIO.OPN.DEVICE
+	lda #$80
+	sta CIO.OPN.DEVICE+1
+	jsr CIO.OPN
+	lda #$01
+	sta SOUNDR
+	lda #$00
+	jmp @halt
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	MYNMI						; PROCEDURE | ASSEMBLER | INTERRUPT
+
+; -------------------  ASM Block 00000086  -------------------
+
+  icl 'asms/nmi.a65'
+
+	rti						; ret
+.endl
+
 .local	INIT						; PROCEDURE
 
-; optimize FAIL ('MIDI_FIFO.FIFO_RESET', MIDICar Player.pas), line = 41
+; optimize OK (init.inc), line = 12
+
+	lda #$00
+	sta DMACTL
+
+; optimize FAIL ('MIDI_FIFO.FIFO_RESET', init.inc), line = 14
 
 	jsr MIDI_FIFO.FIFO_RESET
 
-; optimize OK (MIDICar Player.pas), line = 44
-
-	lda #$00
-	sta SYSTEM.MOVE_00EC.SOURCE
-	lda #$E0
-	sta SYSTEM.MOVE_00EC.SOURCE+1
-	lda #$00
-	sta SYSTEM.MOVE_00EC.DEST
-	lda #$30
-	sta SYSTEM.MOVE_00EC.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_00EC.COUNT
-	lda #$04
-	sta SYSTEM.MOVE_00EC.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_00EC
-	m@INLINE
-	.endl
-
-; optimize OK (MIDICar Player.pas), line = 45
-
-	lda #$0F
-	sta $02C5
-	lda #$00
-	sta $02C6
-
-; optimize OK (MIDICar Player.pas), line = 46
+; optimize OK (init.inc), line = 16
 
 	lda #$30
-	sta $02F4
+	sta CHBASE
 
-; optimize OK (MIDICar Player.pas), line = 47
+; optimize FAIL ('CLEARWORKAREA', init.inc), line = 17
 
-	sta SYSTEM.FILLCHAR_00EB.A
-	lda #$34
-	sta SYSTEM.FILLCHAR_00EB.A+1
-	lda #$10
-	sta SYSTEM.FILLCHAR_00EB.COUNT
-	lda #$04
-	sta SYSTEM.FILLCHAR_00EB.COUNT+1
-	lda #$00
-	sta SYSTEM.FILLCHAR_00EB.VALUE
-	.local +MAIN.SYSTEM.FILLCHAR_00EB
-	m@INLINE
-	.endl
+	jsr CLEARWORKAREA
 
-; optimize OK (MIDICar Player.pas), line = 48
+; optimize OK (init.inc), line = 18
 
 	lda #$00
 	sta $0230
 	lda #$34
 	sta $0230+1
 
-; optimize OK (MIDICar Player.pas), line = 50
+; optimize OK (init.inc), line = 19
 
+	lda #$00
+	sta FN
 	lda #$80
-	ldy #$27
-	sta:rpl $3430,y-
+	sta FN+1
 
-; optimize OK (MIDICar Player.pas), line = 51
+; optimize OK (init.inc), line = 21
 
-	lda #$31
+	lda #$9E
 	sta SCRADR
-	lda #$34
+	lda #$37
 	sta SCRADR+1
-	lda #$13
+	lda #$46
 	sta PUTTEXT.S
 	lda #$80
 	sta PUTTEXT.S+1
 	jsr PUTTEXT
 
-; optimize OK (MIDICar Player.pas), line = 52
-
-	lda #$4F
-	sta SCRADR
-	lda #$34
-	sta SCRADR+1
-	lda #$27
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-
-; optimize FAIL ('CLEARSTATUS', MIDICar Player.pas), line = 53
+; optimize FAIL ('CLEARSTATUS', init.inc), line = 22
 
 	jsr CLEARSTATUS
 
-; optimize FAIL ('MISC.DETECTMEM', MIDICar Player.pas), line = 56
-
-	jsr MISC.DETECTMEM
-	inx
-	lda MISC.DETECTMEM.RESULT
-	:4 asl @
-	sta TOTALXMS
-	lda :STACKORIGIN+STACKWIDTH,x
-	sta TOTALXMS+1
-	dex
-
-; -------------------  ASM Block 00000099  -------------------
+; -------------------  ASM Block 00000087  -------------------
 
  lda #$fe \ sta $100 
-; optimize OK (MIDICar Player.pas), line = 60
+; optimize FAIL ('MISC.DETECTMEM', init.inc), line = 26
+
+	jsr MISC.DETECTMEM
+	lda MISC.DETECTMEM.RESULT
+	sta TOTALXMS
+	lda #$00
+	sta TOTALXMS+1
+
+; optimize OK (init.inc), line = 27
+
+	lda #$10
+	sta :ecx
+	lda #$00
+	sta :ecx+1
+	lda TOTALXMS
+	sta :eax
+	lda TOTALXMS+1
+	sta :eax+1
+	.ifdef fmulinit
+	fmulu_16
+	els
+	imulCX
+	eif
+	lda :eax
+	add #$22
+	sta TOTALXMS
+	lda :eax+1
+	adc #$00
+	sta TOTALXMS+1
+
+; optimize OK (init.inc), line = 28
+
+	lda #$EC
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (init.inc), line = 29
+
+	lda #$58
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+; optimize OK (init.inc), line = 30
+
+	lda TOTALXMS
+	sta PUTINT.VALUE
+	lda TOTALXMS+1
+	sta PUTINT.VALUE+1
+	jsr PUTINT
+
+; optimize OK (init.inc), line = 31
+
+	lda #$5F
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+; optimize OK (init.inc), line = 33
 
 	lda #$00
 	sta MIDFILES.MIDTRACKS
 	lda #$3E
 	sta MIDFILES.MIDTRACKS+1
 
-; optimize OK (MIDICar Player.pas), line = 61
+; optimize OK (init.inc), line = 34
 
 	lda #$00
 	sta MIDFILES.MIDDATA
 	lda #$40
 	sta MIDFILES.MIDDATA+1
 
-; optimize OK (MIDICar Player.pas), line = 63
+; optimize OK (init.inc), line = 36
 
 	lda #$00
 	sta MIDFILES.CTRK
 
-l_083F
+l_09C3
 ; --- ForToDoCondition
 	lda MIDFILES.CTRK
-	cmp #$28
-	jcs l_084D
+	cmp #$10
+	jcs l_09D1
 
-; optimize OK (MIDICar Player.pas), line = 65
+; optimize OK (init.inc), line = 38
 
-	lsr @
-	lsr @
-	sta :eax
-	lsr @
-	adc :eax
-	ror @
-	lsr @
-	lsr @
-	adc :eax
-	ror @
-	adc :eax
-	ror @
-	lsr @
-	lsr @
-	sta X
-	lda MIDFILES.CTRK
-	sta :al
-	lda #$14
-	sta :cl
-	jsr idivAL_CL.MOD
-	lda :ztmp8
-	sta Y
-
-; optimize OK (MIDICar Player.pas), line = 66
-
-	lda MIDFILES.CTRK
 	sta :STACKORIGIN+9
 	lda #$00
 	asl :STACKORIGIN+9
 	rol @
 	sta :STACKORIGIN+STACKWIDTH+9
-	lda #$D0
+	lda #$9A
 	sta :STACKORIGIN+10
 	lda #$34
 	sta :STACKORIGIN+STACKWIDTH+10
-	lda #$14
-	sta :ecx
-	lda X
-	sta :eax
-	.ifdef fmulinit
-	fmulu_8
-	els
-	imulCL
-	eif
-	lda :STACKORIGIN+10
-	add :eax
-	sta :STACKORIGIN+10
-	lda :STACKORIGIN+STACKWIDTH+10
-	adc :eax+1
-	sta :STACKORIGIN+STACKWIDTH+10
-	lda Y
+	lda MIDFILES.CTRK
 	jsr @mul40
 	add :STACKORIGIN+10
 	sta :STACKORIGIN+10
@@ -3524,78 +3753,54 @@ l_083F
 	adc #$00
 	sta :STACKORIGIN+STACKWIDTH+9
 	lda :STACKORIGIN+10
-	sta adr.CHPTR,y
+	sta adr.CHANNELSCRADR,y
 	lda :STACKORIGIN+STACKWIDTH+10
-	sta adr.CHPTR+1,y
+	sta adr.CHANNELSCRADR+1,y
 
 ; --- ForToDoEpilog
 	inc MIDFILES.CTRK
-	jne l_083F
-l_084D
+	jne l_09C3
+l_09D1
 
-; ------------------------------------------------------------
+; optimize OK (init.inc), line = 40
 
-TOTALXMS	= DATAORIGIN+$01F4
-X	= DATAORIGIN+$01F6
-Y	= DATAORIGIN+$01F7
+	lda NMIVEC
+	sta OLDNMIVEC
+	lda NMIVEC+1
+	sta OLDNMIVEC+1
 
-@VarData	= TOTALXMS
-@VarDataSize	= 4
+; optimize OK (init.inc), line = 42
 
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
+	lda #$00
+	sta NMIEN
+	lda <MYNMI
+	sta NMIVEC
+	lda >MYNMI
+	sta NMIVEC+1
+	lda #$40
+	sta NMIEN
 
-.local	LOADPRC						; PROCEDURE
-	sta V
+; optimize OK (init.inc), line = 44
 
-; optimize OK (MIDICar Player.pas), line = 75
+	lda _TM
+	sta OTM
+
+; optimize FAIL ('SETCOLORS', init.inc), line = 45
+
+	jsr SETCOLORS
+
+; optimize OK (init.inc), line = 46
 
 	lda #$22
-	sta SCRADR
-	lda #$38
-	sta SCRADR+1
-
-; optimize OK (MIDICar Player.pas), line = 76
-
-	lda V
-	sub #$01
-	sta PUTINT.VALUE
+	sta DMACTL
 	lda #$00
-	sbc #$00
-	sta PUTINT.VALUE+1
-	jsr PUTINT
-	ldy SCRADR+1
-	sty :bp+1
-	ldy SCRADR
-	lda #$8F
-	sta (:bp),y
-	inc SCRADR
-	sne
-	inc SCRADR+1
-
-; optimize OK (MIDICar Player.pas), line = 77
-
-	lda MIDFILES.TOTALTRACKS
-	sta PUTINT.VALUE
-	lda #$00
-	sta PUTINT.VALUE+1
-	jsr PUTINT
+	sta SOUNDR
 
 ; ------------------------------------------------------------
 
-V	= DATAORIGIN+$01F8
-I	= DATAORIGIN+$01F9
+TOTALXMS	= DATAORIGIN+$01E4
 
-@VarData	= V
+@VarData	= TOTALXMS
 @VarDataSize	= 2
 
 @exit
@@ -3610,162 +3815,77 @@ I	= DATAORIGIN+$01F9
 	eif
 .endl
 
-.local	CHECKPARAMS					; PROCEDURE
+.local	LOADSONG					; PROCEDURE
 
-; optimize FAIL ('SYSTEM.PARAMCOUNT', MIDICar Player.pas), line = 86
+	jmp l_0A0E
 
-	jsr SYSTEM.PARAMCOUNT
-	lda SYSTEM.PARAMCOUNT.RESULT
-	cmp #$01
-	jne l_08C0
-@
+.local	LOADPRC						; PROCEDURE
+	sta V
 
-; optimize OK (MIDICar Player.pas), line = 88
+; optimize OK (load.inc), line = 8
 
-	lda #$01
-	jsr SYSTEM.PARAMSTR
-	lda SYSTEM.PARAMSTR.RESULT
-	sta FN
-	lda SYSTEM.PARAMSTR.RESULT+1
-	sta FN+1
+	lda #$59
+	add T
+	sta $37CE
 
-; optimize OK (MIDICar Player.pas), line = 89
+; optimize FAIL (0, load.inc), line = 9
 
-	lda #$19
+	inc T
+	lda T
+	cmp #$04
+	jne l_0A30
+	lda #$00
+	sta T
+l_0A30
+
+; optimize OK (load.inc), line = 10
+
+	lda V
+	jeq l_0A49
+
+; optimize OK (load.inc), line = 12
+
+	lda #$D8
 	sta SCRADR
-	lda #$38
-	sta SCRADR+1
-	lda #$31
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-
-; optimize OK (MIDICar Player.pas), line = 90
-
-	lda #$80
-	sta PUTTEXTINVERT
-
-; optimize OK (MIDICar Player.pas), line = 91
-
-	lda <LOADPRC
-	sta MIDFILES.LOADPROCESS
-	lda >LOADPRC
-	sta MIDFILES.LOADPROCESS+1
-
-; optimize OK (MIDICar Player.pas), line = 92
-
-	lda FN
-	sta MIDFILES.LOADMID.FN
-	lda FN+1
-	sta MIDFILES.LOADMID.FN+1
-	jsr MIDFILES.LOADMID
-	lda MIDFILES.LOADMID.RESULT
-	sta ERR
-
-; optimize OK (MIDICar Player.pas), line = 93
-
-	jeq l_08EB
-
-; optimize OK (MIDICar Player.pas), line = 95
-
-	lda #$19
-	sta SCRADR
-	lda #$38
+	lda #$37
 	sta SCRADR+1
 
-; optimize OK (MIDICar Player.pas), line = 96
+; optimize OK (load.inc), line = 13
 
-	lda ERR
-	jmi l_0902
-	jeq l_0902
-
-; optimize OK (MIDICar Player.pas), line = 97
-
-	lda ERR
-	sta @CASETMP_0005
-	cmp #$64
-	jne l_090E
-@
-
-; optimize OK (MIDICar Player.pas), line = 98
-
-	lda #$3A
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-
-	jmp a_0005
-l_090E
-	cmp #$65
-	jne l_0919
-@
-
-; optimize OK (MIDICar Player.pas), line = 99
-
-	lda #$4E
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-
-l_0919
-a_0005
-	jmp l_092A
-l_0902
-
-; optimize OK (MIDICar Player.pas), line = 103
-
-	lda #$62
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-	ldy #$00
-	lda ERR
-	spl
-	dey
-	sty PUTINT.VALUE+1
+	lda V
+	sub #$01
 	sta PUTINT.VALUE
+	lda #$00
+	sbc #$00
+	sta PUTINT.VALUE+1
 	jsr PUTINT
-l_092A
+	ldy SCRADR+1
+	sty :bp+1
+	ldy SCRADR
+	lda #$0F
+	sta (:bp),y
+	inc SCRADR
+	sne
+	inc SCRADR+1
 
-; --- WhileProlog
-l_0933
+; optimize OK (load.inc), line = 14
 
-; optimize OK (MIDICar Player.pas), line = 105
-
-	lda KEYB
-	cmp #$FF
-	jeq l_0933
-
-; optimize OK (MIDICar Player.pas), line = 106
-
-	lda #$FF
-	sta KEYB
-
-; optimize FAIL ('EXIT2DOS', MIDICar Player.pas), line = 107
-
-	jsr EXIT2DOS
-l_08EB
-	jmp l_094F
-l_08C0
-
-; optimize OK (MIDICar Player.pas), line = 112
-
-	lda #$01
-	sta MIDFILES.TOTALTRACKS
-l_094F
+	lda MIDFILES.TOTALTRACKS
+	sta PUTINT.VALUE
+	lda #$00
+	sta PUTINT.VALUE+1
+	jsr PUTINT
+	inc SCRADR
+	sne
+	inc SCRADR+1
+l_0A49
 
 ; ------------------------------------------------------------
 
-FN	= DATAORIGIN+$01FA
-ERR	= DATAORIGIN+$01FC
-@CASETMP_0005	= DATAORIGIN+$01FD
+V	= DATAORIGIN+$01E8
 
-@VarData	= FN
-@VarDataSize	= 4
+@VarData	= V
+@VarDataSize	= 1
 
 @exit
 	.ifdef @new
@@ -3778,187 +3898,645 @@ ERR	= DATAORIGIN+$01FC
 	rts						; ret
 	eif
 .endl
-l_0088
+l_0A0E
 
-; optimize FAIL ('INIT', MIDICar Player.pas), line = 117
+; optimize OK (load.inc), line = 19
 
-	jsr INIT
-
-; optimize FAIL ('CHECKPARAMS', MIDICar Player.pas), line = 118
-
-	jsr CHECKPARAMS
-
-; optimize FAIL ('CLEARSTATUS', MIDICar Player.pas), line = 121
-
-	jsr CLEARSTATUS
-
-; optimize OK (MIDICar Player.pas), line = 122
-
-	lda #$19
+	lda #$BA
 	sta SCRADR
-	lda #$38
+	lda #$37
 	sta SCRADR+1
-	lda #$6F
+	lda FN
+	sta PUTTEXT.S
+	lda FN+1
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+; optimize FAIL ('STATUSLOADING', load.inc), line = 20
+
+	jsr STATUSLOADING
+
+; optimize OK (load.inc), line = 21
+
+	lda <LOADPRC
+	sta MIDFILES.LOADPROCESS
+	lda >LOADPRC
+	sta MIDFILES.LOADPROCESS+1
+	lda #$00
+	sta T
+
+; optimize OK (load.inc), line = 22
+
+	lda FN
+	sta MIDFILES.LOADMID.FN
+	lda FN+1
+	sta MIDFILES.LOADMID.FN+1
+	jsr MIDFILES.LOADMID
+	lda MIDFILES.LOADMID.RESULT
+	sta ERR
+
+; optimize OK (load.inc), line = 23
+
+	jeq l_0A90
+
+; optimize OK (load.inc), line = 25
+
+	lda #$CF
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+
+; optimize OK (load.inc), line = 26
+
+	lda ERR
+	jmi l_0AA7
+
+; optimize OK (load.inc), line = 27
+
+	sta @CASETMP_0003
+	cmp #$64
+	jne l_0AB3
+@
+
+; optimize OK (load.inc), line = 28
+
+	lda #$63
 	sta PUTTEXT.S
 	lda #$80
 	sta PUTTEXT.S+1
 	jsr PUTTEXT
 
-; optimize FAIL ('MC6850.MC6850_RESET', MIDICar Player.pas), line = 125
+	jmp a_0003
+l_0AB3
+	cmp #$65
+	jne l_0ABE
+@
+
+; optimize OK (load.inc), line = 29
+
+	lda #$77
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+
+l_0ABE
+a_0003
+	jmp l_0ACF
+l_0AA7
+
+; optimize OK (load.inc), line = 33
+
+	lda #$8B
+	sta PUTTEXT.S
+	lda #$80
+	sta PUTTEXT.S+1
+	jsr PUTTEXT
+	lda ERR
+	sta PUTINT.VALUE
+	lda #$00
+	sta PUTINT.VALUE+1
+	jsr PUTINT
+l_0ACF
+
+; --- WhileProlog
+l_0AD8
+
+; optimize OK (load.inc), line = 35
+
+	lda KEYB
+	cmp #$FF
+	jeq l_0AD8
+
+; optimize OK (load.inc), line = 36
+
+	lda #$FF
+	sta KEYB
+
+; optimize FAIL ('EXIT2DOS', load.inc), line = 37
+
+	jsr EXIT2DOS
+l_0A90
+
+; optimize OK (load.inc), line = 39
+
+	lda #$00
+	sta SYSTEM.MOVE_0103.SOURCE
+	lda #$3E
+	sta SYSTEM.MOVE_0103.SOURCE+1
+	lda #$00
+	sta SYSTEM.MOVE_0103.DEST
+	lda #$3C
+	sta SYSTEM.MOVE_0103.DEST+1
+	lda #$00
+	sta SYSTEM.MOVE_0103.COUNT
+	lda #$02
+	sta SYSTEM.MOVE_0103.COUNT+1
+	.local +MAIN.SYSTEM.MOVE_0103
+	m@INLINE
+	.endl
+
+; ------------------------------------------------------------
+
+ERR	= DATAORIGIN+$01E6
+T	= DATAORIGIN+$01E7
+@CASETMP_0003	= DATAORIGIN+$01E9
+
+@VarData	= ERR
+@VarDataSize	= 3
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+l_009F
+
+; optimize FAIL ('INIT', MIDICar Player.pas), line = 56
+
+	jsr INIT
+
+; optimize FAIL ('SYSTEM.PARAMCOUNT', MIDICar Player.pas), line = 58
+
+	jsr SYSTEM.PARAMCOUNT
+	lda SYSTEM.PARAMCOUNT.RESULT
+	cmp #$01
+	jne l_0B01
+@
+
+; optimize OK (MIDICar Player.pas), line = 60
+
+	lda #$01
+	jsr SYSTEM.PARAMSTR
+	lda SYSTEM.PARAMSTR.RESULT
+	sta FN
+	lda SYSTEM.PARAMSTR.RESULT+1
+	sta FN+1
+
+; optimize FAIL ('LOADSONG', MIDICar Player.pas), line = 61
+
+	jsr LOADSONG
+
+; optimize FAIL ('CLEARSTATUS', MIDICar Player.pas), line = 62
+
+	jsr CLEARSTATUS
+	jmp l_0B12
+l_0B01
+
+; optimize OK (MIDICar Player.pas), line = 67
+
+	lda #$00
+	sta MIDFILES.TOTALTRACKS
+l_0B12
+
+; optimize FAIL ('CLEARUVMETERS', MIDICar Player.pas), line = 70
+
+	jsr CLEARUVMETERS
+
+; optimize FAIL ('STATUSPLAYING', MIDICar Player.pas), line = 71
+
+	jsr STATUSPLAYING
+
+; optimize FAIL ('MC6850.MC6850_RESET', MIDICar Player.pas), line = 74
 
 	jsr MC6850.MC6850_RESET
 
-; optimize OK (MIDICar Player.pas), line = 126
+; optimize OK (MIDICar Player.pas), line = 75
 
 	lda #$96
 	jsr MC6850.MC6850_INIT
 
-; optimize FAIL ('RESET_MIDI', MIDICar Player.pas), line = 131
+; optimize FAIL ('RESET_MIDI', MIDICar Player.pas), line = 77
 
 	jsr RESET_MIDI
 
-; optimize OK (MIDICar Player.pas), line = 132
+; optimize FAIL ('MIDFILES.INITTIMER', MIDICar Player.pas), line = 78
 
-	lda #$00
-	sta MIDFILES._TOTALTICKS
-	sta MIDFILES._TOTALTICKS+1
-	sta MIDFILES._TOTALTICKS+2
-	sta MIDFILES._TOTALTICKS+3
-
-; optimize FAIL ('MIDFILES.SETTEMPO', MIDICar Player.pas), line = 133
-
-	jsr MIDFILES.SETTEMPO
-
-; optimize OK (MIDICar Player.pas), line = 137
-
-	lda MIDFILES.TOTALTRACKS
-	sta MIDFILES.CTRK
+	jsr MIDFILES.INITTIMER
 
 ; --- RepeatUntilProlog
-l_096D
+l_0B1E
 
-; optimize FAIL ('MIDFILES.PROCESSMIDI', MIDICar Player.pas), line = 140
+; optimize FAIL ('MIDFILES.PROCESSMIDI', MIDICar Player.pas), line = 83
 
 	jsr MIDFILES.PROCESSMIDI
 
-; optimize FAIL ('m@INLINE', MIDICar Player.pas), line = 148
+; optimize OK (MIDICar Player.pas), line = 84
 
-	.local +MAIN.MIDI_FIFO.FIFO_PUSHDIRECT2MC6850
-	m@INLINE
-	.endl
+	lda ISSTOPPED
+	jne l_0B3A
+	lda MIDFILES.PLAYINGTRACKS
+	jne l_0B3A
 
-; optimize OK (MIDICar Player.pas), line = 151
+; optimize OK (MIDICar Player.pas), line = 86
+
+	lda PLAYERSTATUS
+	and #$04
+	jeq l_0B51
+
+; optimize FAIL ('STATUSSTOPPED', MIDICar Player.pas), line = 88
+
+	jsr STATUSSTOPPED
+
+; optimize FAIL ('STATUSPLAYING', MIDICar Player.pas), line = 89
+
+	jsr STATUSPLAYING
+	jmp l_0B5D
+l_0B51
+
+; optimize OK (MIDICar Player.pas), line = 92
+
+	lda #$3E
+	sta KEYB
+l_0B5D
+l_0B3A
+
+; optimize OK (MIDICar Player.pas), line = 95
+
+	lda _TM
+	cmp OTM
+	jeq l_0B77
+
+; optimize OK (MIDICar Player.pas), line = 97
+
+	sta OTM
+
+; optimize OK (MIDICar Player.pas), line = 98
+
+	lda #$C0
+	sta SCRADR
+	lda #$37
+	sta SCRADR+1
+	lda <MIDFILES._TOTALTICKS
+	sta PUTHEX.V
+	lda >MIDFILES._TOTALTICKS
+	sta PUTHEX.V+1
+	lda #$08
+	sta PUTHEX.N
+	jsr PUTHEX
+
+; optimize OK (uvmeters.inc), line = 1
+
+	lda PLAYERSTATUS
+	and #$02
+	jeq l_0B9B
+
+; optimize OK (uvmeters.inc), line = 3
+
+	lda #$00
+	sta CHN
+
+; --- RepeatUntilProlog
+l_0BA1
+
+; optimize OK (uvmeters.inc), line = 5
+
+	lda CHN
+	asl @
+	tay
+	lda adr.CHANNELSCRADR,y
+	sta SCRADR
+	lda adr.CHANNELSCRADR+1,y
+	sta SCRADR+1
+
+; optimize OK (uvmeters.inc), line = 6
+
+	ldy CHN
+	lda MIDFILES.adr.CHNVOLUME,y
+	sta C
+
+; optimize OK (uvmeters.inc), line = 7
+
+	jeq l_0BC4
+
+; optimize OK (uvmeters.inc), line = 9
+
+	cmp #$05
+	jcc l_0BD7
+	sub #$04
+	sta C
+	jmp l_0BE2
+l_0BD7
+	lda #$00
+	sta C
+l_0BE2
+
+; optimize OK (uvmeters.inc), line = 10
+
+	ldy CHN
+	lda C
+	sta MIDFILES.adr.CHNVOLUME,y
+
+; optimize OK (uvmeters.inc), line = 11
+
+	lsr @
+	and #$3C
+	sta V
+
+; -------------------  ASM Block 00000088  -------------------
+
+        clc
+        lda #<UVMETER_ADDR
+        adc v
+        sta $d6
+        lda #>UVMETER_ADDR
+        sta $d7
+        ldy #3
+      loop:
+        lda ($d6),y
+        sta ($d4),y
+        dey
+        bpl loop
+      
+l_0BC4
+
+; optimize FAIL (0, uvmeters.inc), line = 29
+
+	inc CHN
+
+; optimize OK (uvmeters.inc), line = 30
+
+	lda CHN
+	cmp #$10
+	jne l_0BA1
+l_0B9B
+l_0B77
+
+; optimize OK (keyboard.inc), line = 1
 
 	lda KEYB
 	cmp #$FF
-	jeq l_0981
+	jeq l_0C26
 
-; optimize OK (MIDICar Player.pas), line = 153
+; optimize OK (keyboard.inc), line = 3
 
-	sta @CASETMP_0006
+	sta @CASETMP_0004
 	cmp #$1C
-	jne l_098D
+	jne l_0C32
 @
-	jmp b_096D					; break
+	jmp b_0B1E					; break
 
-	jmp a_0006
-l_098D
+	jmp a_0004
+l_0C32
+	cmp #$00
+	jne l_0C3B
+@
+
+; optimize OK (keyboard.inc), line = 7
+
+	lda PLAYERSTATUS
+	eor #$04
+	sta PLAYERSTATUS
+
+; optimize FAIL ('ISLOOPED', keyboard.inc), line = 8
+
+	jsr ISLOOPED
+
+	jmp a_0004
+l_0C3B
+	cmp #$25
+	jne l_0C4F
+@
+
+; optimize OK (keyboard.inc), line = 12
+
+	lda PLAYERSTATUS
+	eor #$02
+	sta PLAYERSTATUS
+
+; optimize OK (keyboard.inc), line = 13
+
+	lda #$72
+	sta SYSTEM.FILLCHAR_0102.A
+	lda #$34
+	sta SYSTEM.FILLCHAR_0102.A+1
+	lda #$20
+	sta SYSTEM.FILLCHAR_0102.COUNT
+	lda #$03
+	sta SYSTEM.FILLCHAR_0102.COUNT+1
+	lda #$00
+	sta SYSTEM.FILLCHAR_0102.VALUE
+	.local +MAIN.SYSTEM.FILLCHAR_0102
+	m@INLINE
+	.endl
+
+; optimize OK (keyboard.inc), line = 14
+
+	lda PLAYERSTATUS
+	and #$02
+	jeq l_0C73
+
+; optimize FAIL ('CLEARUVMETERS', keyboard.inc), line = 15
+
+	jsr CLEARUVMETERS
+l_0C73
+
+	jmp a_0004
+l_0C4F
+	cmp #$27
+	jne l_0C80
+@
+
+; optimize OK (keyboard.inc), line = 19
+
+	lda PLAYERSTATUS
+	eor #$01
+	sta PLAYERSTATUS
+
+; optimize FAIL ('SETCOLORS', keyboard.inc), line = 20
+
+	jsr SETCOLORS
+
+	jmp a_0004
+l_0C80
 	cmp #$0A
-	jne l_0996
+	jne l_0C94
 @
 
-; optimize OK (MIDICar Player.pas), line = 157
+; optimize OK (keyboard.inc), line = 24
 
 	lda MIDFILES._TIMERSTATUS
-	eor #$80
-	sta MIDFILES._TIMERSTATUS
+	jpl l_0CAA
 
-; optimize OK (MIDICar Player.pas), line = 158
+; optimize FAIL ('STATUSPLAYING', keyboard.inc), line = 26
 
-	lda #$19
-	sta SCRADR
-	lda #$38
-	sta SCRADR+1
+	jsr STATUSPLAYING
+	jmp l_0CB5
+l_0CAA
 
-; optimize OK (MIDICar Player.pas), line = 159
+; optimize FAIL ('STATUSPAUSE', keyboard.inc), line = 27
 
-	lda MIDFILES._TIMERSTATUS
-	jmi l_09BA
+	jsr STATUSPAUSE
+l_0CB5
 
-; optimize OK (MIDICar Player.pas), line = 160
+	jmp a_0004
+l_0C94
+	cmp #$3E
+	jne l_0CBF
+@
 
-	lda #$6F
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-	jmp l_09C6
-l_09BA
+; optimize FAIL ('STATUSSTOPPED', keyboard.inc), line = 29
 
-; optimize OK (MIDICar Player.pas), line = 162
+	jsr STATUSSTOPPED
+	jmp a_0004
+l_0CBF
+	cmp #$0E
+	beq @+
+	cmp #$06
+	beq @+
+	cmp #$0F
+	jne l_0CCD
+@
 
-	lda #$78
-	sta PUTTEXT.S
-	lda #$80
-	sta PUTTEXT.S+1
-	jsr PUTTEXT
-l_09C6
+; optimize OK (keyboard.inc), line = 32
 
-l_0996
-a_0006
+	lda KEYB
+	cmp #$0E
+	jne l_0CDF
+	lda MIDFILES.TEMPOSHIFT
+	add #$20
+	sta MIDFILES.TEMPOSHIFT
+	lda MIDFILES.TEMPOSHIFT+1
+	adc #$4E
+	sta MIDFILES.TEMPOSHIFT+1
+	lda MIDFILES.TEMPOSHIFT+2
+	adc #$00
+	sta MIDFILES.TEMPOSHIFT+2
+	lda MIDFILES.TEMPOSHIFT+3
+	adc #$00
+	sta MIDFILES.TEMPOSHIFT+3
+l_0CDF
 
-; optimize OK (MIDICar Player.pas), line = 165
+; optimize OK (keyboard.inc), line = 33
+
+	lda KEYB
+	cmp #$06
+	jne l_0CF5
+	lda MIDFILES.TEMPOSHIFT
+	sub #$20
+	sta MIDFILES.TEMPOSHIFT
+	lda MIDFILES.TEMPOSHIFT+1
+	sbc #$4E
+	sta MIDFILES.TEMPOSHIFT+1
+	lda MIDFILES.TEMPOSHIFT+2
+	sbc #$00
+	sta MIDFILES.TEMPOSHIFT+2
+	lda MIDFILES.TEMPOSHIFT+3
+	sbc #$00
+	sta MIDFILES.TEMPOSHIFT+3
+l_0CF5
+
+; optimize OK (keyboard.inc), line = 34
+
+	lda KEYB
+	cmp #$0F
+	jne l_0D0B
+	lda #$00
+	sta MIDFILES.TEMPOSHIFT
+	sta MIDFILES.TEMPOSHIFT+1
+	sta MIDFILES.TEMPOSHIFT+2
+	sta MIDFILES.TEMPOSHIFT+3
+l_0D0B
+
+; optimize FAIL ('MIDFILES.SETTEMPO', keyboard.inc), line = 35
+
+	jsr MIDFILES.SETTEMPO
+
+l_0CCD
+a_0004
+
+; optimize OK (keyboard.inc), line = 38
 
 	lda #$FF
 	sta KEYB
-l_0981
+l_0C26
 
-; optimize OK (MIDICar Player.pas), line = 167
+; optimize OK (MIDICar Player.pas), line = 104
 
-	lda MIDFILES.PLAYINGTRACKS
-	jne l_096D
-b_096D
+	jmp l_0B1E
+b_0B1E
 
-; optimize FAIL ('RESET_MIDI', MIDICar Player.pas), line = 176
+; optimize FAIL ('STATUSSTOPPED', MIDICar Player.pas), line = 108
 
-	jsr RESET_MIDI
+	jsr STATUSSTOPPED
 
-; optimize OK (MIDICar Player.pas), line = 182
+; optimize OK (MIDICar Player.pas), line = 109
 
-	sei
-	mva MIDFILES.OLDTIMERVEC VTIMR1
-	mva MIDFILES.OLDTIMERVEC+1 VTIMR1+1
-	lda irqens
-	and #$fe
-	sta irqens
-	sta irqen
-	cli
+	lda #$00
+	sta NMIEN
+	lda OLDNMIVEC
+	sta NMIVEC
+	lda OLDNMIVEC+1
+	sta NMIVEC+1
+	lda #$40
+	sta NMIEN
 
-; optimize FAIL ('EXIT2DOS', MIDICar Player.pas), line = 183
+; optimize FAIL ('EXIT2DOS', MIDICar Player.pas), line = 110
 
 	jsr EXIT2DOS
 
 ; ------------------------------------------------------------
 
+CHARS_ADDR	= $3000
 DLIST_ADDR	= $3400
-SCREEN_ADDR	= $3430
-SCREEN_STATUS	= $3818
+SCREEN_ADDR	= $3422
+SCREEN_TIME	= $37BA
+SCREEN_STATUS	= $37CE
+UVMETER_ADDR	= $3880
+START_INFO_ADDR	= $3C00
 TRACK_DATA_ADDR	= $3E00
 MIDI_DATA_ADDR	= $4000
-FREE_MEM	= $23
-adr.CHPTR	= [DATAORIGIN+$019C] .array [40] .word
-.var CHPTR	= adr.CHPTR .word
-SCRADR	= DATAORIGIN+$01EC
-adr.GM_RESET	= CODEORIGIN+$0081
+FREE_MEM	= $22
+F_CLEAR	= $20
+PS_COLORSET	= $01
+PS_VIEW	= $02
+PS_LOOP	= $04
+adr.CHANNELSCRADR	= [DATAORIGIN+$01A7] .array [16] .word
+.var CHANNELSCRADR	= adr.CHANNELSCRADR .word
+SCRADR	= $D4
+_TM	= $14
+OTM	= DATAORIGIN+$01C7
+CHN	= DATAORIGIN+$01C8
+TPTR	= DATAORIGIN+$01C9
+TPS	= DATAORIGIN+$01CB
+SEC	= DATAORIGIN+$01CD
+TRKSTAT	= DATAORIGIN+$01CE
+V	= DATAORIGIN+$01CF
+I	= DATAORIGIN+$01D0
+C	= DATAORIGIN+$01D1
+ISSTOPPED	= DATAORIGIN+$01D2
+FN	= DATAORIGIN+$01D3
+OLDNMIVEC	= DATAORIGIN+$01D5
+PLAYERSTATUS	= $4A
+adr.COLORS	= CODEORIGIN+$0098
+.var COLORS	= adr.COLORS .word
+adr.GM_RESET	= CODEORIGIN+$00A2
 .var GM_RESET	= adr.GM_RESET .word
-adr.HEX	= CODEORIGIN+$0087
-.var HEX	= adr.HEX .word
+K_L	= $00
+K_PLUS	= $06
+K_P	= $0A
+K_MINUS	= $0E
+K_EQ	= $0F
 K_ESC	= $1C
 K_SPACE	= $21
-K_P	= $0A
+K_M	= $25
+K_INVERS	= $27
+K_S	= $3E
 KEYB	= $02FC
-PUTTEXTINVERT	= DATAORIGIN+$01EE
-@CASETMP_0006	= DATAORIGIN+$01FE
+PUTTEXTINVERT	= DATAORIGIN+$01D7
+NMIEN	= $D40E
+NMIVEC	= $FFFA
+SDMACTL	= DATAORIGIN+$01D8
+DMACTL	= $D400
+CHBASE	= $02F4
+SOUNDR	= $41
+@CASETMP_0004	= DATAORIGIN+$01EA
 @exit
 
 @halt	ldx #$00
@@ -4001,18 +4579,6 @@ ROMOFF
 	jsr MAIN.MC6850.@UnitInit
 	.fi
 
-	.ifdef MAIN.DOS.@UnitInit
-	jsr MAIN.DOS.@UnitInit
-	.fi
-
-	.ifdef MAIN.STRUTILS.@UnitInit
-	jsr MAIN.STRUTILS.@UnitInit
-	.fi
-
-	.ifdef MAIN.SYSUTILS.@UnitInit
-	jsr MAIN.SYSUTILS.@UnitInit
-	.fi
-
 	.ifdef MAIN.MIDI_FIFO.@UnitInit
 	jsr MAIN.MIDI_FIFO.@UnitInit
 	.fi
@@ -4040,18 +4606,6 @@ ROMOFF
 	.print 'MC6850: ',MAIN.MC6850,'..',MAIN.MC6850+.SIZEOF(MAIN.MC6850)-1
 	eif
 
-	ift .SIZEOF(MAIN.DOS) > 0
-	.print 'DOS: ',MAIN.DOS,'..',MAIN.DOS+.SIZEOF(MAIN.DOS)-1
-	eif
-
-	ift .SIZEOF(MAIN.STRUTILS) > 0
-	.print 'STRUTILS: ',MAIN.STRUTILS,'..',MAIN.STRUTILS+.SIZEOF(MAIN.STRUTILS)-1
-	eif
-
-	ift .SIZEOF(MAIN.SYSUTILS) > 0
-	.print 'SYSUTILS: ',MAIN.SYSUTILS,'..',MAIN.SYSUTILS+.SIZEOF(MAIN.SYSUTILS)-1
-	eif
-
 	ift .SIZEOF(MAIN.MIDI_FIFO) > 0
 	.print 'MIDI_FIFO: ',MAIN.MIDI_FIFO,'..',MAIN.MIDI_FIFO+.SIZEOF(MAIN.MIDI_FIFO)-1
 	eif
@@ -4072,13 +4626,13 @@ ROMOFF
 
 ; ------------------------------------------------------------
 
-	.align $0004
+	org $2000
 
 DATAORIGIN
 .by  $28 $00 $18 $00 $2D $0C
 
 VARINITSIZE	= *-DATAORIGIN
-VARDATASIZE	= 511
+VARDATASIZE	= 491
 
 PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
 
@@ -4089,13 +4643,13 @@ PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
 ; ------------------------------------------------------------
 
 .macro	STATICDATA
-.by  $04 $54 $52 $55 $45 $00 $05 $46  $41 $4C $53 $45 $00 $00 $00 $02  $45 $3A $00 $12 $AD $A9 $A4 $A9
-.by  $A3 $E1 $F2 $80 $B0 $EC $E1 $F9  $E5 $F2 $80 $B2 $A3 $91 $00 $08  $92 $90 $92 $92 $80 $A7 $B3 $A4
-.by  $00 $07 $AC $EF $E1 $E4 $E9 $EE  $E7 $00 $12 $B5 $EE $F3 $F5 $F0  $F0 $EF $F2 $F4 $E5 $E4 $80 $E6
-.by  $EF $F2 $ED $E1 $F4 $00 $12 $AE  $EF $F4 $80 $E5 $EE $EF $F5 $E7  $E8 $F4 $80 $ED $E5 $ED $EF $F2
-.by  $F9 $00 $0B $A9 $8F $AF $80 $A5  $F2 $F2 $EF $F2 $80 $83 $00 $07  $B0 $EC $E1 $F9 $E9 $EE $E7 $00
-.by  $07 $B0 $E1 $F5 $F3 $E5 $80 $80  $00 $F0 $7E $7F $09 $01 $F7 $10  $11 $12 $13 $14 $15 $16 $17 $18
-.by  $19 $61 $62 $63 $64 $65 $66
+.by  $00 $00 $04 $4C $4F $4F $50 $00  $04 $20 $20 $20 $20 $00 $07 $50  $6C $61 $79 $69 $6E $67 $00 $07
+.by  $50 $61 $75 $73 $65 $20 $20 $00  $07 $53 $74 $6F $70 $70 $65 $64  $00 $07 $4C $6F $61 $64 $69 $6E
+.by  $67 $00 $0E $43 $61 $6C $63 $75  $6C $61 $74 $69 $6E $67 $2E $2E  $2E $00 $02 $45 $3A $00 $10 $05
+.by  $12 $12 $12 $12 $12 $54 $49 $4D  $45 $12 $12 $12 $12 $12 $17 $00  $05 $4D $65 $6D $3A $20 $00 $02
+.by  $4B $42 $00 $12 $55 $6E $73 $75  $70 $70 $6F $72 $74 $65 $64 $20  $66 $6F $72 $6D $61 $74 $00 $12
+.by  $4E $6F $74 $20 $65 $6E $6F $75  $67 $68 $74 $20 $6D $65 $6D $6F  $72 $79 $00 $0B $49 $2F $4F $20
+.by  $45 $72 $72 $6F $72 $20 $23 $00  $00 $00 $0A $00 $0A $0A $0A $00  $00 $00 $F0 $7E $7F $09 $01 $F7
 .endm
 
 	end

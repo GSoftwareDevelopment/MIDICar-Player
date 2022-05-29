@@ -12,9 +12,8 @@
 				"-ipath:./",
 				"-define:USE_FIFO",
 				// "-define:USE_SUPPORT_VARS",
-				// "-define:DEBUG",
 				"-code:8000",
-				// "-data:2000",
+				"-data:2000",
 				"-o:./asm/MIDICar Player.a65"
 			],
 			"presentation": {

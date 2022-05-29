@@ -1,0 +1,57 @@
+// store `scradr` value as a operand of opcode
+  lda scradr
+  sta screen
+  lda scradr+1
+  sta screen+1
+  lda v
+  sta vadr1
+  sta vadr2
+  lda v+1
+  sta vadr1+1
+  sta vadr2+1
+
+  lda #0
+  sta _vofs
+
+// get nibbles to show, if =0 exit
+  ldy n
+  beq stop
+
+hexLoop:
+  ldx _vofs
+  tya
+  and #1
+  bne HiNibble
+  lda vadr1:$f000,x
+  and #$0f
+  jmp put2screen
+HiNibble:
+  lda vadr2:$f000,x
+  :4 lsr @
+  inc _vofs
+
+put2screen:
+  tax
+  lda hexTab,x
+  ora puttextinvert
+  dey
+  sta screen:$f000,y
+
+  cpy #0
+  bne hexLoop
+
+calcEndAddr:
+  lda scradr
+  clc
+  adc n
+  sta scradr
+  bcc stop
+  inc scradr+1
+
+stop:
+  rts
+
+_vofs
+  .by 0
+hexTab:
+  dta d'0123456789ABCDEF'

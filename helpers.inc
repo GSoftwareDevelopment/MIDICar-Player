@@ -1,84 +1,64 @@
 const
-  GM_RESET: array[0..5] of byte = ($f0, $7e, $7f, $09, $01, $f7);
-  hex:array[0..15] of char = (
-    '0'~,'1'~,'2'~,'3'~,'4'~,'5'~,'6'~,'7'~,
-    '8'~,'9'~,'a'~,'b'~,'c'~,'d'~,'e'~,'f'~
+  colors:Array[0..1,0..4] of byte = (
+    (0,0,10,0,10),
+    (10,10,0,0,0)
   );
 
-  k_esc = 28;
+  GM_RESET: array[0..5] of byte = ($f0, $7e, $7f, $09, $01, $f7);
+
+  k_l     = 0;
+  k_plus  = 6;
+  k_p     = 10;
+  k_minus = 14;
+  k_eq    = 15;
+  k_esc   = 28;
   k_space = 33;
-  k_p = 10;
+  k_m     = 37;
+  k_invers= 39;
+  k_s     = 62;
 
 var
   keyb:byte absolute $2fc;
   puttextinvert:byte;
 
+  NMIEN:Byte absolute $D40E;
+  NMIVEC:Pointer absolute $fffa;
+  SDMACTL:Byte;
+  DMACTL:Byte absolute $d400;
+  CHBASE:Byte absolute 756;
+  SOUNDR:Byte absolute $41;
+
+procedure setColors;
+var p:pointer;
+
+begin
+  p:=@colors[byte((playerStatus and ps_colorSet)=ps_colorSet),0];
+  move(p,pointer($d016),5);
+  move(p,pointer(708),5);
+end;
+
 procedure PutText(s:PString);
 var
-  l:byte;
+  l,c:byte;
 
 begin
-  l:=byte(s[0]); inc(s,1);
-  move(s,pointer(scradr),l);
-  inc(scradr,l);
-end;
-
-procedure PutHex(var v; n:byte);
-var
-  a:byte;
-  p:^Byte;
-
-begin
-  p:=v;
-  inc(scradr,n);
-  while n>0 do
+  l:=byte(s[0]);
+  while l>0 do
   begin
-    if n and 1=0 then
-      a:=p^
-    else
-      a:=a shr 4;
-    poke(scradr,byte(hex[a and $f]) or puttextinvert); dec(scradr);
-    dec(n);
+    inc(s);
+    c:=byte(s^);
+    if c<32 then inc(c,64)
+    else if c<96 then dec(c,32);
+    poke(scradr,c);
+    inc(scradr);
+    dec(l);
   end;
-  inc(scradr,n);
 end;
 
-// procedure strVal2Mem(_dest:pointer; value:byte; zeros:byte);
-// var
-//   ptr,digit,v:byte;
-//   dest:array[0..0] of byte;
-//   base,step:byte;
-
-//   procedure exdigit();
-//   begin
-//     if (value>=base) then begin digit:=$15; dec(value,base); end else digit:=$10;
-//     v:=4;
-//     while value>=step do
-//     begin
-//       dec(base,step);
-//       if (value>=base) then begin digit:=digit+v; dec(value,base); exit; end;
-//       dec(v);
-//     end;
-//   end;
-
-// begin
-//   dest:=_dest; ptr:=0;
-//   base:=255; step:=100; exdigit();
-//   if (zeros>=3) then begin dest[ptr]:=digit or puttextinvert; ptr:=ptr+1; end;
-
-//   base:=50; step:=10; exdigit();
-//   if (zeros>=2) then begin dest[ptr]:=digit or puttextinvert; ptr:=ptr+1; end;
-
-//   base:=5; step:=1; exdigit();
-//   if (zeros>=1) then dest[ptr]:=digit or puttextinvert;
-// end;
-
-// procedure PutValue(value:smallint; zeros:byte);
-// begin
-// //   setPos(x,y);
-//   strVal2Mem(pointer(scradr),value,zeros);
-//   inc(scradr,zeros);
-// End;
+procedure PutHex(var v; n:byte); Assembler;
+asm
+  icl 'asms/puthex.a65'
+end;
 
 {
   the following procedure is based on code from this page
@@ -87,79 +67,7 @@ end;
 }
 procedure putInt(value:smallint); assembler;
 asm
-EOL = 0
-
-    lda scradr
-    sta screen1
-    sta screen2
-    lda scradr+1
-    sta screen1+1
-    sta screen2+1
-
-INT2STR:
-    ldy #0
-    sty _cnt
-ITSNEXT:
-    ldx #0
-ITSSLP:
-    lda value
-    sec
-    sbc Pow10Tab,Y
-    sta value
-    lda value+1
-    iny
-    sbc Pow10Tab,Y
-    bcc ITSADD
-    sta value+1
-    inx
-    dey
-    clc
-    bcc ITSSLP
-ITSADD:
-    dey
-    lda value
-    adc Pow10Tab,Y
-    sta value
-    txa
-    ora #$10
-    ldx _cnt
-    bne storeDigit
-    cmp #$10
-    beq skipDigit
-storeDigit:
-    ora puttextinvert
-    sta screen1:$f000,X
-    inc _cnt
-skipDigit:
-    iny
-    iny
-    cpy #8
-    bcc ITSNEXT
-    lda value
-    ora #$10
-    ldx _cnt
-    ora puttextinvert
-    sta screen2:$f000,X
-    inx
-
-// set screen addres to the end of value
-    txa
-    clc
-    adc scradr
-    sta scradr
-    bcc stop
-    inc scradr+1
-
-stop:
-    rts
-
-_cnt
-    .by 0
-Pow10Tab
-    .wo 10000
-    .wo 1000
-    .wo 100
-    .wo 10
+  icl 'asms/int2str.a65'
 end;
 
 procedure reset_MIDI;
@@ -167,8 +75,90 @@ begin
   FIFO_Send(GM_Reset,6); FIFO_Flush;
 end;
 
+procedure clearWorkArea;
+begin
+  fillchar(pointer(SCREEN_ADDR+80),SCREEN_TIME-SCREEN_ADDR-80,0);
+end;
+
+procedure isLooped;
+begin
+  scradr:=SCREEN_TIME;
+  if (playerStatus and ps_loop)<>0 then
+    putText('LOOP')
+  else
+    putText('    ');
+end;
+
+procedure clearStatus;
+begin
+  fillchar(pointer(SCREEN_STATUS-20),60,0);
+  isLooped;
+  if length(fn)>16 then fn[0]:=#16;
+  scradr:=SCREEN_STATUS+40-byte(fn[0]); putText(fn);
+end;
+
+procedure clearUVMeters;
+begin
+  if playerStatus and ps_view<>0 then
+  begin
+    chn:=0;
+    repeat
+      scradr:=channelScrAdr[chn];
+      fillChar(pointer(scradr),4,$40);
+      inc(chn);
+    until chn=16;
+  end;
+end;
+
+procedure statusPlaying;
+begin
+  scradr:=SCREEN_STATUS+1;
+  PutText('Playing');
+  if isStopped then
+  begin
+    initTimer;
+    isStopped:=false;
+  end
+  else
+    _timerStatus:=_timerStatus and not f_counter;
+end;
+
+procedure statusPause;
+begin
+  if isStopped then exit;
+  scradr:=SCREEN_STATUS+1;
+  PutText('Pause  ');
+  _timerStatus:=_timerStatus or f_counter;
+end;
+
+procedure statusStopped;
+begin
+  isStopped:=true;
+  scradr:=SCREEN_STATUS+1;
+  PutText('Stopped');
+  _timerStatus:=_timerStatus or f_counter;
+  _totalTicks:=0; _subCnt:=1;
+  setIntVec(iTim1,oldTimerVec);
+  Reset_MIDI;
+  move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
+  chn:=0;
+  clearUVMeters;
+end;
+
+procedure statusLoading;
+begin
+  scradr:=SCREEN_STATUS+2;
+  PutText('Loading');
+end;
+
+procedure statusCalculating;
+begin
+  scradr:=SCREEN_STATUS+1;
+  PutText('Calculating...');
+end;
+
 procedure exit2DOS;
 begin
-  Cls(0); Opn(0,12,0,'E:');
+  Cls(0); Opn(0,12,0,'E:'); SOUNDR:=1;
   halt;
 end;
