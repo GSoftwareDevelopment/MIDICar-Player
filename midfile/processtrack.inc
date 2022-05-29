@@ -3,45 +3,37 @@
 }
 
 procedure ProcessTrack;
-// var
-//   flagSysEx:Boolean;
-//   msgLen:Byte;
+var
+  event:byte absolute $ff; // yes, this is the same address as `FIFO_Byte` and `MC_Byte` :)
 
   procedure readB; Inline;
   begin
-    _tmp:=_ptr^;
+    event:=_ptr^;
     inc(_adr);
     memBoundCheck;
   end;
 
-  procedure readB2FB; Inline;
-  begin
-{$IFDEF USE_FIFO}
-    FIFO_Byte:=_ptr^;
-{$ELSE}
-    MC_Byte:=_ptr^;
-{$ENDIF}
-    inc(_adr);
-    memBoundCheck;
+  procedure readVarL; Assembler;
+  asm
+    icl 'midfile/asms/readvar.asm'
   end;
 
-{$i readVarL.inc}
-{$i read24bits.inc}
+  procedure read24; Assembler;
+  asm
+    icl 'midfile/asms/read24bigendian.pas'
+  end;
+
 {$i events.inc}
 
 begin
-  _timerStatus:=_timerStatus xor f_counter;     // pause ticking
-  dTm:=_totalTicks-_trackTime;                 // time correction
-
   asm ldy _bank \ lda $100,y \ sta PORTB end;
-  _delta:=0;
   repeat
     if (_status and f_skipDelta)=0 then
     begin
       readVarL;
       if _delta>0 then
       begin
-        _trackTime:=_totalTicks+_delta-dTm;      // calculate new track time with time correction
+        _trackTime:=_trackTime+_delta;
         break;
       end;
     end
@@ -50,8 +42,10 @@ begin
 
     if _ptr^ and $80<>0 then
     begin
-      ReadB; _event:=_tmp;
-    end;
+      ReadB; _event:=event;
+    end
+    else
+      event:=_event;
 
     if _event<=$bf then
       eventMidi3
@@ -67,5 +61,4 @@ begin
   until _status and f_stop<>0;
 
   _status:=_status or f_skipDelta;
-  _timerStatus:=_timerStatus xor f_counter;  // resume ticking
 end;

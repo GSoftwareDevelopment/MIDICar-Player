@@ -11,7 +11,7 @@ var
   loadSize:Byte;
   trkData:PMIDTrack;
 
-{$i bigindian.inc}
+{$i bigendian.inc}
 
 begin
 {$I-}
@@ -60,15 +60,15 @@ begin
     else if chunkTag=TAG_MTRK then
     begin
       inc(trackCount);
-      loadProcess(trackCount);
 
+      trkData^.status:=0;
       trkData^.bank:=_bank;
       trkData^.ptr:=pointer(_adr);
       trkData^.trackTime:=0;
-      trkData^.status:=0;
 
       while Len>0 do
       begin
+        loadProcess(trackCount);
         memBoundCheck; if IOResult<>1 then exit(ERR_NOT_ENOUGHT_MEMORY);
 
         if len>LOADBUF_SIZE then loadSize:=LOADBUF_SIZE else loadSize:=len;

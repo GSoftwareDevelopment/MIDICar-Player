@@ -4,7 +4,7 @@
 
 const
   f_counter = %10000000; // prevents counting
-  f_tick    = %01000000; // tic indicator
+  f_tick    = %01000000; // tick indicator
   f_flags   = %11000000; // flags mask
   f_ratio   = %00001111; // timer divider mask
 
@@ -23,3 +23,5 @@ const
 
   TAG_MTHD : TTag = $6468544D;
   TAG_MTRK : TTag = $6B72544D;
+
+  sizeOf_TMIDTrack = sizeOf(TMIDTrack);

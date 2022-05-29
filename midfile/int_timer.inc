@@ -5,9 +5,7 @@
 procedure int_timer; Interrupt; Assembler;
 asm
     lda _timerStatus
-    bpl doSubTick
-    pla
-    rti
+    bmi skip
 
 doSubTick:
     and #f_ratio
@@ -15,23 +13,43 @@ doSubTick:
     beq doMainTick
 
     inc _subCnt
-    pla
-    rti
+    bvs skip
 
 doMainTick:
     lda #1
     sta _subCnt
+
+    lda _timerStatus
+    ora #f_tick
+    sta _timerStatus
 
     inc _totalTicks
     bne skip
     inc _totalTicks+1
     bne skip
     inc _totalTicks+2
-    bne skip
-    inc _totalTicks+3
-    bne skip
+    // bne skip
+    // inc _totalTicks+3
 
 skip:
+
+//   sty regy
+
+//   ldy MIDI_FIFO.FIFO_Tail
+//   cpy MIDI_FIFO.FIFO_Head
+//   beq fifo_end
+
+//   lda MC6850.MC6850_CNTRREG
+//   and #MC6850.TDRE
+//   beq fifo_end
+
+//   lda MIDI_FIFO.FIFO_ADDR,y
+//   sta MC6850.MC6850_BUFFER
+
+//   inc MIDI_FIFO.FIFO_Tail
+
+// fifo_end:
+//   ldy regy:#$00
 
   pla
 end;

@@ -1,24 +1,29 @@
 procedure eventMidi3; // Inline;
 begin
 {$IFDEF USE_FIFO}
-  FIFO_Byte:=_event; FIFO_WriteByte;
-  readB2FB; FIFO_WriteByte;
-  readB2FB; FIFO_WriteByte;
+  FIFO_WriteByte;
+  readB; FIFO_WriteByte;
+  readB; FIFO_WriteByte;
 {$ELSE}
-  MC_Byte:=_event; MC6850_Send2;
-  readB2FB; MC6850_Send2;
-  readB2FB; MC6850_Send2;
+  MC6850_Send2;
+  readB; MC6850_Send2;
+  readB; MC6850_Send2;
 {$ENDIF}
+{
+  The value read will represent the strength with which the sound will play.
+}
+  if (event>0) and (_event and $f0=$90) then
+    chnVolume[_event and $0f]:=MC_Byte;
 end;
 
 procedure eventMidi2;
 begin
 {$IFDEF USE_FIFO}
-  FIFO_Byte:=_event; FIFO_WriteByte;
-  readB2FB; FIFO_WriteByte;
+  FIFO_WriteByte;
+  readB; FIFO_WriteByte;
 {$ELSE}
-  MC_Byte:=_event; MC6850_Send2;
-  readB2FB; MC6850_Send2;
+  MC6850_Send2;
+  readB; MC6850_Send2;
 {$ENDIF}
 end;
 
@@ -26,13 +31,13 @@ procedure eventSysEx; // Inline;
 begin
   readVarL;
 {$IFDEF USE_FIFO}
-  FIFO_Byte:=_event; FIFO_WriteByte;
+  FIFO_WriteByte;
 {$ELSE}
-  MC_Byte:=_event; MC6850_Send2;
+  MC6850_Send2;
 {$ENDIF}
   while _tmp>0 do
   begin
-    readB2FB;
+    readB;
 {$IFDEF USE_FIFO}
     FIFO_WriteByte;
 {$ELSE}
@@ -50,33 +55,28 @@ end;
 
 procedure eventMeta; // Inline;
 begin
-  readB2FB; // fetch Meta event numer
+  readB; // fetch Meta event numer
   readVarL; // fetch data size
-  // case FIFO_Byte of
-  // case MC_Byte of
-  // {$ENDIF}
 
-  if {$IFDEF USE_FIFO}FIFO_Byte{$ELSE}MC_Byte{$ENDIF}=$2f then // end of track
-
-    _status:=_status or f_stop
-
-  else if {$IFDEF USE_FIFO}FIFO_Byte{$ELSE}MC_Byte{$ENDIF}=$51 then // set tempo
+  if event=$2f then // end of track
   begin
-    read24;
-    if _delta<>ms_per_qnote then
-    begin
-      ms_per_qnote:=_delta;
-      setTempo;
-    end;
+    Dec(PlayingTracks);
+    _status:=_status or f_stop;
+  end
+  else if event=$51 then // set tempo
+  begin
+    read24; // result in _delta!
+    ms_per_qnote:=_delta;
+    setTempo;
   end
   {$IFDEF USE_SUPPORT_VARS}
-  else if {$IFDEF USE_FIFO}FIFO_Byte{$ELSE}MC_Byte{$ENDIF}=$58 then // set tempo
+  else if event=$58 then // set tempo
   begin
-    readB; tactNum:=_tmp;
-    readB; tactDenum:=_tmp;
-    readB; ticks_per_qnote:=_tmp;
-    readB; ticks_per_32nd:=_tmp;
-  end;
+    readB; tactNum:=event;
+    readB; tactDenum:=event;
+    readB; ticks_per_qnote:=event;
+    readB; ticks_per_32nd:=event;
+  end
   {$ENDIF}
   else
   // any orther meta event are skipped
