@@ -49,7 +49,7 @@ begin
     c:=byte(s^);
     if c<32 then inc(c,64)
     else if c<96 then dec(c,32);
-    poke(scradr,c);
+    poke(scradr,c or puttextinvert);
     inc(scradr);
     dec(l);
   end;
@@ -110,52 +110,6 @@ begin
   end;
 end;
 
-procedure statusPlaying;
-begin
-  scradr:=SCREEN_STATUS+1;
-  PutText('Playing');
-  if isStopped then
-  begin
-    initTimer;
-    isStopped:=false;
-  end
-  else
-    _timerStatus:=_timerStatus and not f_counter;
-end;
-
-procedure statusPause;
-begin
-  if isStopped then exit;
-  scradr:=SCREEN_STATUS+1;
-  PutText('Pause  ');
-  _timerStatus:=_timerStatus or f_counter;
-end;
-
-procedure statusStopped;
-begin
-  isStopped:=true;
-  scradr:=SCREEN_STATUS+1;
-  PutText('Stopped');
-  _timerStatus:=_timerStatus or f_counter;
-  _totalTicks:=0; _subCnt:=1;
-  setIntVec(iTim1,oldTimerVec);
-  Reset_MIDI;
-  move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
-  chn:=0;
-  clearUVMeters;
-end;
-
-procedure statusLoading;
-begin
-  scradr:=SCREEN_STATUS+2;
-  PutText('Loading');
-end;
-
-procedure statusCalculating;
-begin
-  scradr:=SCREEN_STATUS+1;
-  PutText('Calculating...');
-end;
 
 procedure exit2DOS;
 begin
