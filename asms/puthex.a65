@@ -33,7 +33,7 @@ HiNibble:
 put2screen:
   tax
   lda hexTab,x
-  ora puttextinvert
+//  ora puttextinvert
   dey
   sta screen:$f000,y
 
