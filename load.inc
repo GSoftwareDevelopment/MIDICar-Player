@@ -22,19 +22,19 @@ begin
   err:=LoadMid(fn);
   if err<>0 then
   begin
-    scradr:=SCREEN_STATUS+1;
+    scradr:=SCREEN_STATUS; puttextinvert:=128;
     if err<128 then
     case err of
-      ERR_UNSUPPORTED_FORMAT: PutText('Unsupported format');
-      ERR_NOT_ENOUGHT_MEMORY: PutText('Not enought memory');
+      ERR_UNSUPPORTED_FORMAT: PutText(' Unsupported format ');
+      ERR_NOT_ENOUGHT_MEMORY: PutText(' Not enought memory ');
     end
     else
     begin
-      PutText('I/O Error #'); putInt(err);
+      PutText(' I/O Error # '); putInt(err);
     end;
     while keyb=255 do ;
-    keyb:=255;
-    exit2DOS;
+    puttextinvert:=0;
+    totalTracks:=0; exit;
   end;
   move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
 
