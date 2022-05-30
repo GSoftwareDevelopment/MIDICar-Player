@@ -19,7 +19,7 @@ const
   START_INFO_ADDR = $3C00;
   TRACK_DATA_ADDR = $3E00;
   MIDI_DATA_ADDR  = $4000;
-  FREE_MEM        = (($8000-$4000)+($d000-$a400)+($ff00-$e000)) div 1024;
+  FREE_MEM        = (($8000-$4000)+($d000-$a800)+($ff00-$e000)) div 1024;
 
   f_clear = %00100000;
 
@@ -28,7 +28,6 @@ const
   ps_loop     = %100;
 
 {$r player.rc}
-{$r selftest.rc}
 
 var
   channelScrAdr:array[0..15] of word;
@@ -45,9 +44,10 @@ var
   fn:PString;
   oldNMIVec:Pointer;
   playerStatus:Byte absolute $4a;
+  totalXMS:Byte;
 
 {$i helpers.inc}
-
+{$i status.inc}
 {$i init.inc}
 {$i load.inc}
 {$i fileselect.inc}
@@ -55,41 +55,26 @@ var
 begin
   init;
 
-  if paramCount=1 then
+  if paramCount>0 then
   begin
     fn:=ParamStr(1);
+    _bank:=totalXMS;
+    _adr:=$4000;
     loadSong;
-    clearStatus;
-  end
-  else
-  begin
-    // fileSelect;
-    totalTracks:=0;
   end;
-//
+
+  clearStatus;
   clearUVMeters;
-  statusPlaying;
-
-  // initialize MIDICar (MC6850)
-  MC6850_Reset;
-  MC6850_Init(CD_64+WS_OddParity+WS_8bits+IRQ_Receive);
-
-  Reset_MIDI;        // reset MIDI
-  initTimer;
 
 // Player loop
-
+  puttextinvert:=128;
   Repeat
     processMIDI;
     if not isStopped and (playingTracks=0) then
     begin
+      statusStopped;
       if playerStatus and ps_loop<>0 then
-      begin
-        statusStopped;
         statusPlaying;
-      end
-      else
-        keyb:=k_s;
     end;
 
     if _tm<>otm then
