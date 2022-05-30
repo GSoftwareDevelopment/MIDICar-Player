@@ -1,17 +1,22 @@
 function LoadMID(fn:PString):shortint;
 const
-  LOADBUF_SIZE=255;
+  LOADBUF_SIZE=16*1024;
 
 var
   f:File;
   trackCount:byte;
   chunkTag:TTag;
-  v,top,endAdr:Word;
+  v,top,endAdr,loadSize:Word;
   Len:Longint;
-  loadSize:Byte;
   trkData:PMIDTrack;
+  RBuf:TByteArray absolute $4000;
 
 {$i bigendian.inc}
+
+  procedure bget(dest:pointer);
+  begin
+    BlockRead(f,dest,loadSize,v);
+  end;
 
 begin
 {$I-}
@@ -24,8 +29,6 @@ begin
     exit;
   end;
 
-  _bank:=0;
-  _ptr:=MIDData;
   trkData:=@MIDTracks;
   trackCount:=0;
   totalTracks:=255;
@@ -62,36 +65,35 @@ begin
       inc(trackCount);
 
       trkData^.status:=0;
+      trkData^.trackTime:=0;
       trkData^.bank:=_bank;
       trkData^.ptr:=pointer(_adr);
-      trkData^.trackTime:=0;
+
+      asm ldy _bank \ lda $100,y \ sta PORTB end;
 
       while Len>0 do
       begin
         loadProcess(trackCount);
         memBoundCheck; if IOResult<>1 then exit(ERR_NOT_ENOUGHT_MEMORY);
 
-        if len>LOADBUF_SIZE then loadSize:=LOADBUF_SIZE else loadSize:=len;
-        endAdr:=_adr+loadSize;
-        if _bank=0 then
+        if hi(_adr)>=$d8 then loadSize:=$ff00
+        else if hi(_adr)>=$c0 then loadSize:=$d000
+        else if hi(_adr)>=$a8 then loadSize:=$c000
+        else if hi(_adr)>=$40 then loadSize:=$8000;
+        dec(loadSize,_adr);
+        if loadSize=0 then continue;
+        if loadSize>len then loadSize:=len;
+
+        if hi(_adr)>=$c0 then
         begin
-          if (hi(endAdr)>=$80) and (hi(endAdr)<$a4) then
-            loadSize:=$8000-_adr
-          else if (hi(endAdr)>=$d0) and (hi(endAdr)<$d8) then
-            loadSize:=$d000-_adr
-          else if (hi(endAdr)>=$ff) then
-            loadSize:=$ff00-_adr
+          bget(RBuf);
+          move(RBuf,_ptr,v);
         end
         else
-          if (hi(endAdr)>=$80) then
-            loadSize:=$8000-_adr;
+          bget(_ptr);
 
-        if loadSize=0 then continue;
-
-        BlockRead(f,RBuf,loadSize,v);
         if v<>loadSize then exit(IOResult);
 
-        move(@RBuf,_ptr,loadSize);
         inc(_adr,v);
         Dec(Len,v);
       end;

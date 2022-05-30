@@ -43,34 +43,27 @@ checkMemType
                       // otherwise, we checking bound of extended memory
 
 // base memory bounds check
-check1Bound           // 1st boundary $8000..$a3ff - program area
-  cmp #$80
-  bne check2Bound
-
-  lda #$a4
-  sta _adr+1
-  rts
-
-check2Bound:          // 2nd boundary $bc00..$bfff - DL $ Screen (BASIC OFF!)
-
-  // cmp #$bc
-  // bne check3Bound
-
-  // lda #$c0
-  // sta _adr+1
-  // rts
-
-check3Bound:          // 3rd boundary $d000..$d7ff - I/O area
+// 1st, memory under ROM
+check1Bound:
   cmp #$d0
-  bne check4Bound
+  bne check2Bound
 
   lda #$d8
   sta _adr+1
   rts
 
-check4bound           // 4th boundary $ff00..$ffff
+check2bound
   cmp #$ff
-  beq switchXMSBank
+  bne check3Bound
+
+  lda #$40
+  sta _adr+1
+  rts
+
+// 2nd, $4000..$8000
+check3Bound
+  cmp #$80
+  beq outOfMem
   rts
 
 // extended memory bound check
@@ -82,15 +75,21 @@ checkXMSBound         // extender memory window $4000..$7fff
   rts
 
 switchXMSBank:
-  iny             // increase current bank index
+  dey             // decrement current bank index
+  beq switch2Conv // if zero, meand we back to conventional memory
+
   lda $100,y      // get bank set
-  beq outOfMem    // if zero, means Out Of Memory
-
   sty _bank       // store current bank index
-
   sta PORTB       // set PORTB (switch bank)
-
   lda #$40        // set MSB address to the begining of bank
+  sta _adr+1
+  rts
+
+switch2Conv:
+  lda #$fe        // switch to conventional memory and turn off ROM
+  sty _bank
+  sta PORTB
+  lda #$a8        // set MSB address
   sta _adr+1
   rts
 

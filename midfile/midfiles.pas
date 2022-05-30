@@ -61,9 +61,6 @@ Uses
   {$IFDEF USE_FIFO}MIDI_FIFO,{$ENDIF}
   MC6850;
 
-var
-  RBuf:TByteArray absolute $600;
-
 {$i int_timer.inc}
 {$i memboundcheck.inc}
 
@@ -114,6 +111,9 @@ initialization
   loadProcess:=@nullLoadPrcs;
   tickDiv:=384;
   ms_per_qnote:=500000;
+  totalTracks:=0;
+  cTrk:=0;
+  _timerStatus:=f_counter;
 {$IFDEF USE_SUPPORT_VARS}
   tactNum:=4;
   tactDenum:=4;
