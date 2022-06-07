@@ -9,11 +9,11 @@ var
   FIFO2Null:Boolean = False;
 
 procedure FIFO_Reset;
-procedure FIFO_ReadByte; // Inline;
-procedure FIFO_PushDirect2MC6850; // Inline;
+procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
 procedure FIFO_WriteByte; Assembler; // Inline;
-procedure FIFO_Send(var data; len:byte);
-procedure FIFO_Flush; // Assembler;
+procedure FIFO_Flush;  Assembler; Keep;
+// procedure FIFO_ReadByte; // Inline;
+// procedure FIFO_Send(var data; len:byte);
 
 implementation
 uses mc6850;
@@ -31,23 +31,21 @@ begin
   FIFO_Tail:=0;
 end;
 
-procedure FIFO_PushDirect2MC6850; // Inline;
-begin
-  if (MC6850_CNTRReg and TDRE)<>0 then
-    if (FIFO_Tail<>FIFO_Head) then
-    begin
-      MC6850_BUFFER:=FIFO_Buf[FIFO_Tail];
-      Inc(FIFO_Tail);
-    end;
-end;
+procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
+asm
+  lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
+  and #MC6850.TDRE
+  beq exitPush
 
-procedure FIFO_ReadByte; // Inline;
-begin
-  if (FIFO_Tail<>FIFO_Head) then
-  begin
-    FIFO_Byte:=FIFO_Buf[FIFO_Tail];
-    Inc(FIFO_Tail);
-  end;
+  ldy FIFO_Tail
+  cpy FIFO_Head
+  beq exitPush
+
+  lda FIFO_ADDR,y
+  sta MCBaseBuf:$d500  //MC6850.MC6850_BUFFER
+  inc FIFO_Tail
+
+exitPush:
 end;
 
 procedure FIFO_WriteByte; Assembler; // Inline;
@@ -58,13 +56,7 @@ asm
   cmp FIFO_Tail
   bne storeInFIFO
 
-  lda $d01a
-  eor #$47
-  sta $d01a
   jsr FIFO_Flush
-  lda $d01a
-  eor #$47
-  sta $d01a
 
 storeInFIFO:
   ldy FIFO_Head
@@ -74,6 +66,48 @@ storeInFIFO:
 
   jsr FIFO_PushDirect2MC6850
 exitWrite:
+end;
+
+procedure FIFO_Flush; Assembler;
+asm
+  sei
+  // lda _timerStatus
+  // eor #$80
+  // sta _timerStatus
+
+  ldy FIFO_Tail
+flushLoop:
+  cpy FIFO_Head
+  beq endFlush
+
+waitOnMC:
+  lda MCBaseState:$d500 // MC6850.MC6850_CNTRReg
+  and #MC6850.TDRE
+  beq waitOnMc
+
+  lda FIFO_ADDR,y
+  sta MCBaseBuf:$d500   // MC6850.MC6850_BUFFER
+
+  iny
+  jmp flushLoop
+
+endFlush:
+  sty FIFO_Tail
+
+  cli
+  // lda _timerStatus
+  // eor #$80
+  // sta _timerStatus
+end;
+
+{
+procedure FIFO_ReadByte; // Inline;
+beginzdarza się, że człowiek
+  if (FIFO_Tail<>FIFO_Head) then
+  begin
+    FIFO_Byte:=FIFO_Buf[FIFO_Tail];
+    Inc(FIFO_Tail);
+  end;
 end;
 
 procedure FIFO_Send(var data; len:byte);
@@ -89,38 +123,7 @@ begin
   end;
 end;
 
-procedure FIFO_Flush;{ Assembler;
-asm
-  sei
-  // lda _timerStatus
-  // eor #$80
-  // sta _timerStatus
-
-  ldy FIFO_Tail
-flushLoop:
-  cpy FIFO_Head
-  beq endFlush
-
-waitOnMC:
-  lda MC6850.MC6850_CNTRReg
-  and #MC6850.TDRE
-  bne waitOnMc
-
-  lda FIFO_ADDR,y
-  sta MC6850.MC6850_BUFFER
-
-  iny
-  jmp flushLoop
-
-endFlush:
-  sty FIFO_Tail
-
-  cli
-  // lda _timerStatus
-  // eor #$80
-  // sta _timerStatus
-end;}
-
+// old FIFO_FLUSH
 begin
   _timerStatus:=_timerStatus xor $80;
   While FIFO_Tail<>FIFO_Head do
@@ -133,6 +136,6 @@ begin
   end;
   _timerStatus:=_timerStatus xor $80;
 end;
-
+}
 
 end.

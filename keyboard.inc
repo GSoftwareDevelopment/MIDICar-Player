@@ -10,7 +10,7 @@ begin
     k_m:
       begin
         playerStatus:=playerStatus xor ps_view;
-        fillchar(pointer(SCREEN_ADDR+80),800,0);
+        clearWorkArea;
         if playerStatus and ps_view<>0 then
           clearUVMeters;
       end;

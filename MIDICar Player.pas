@@ -11,13 +11,15 @@ Uses
 const
   CHARS_ADDR      = $3000;
   DLIST_ADDR      = $3400;
-  SCREEN_ADDR     = $3422;
-  SCREEN_TIME     = SCREEN_ADDR+23*40;
+  SCREEN_ADDR     = $3448;
+  SCREEN_WORK     = SCREEN_ADDR+19*40;
+  SCREEN_TIME     = SCREEN_WORK+17*40;
   SCREEN_STATUS   = SCREEN_TIME+20;
-  UVMETER_ADDR    = $3880;
+  SCREEN_FOOT     = SCREEN_STATUS+40;
+  UVMETER_ADDR    = $2BC0;
 
-  START_INFO_ADDR = $3C00;
-  TRACK_DATA_ADDR = $3E00;
+  START_INFO_ADDR = $2C00;
+  TRACK_DATA_ADDR = $2E00;
   MIDI_DATA_ADDR  = $4000;
   FREE_MEM        = (($8000-$4000)+($d000-$a800)+($ff00-$e000)) div 1024;
 
@@ -63,11 +65,12 @@ begin
     loadSong;
   end;
 
+  setNMI;
+
   clearStatus;
   clearUVMeters;
 
 // Player loop
-  puttextinvert:=128;
   Repeat
     processMIDI;
     if not isStopped and (playingTracks=0) then
@@ -89,8 +92,7 @@ begin
   until false;
 
 // End player loop
+  unsetNMI;
 
-  statusStopped;
-  NMIEN:=$00; NMIVEC:=oldNMIVec; NMIEN:=$40;
   exit2DOS;
 end.

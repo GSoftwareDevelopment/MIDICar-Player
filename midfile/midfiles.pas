@@ -58,6 +58,7 @@ procedure ProcessMIDI;
 
 implementation
 Uses
+  {$IFDEF USE_CIO}CIO,{$ENDIF}
   {$IFDEF USE_FIFO}MIDI_FIFO,{$ENDIF}
   MC6850;
 

@@ -3,12 +3,12 @@ Unit MC6850;
 Interface
 
 const
-    MC6850_BASE = $D500;
+//     MC6850_BASE = $D5E0;
 
-// adresses of VIA6522 registers
-    ADDR_MC6850_CNTRREG  = MC6850_BASE + 0;    // Control Register (write access)
-    ADDR_MC6850_BUFFER   = MC6850_BASE + 1;    // Receive/Send Buffer
-    ADDR_MC6850_STATREG  = MC6850_BASE + 0;    // Status Register (read access)
+// // adresses of VIA6522 registers
+//     ADDR_MC6850_CNTRREG  = MC6850_BASE + 0;    // Control Register (write access)
+//     ADDR_MC6850_BUFFER   = MC6850_BASE + 1;    // Receive/Send Buffer
+//     ADDR_MC6850_STATREG  = MC6850_BASE + 0;    // Status Register (read access)
 
 //MC6850_CNTRREG Write Access
     CR0 = 1       ;   // Counter Divide Select Bit0    00 = f/1      01 = f/16
@@ -52,46 +52,31 @@ const
 
 var
 // VIA6522 registers
-    MC6850_CNTRREG  : byte absolute ADDR_MC6850_CNTRREG;
-    MC6850_BUFFER   : byte absolute ADDR_MC6850_BUFFER;
-    MC6850_STATREG  : byte absolute ADDR_MC6850_CNTRREG;
+    // MC6850_CNTRREG  : byte absolute ADDR_MC6850_CNTRREG;
+    // MC6850_BUFFER   : byte absolute ADDR_MC6850_BUFFER;
+    // MC6850_STATREG  : byte absolute ADDR_MC6850_CNTRREG;
     MC_Byte         : byte absolute $ff;
 
-procedure MC6850_Reset;
-procedure MC6850_Init(setup:byte);
-function  MC6850_Receive:byte;
-procedure MC6850_Send(data:byte);
-procedure MC6850_Send2; inline;
+procedure MC6850_Init(setup:byte); assembler; Keep;
+procedure MC6850_Send2; assembler; Keep;
 
 implementation
 
-procedure MC6850_Reset;
-begin
-    MC6850_CNTRReg:=MasterReset;
+procedure MC6850_Init(setup:byte); assembler;
+asm
+    lda setup
+    sta MCBaseState:$d500
 end;
 
-procedure MC6850_Init(setup:byte);
-begin
-    MC6850_CNTRReg:=setup;
+procedure MC6850_Send2; assembler;
+asm
+wait:
+    lda MCBaseState:$d500
+    and #TDRE
+    bne wait
+
+    lda MC_Byte
+    sta MCBaseBuf:$d500
 end;
 
-function MC6850_Receive:byte;
-begin
-    repeat until (MC6850_CNTRReg and RDRF)<>0;
-    result:=MC6850_BUFFER;
-end;
-
-procedure MC6850_Send(data:byte);
-begin
-{$IFDEF DEBUG} poke($d01a,4); {$ENDIF}
-    repeat until (MC6850_CNTRReg and TDRE)<>0;
-    MC6850_BUFFER:=data;
-{$IFDEF DEBUG} poke($d01a,15); {$ENDIF}
-end;
-
-procedure MC6850_Send2; inline;
-begin
-    repeat until (MC6850_CNTRReg and TDRE)<>0;
-    MC6850_BUFFER:=MC_Byte;
-end;
 end.

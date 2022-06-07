@@ -1,4 +1,5 @@
 CHARS_ADDR rcdata 'resources/font_s.fnt';
 DLIST_ADDR rcasm 'resources/dlist.asm';
-SCREEN_ADDR rcdata 'resources/header.obj';
+SCREEN_ADDR rcdata 'resources/header-gr8.obj';
+SCREEN_FOOT rcdata 'resources/footer-gr8-2.obj';
 UVMETER_ADDR rcdata 'resources/uvmeter.obj';

@@ -1,0 +1,30 @@
+  lda s+1
+  sta $d7
+  lda s
+  sta $d6
+
+  ldy #0
+  lda ($d6),y
+  beq exitPutText
+
+  pha
+  tay
+
+  inc $d6
+  bne putText
+  inc $d7
+
+putText:
+  lda ($d6),y   // get string character
+  sta ($d4),y   // put on screen
+  dey
+  bpl putText
+
+  pla
+  clc
+  adc $d4
+  sta $d4
+  bcc exitPutText
+  inc $d5
+
+exitPutText:

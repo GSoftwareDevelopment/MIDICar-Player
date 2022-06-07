@@ -1,9 +1,12 @@
 function LoadMID(fn:PString):shortint;
 const
   LOADBUF_SIZE=16*1024;
+  CIO_CHN = 1;
 
 var
+{$IFNDEF USE_CIO}
   f:File;
+{$ENDIF}
   trackCount:byte;
   chunkTag:TTag;
   v,top,endAdr,loadSize:Word;
@@ -13,19 +16,31 @@ var
 
 {$i bigendian.inc}
 
-  procedure bget(dest:pointer);
+  procedure _bget(dest:pointer);
   begin
+{$IFNDEF USE_CIO}
     BlockRead(f,dest,loadSize,v);
+{$ELSE}
+    BGet(CIO_CHN,dest,loadSize);
+{$ENDIF}
   end;
 
 begin
-{$I-}
+// {$I-}
+{$IFNDEF USE_CIO}
   Assign(f,fn);
   Reset(f,1);
+{$ELSE}
+  Opn(CIO_CHN,4,0,fn);
+{$ENDIF}
   if IOResult>127 then
   begin
     result:=IOResult;
-    Close(f);
+{$IFNDEF USE_CIO}
+  Close(f);
+{$ELSE}
+  Cls(1);
+{$ENDIF}
     exit;
   end;
 
@@ -33,10 +48,14 @@ begin
   trackCount:=0;
   totalTracks:=255;
 
-  while (IOResult=1) and (not EOF(F)) and (trackCount<totalTracks) do
+  while (IOResult=1) {and (not EOF(F))} and (trackCount<totalTracks) do
   begin
+{$IFNDEF USE_CIO}
     BlockRead(f,chunkTag,4,v);
     if (v<>4) then break;
+{$ELSE}
+    BGet(CIO_CHN,@chunkTag,4);
+{$ENDIF}
     Len:=ReadLongBI;
     if chunkTag=TAG_MTHD then
     begin
@@ -74,7 +93,12 @@ begin
       while Len>0 do
       begin
         loadProcess(trackCount);
-        memBoundCheck; if IOResult<>1 then exit(ERR_NOT_ENOUGHT_MEMORY);
+        memBoundCheck;
+        if IOResult<>1 then
+        begin
+          IOResult:=ERR_NOT_ENOUGHT_MEMORY;
+          break;
+        end;
 
         if hi(_adr)>=$d8 then loadSize:=$ff00
         else if hi(_adr)>=$c0 then loadSize:=$d000
@@ -86,21 +110,29 @@ begin
 
         if hi(_adr)>=$c0 then
         begin
-          bget(RBuf);
-          move(RBuf,_ptr,v);
+          _bget(@RBuf);
+          move(RBuf,_ptr,loadSize);
         end
         else
-          bget(_ptr);
+          _bget(_ptr);
 
+{$IFNDEF USE_CIO}
         if v<>loadSize then exit(IOResult);
+{$ELSE}
+        if IOResult<>1 then break;
+{$ENDIF}
 
-        inc(_adr,v);
-        Dec(Len,v);
+        inc(_adr,loadSize);
+        Dec(Len,loadSize);
       end;
 
       inc(trkData,1);
     end;
   end;
+{$IFNDEF USE_CIO}
   Close(f);
-  result:=0;
+{$ELSE}
+  Cls(1);
+{$ENDIF}
+  if IOResult<>1 then result:=0;
 end;

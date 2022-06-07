@@ -1,6 +1,10 @@
 function ReadWordBI:Word;
 begin
+{$IFNDEF USE_CIO}
   blockRead(f,result{BI},2);
+{$ELSE}
+  BGet(CIO_CHN,@result,2);
+{$ENDIF}
   asm
     ldx result
     ldy result+1
@@ -11,7 +15,11 @@ end;
 
 function ReadLongBI:longint;
 begin
+{$IFNDEF USE_CIO}
   blockRead(f,result{BI},4);
+{$ELSE}
+  BGet(CIO_CHN,@result,4);
+{$ENDIF}
   asm
     ldx result
     ldy result+3

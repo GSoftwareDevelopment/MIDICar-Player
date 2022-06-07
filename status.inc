@@ -1,9 +1,9 @@
 procedure statusPlaying;
 begin
-  scradr:=SCREEN_STATUS;
   if totalTracks>0 then
   begin
-    PutText(' Playing ');
+    scradr:=SCREEN_TIME+1; putINTText(#$3b+#$00+#$00);
+    scradr:=SCREEN_STATUS; PutINTText(' Playing '*~);
     if isStopped then
     begin
       initTimer;
@@ -14,27 +14,27 @@ begin
   end
   else
   begin
-    PutText(' No song ');
+    scradr:=SCREEN_TIME+1; putINTText(#$00+#$00+#$00);
+    scradr:=SCREEN_STATUS; PutINTText(' No song '*~);
   end;
 end;
 
 procedure statusPause;
 begin
   if isStopped then exit;
-  scradr:=SCREEN_STATUS;
-  PutText('  Pause  ');
+  scradr:=SCREEN_TIME+1; putINTText(#$00+#$3c+#$00);
+  scradr:=SCREEN_STATUS; PutINTText('  Pause  '*~);
   _timerStatus:=_timerStatus or f_counter;
 end;
 
 procedure statusStopped;
 begin
+  if totalTracks=0 then exit;
+  if isStopped then exit;
   isStopped:=true;
-  scradr:=SCREEN_STATUS;
-  PutText(' Stopped ');
-  _timerStatus:=_timerStatus or f_counter;
-  _totalTicks:=0; _subCnt:=1;
-  setIntVec(iTim1,oldTimerVec);
-  Reset_MIDI;
+  scradr:=SCREEN_TIME+1; putINTText(#$00+#$00+#$3d);
+  scradr:=SCREEN_STATUS; PutINTText(' Stopped '*~);
+  StopMIDI;
   move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
   chn:=0;
   clearUVMeters;
@@ -42,6 +42,5 @@ end;
 
 procedure statusLoading;
 begin
-  scradr:=SCREEN_STATUS+2;
-  PutText('Loading');
+  scradr:=SCREEN_STATUS+2; PutINTText(' Loading '*~);
 end;

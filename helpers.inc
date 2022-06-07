@@ -28,6 +28,22 @@ var
   CHBASE:Byte absolute 756;
   SOUNDR:Byte absolute $41;
 
+procedure MyNMI; Interrupt; Assembler;
+asm
+  icl 'asms/nmi.a65'
+end;
+
+procedure setNMI;
+begin
+  oldNMIVec:=NMIVEC;
+  NMIEN:=$00; NMIVEC:=@MyNMI; NMIEN:=$40;
+end;
+
+procedure unsetNMI;
+begin
+  NMIEN:=$00; NMIVEC:=oldNMIVec; NMIEN:=$40;
+end;
+
 procedure setColors;
 var p:pointer;
 
@@ -37,7 +53,12 @@ begin
   move(p,pointer(708),5);
 end;
 
-procedure PutText(s:PString);
+procedure putINTText(s:PString); Assembler;
+asm
+  icl 'asms/putinttext.a65'
+end;
+
+procedure PutASCText(s:PString);
 var
   l,c:byte;
 
@@ -71,30 +92,52 @@ asm
 end;
 
 procedure reset_MIDI;
+var
+  i:byte;
+
 begin
-  FIFO_Send(GM_Reset,6); FIFO_Flush;
+  i:=0;
+  while i<6 do
+  begin
+    FIFO_Byte:=GM_Reset[i]; FIFO_WriteByte;
+    inc(i);
+  end;
+  FIFO_Flush;
+end;
+
+procedure stopMIDI;
+begin
+  _timerStatus:=_timerStatus or f_counter;
+  _totalTicks:=0; _subCnt:=1;
+  setIntVec(iTim1,oldTimerVec);
+  Reset_MIDI;
 end;
 
 procedure clearWorkArea;
 begin
-  fillchar(pointer(SCREEN_ADDR+80),SCREEN_TIME-SCREEN_ADDR-80,0);
+  fillchar(pointer(SCREEN_WORK),SCREEN_TIME-SCREEN_WORK-40,0);
 end;
 
 procedure isLooped;
 begin
-  scradr:=SCREEN_TIME;
+  scradr:=SCREEN_TIME+4;
   if (playerStatus and ps_loop)<>0 then
-    putText('LOOP')
+    putINTText(#$3e+#$3f)
   else
-    putText('    ');
+    putINTText(#$00+#$00);
 end;
 
 procedure clearStatus;
+var
+  l:byte;
+
 begin
-  fillchar(pointer(SCREEN_STATUS-20),60,0);
+  fillchar(pointer(SCREEN_TIME),60,0);
   isLooped;
-  if length(fn)>16 then fn[0]:=#16;
-  scradr:=SCREEN_STATUS+40-byte(fn[0]); putText(fn);
+  l:=length(fn);
+  if l=0 then exit;
+  if l>16 then fn[0]:=#16;
+  scradr:=SCREEN_STATUS+(39-l); putASCText(fn);
 end;
 
 procedure clearUVMeters;
@@ -104,15 +147,15 @@ begin
     chn:=0;
     repeat
       scradr:=channelScrAdr[chn];
-      fillChar(pointer(scradr),4,$40);
+      fillChar(pointer(scradr),4,$41);
       inc(chn);
     until chn=16;
   end;
 end;
 
-
 procedure exit2DOS;
 begin
+  stopMIDI;
   Cls(0); Opn(0,12,0,'E:'); SOUNDR:=1;
   halt;
 end;

@@ -1,0 +1,86 @@
+    org $8000
+
+BOOT?   = $09
+DOSVEC  = $0A
+MCBASE  = $D8
+
+ICCHID  = $0340
+ICCMD   = $0342
+ICBUFA  = $0344
+ICBUFL  = $0348
+CIOV    = $E456
+
+START:
+    jsr detect_sdx
+    cmp #$ff
+    beq no_sdx
+    lda #<SDX_FOUND
+    ldy #>SDX_FOUND
+    jsr PRINT
+    jmp exit2DOS
+
+no_sdx:
+    jsr detect_axlon
+    cpy #$00
+    beq no_axlon
+    lda #<AXLON_FOUND
+    ldy #>AXLON_FOUND
+    jsr PRINT
+    jmp exit2DOS
+
+no_axlon:
+    jsr detect_MC
+    bcs MCNotFound
+
+    sty MCBASE
+    stx MCBASE+1
+    rts
+
+    ; lda #<MIDICAR_EXIST
+    ; ldy #>MIDICAR_EXIST
+    ; jmp PRINT
+
+MCNotFound:
+    lda #<MIDICAR_NOT_FOUND
+    ldy #>MIDICAR_NOT_FOUND
+    jsr PRINT
+
+exit2DOS:
+    jmp (DOSVEC)
+
+;
+
+    icl 'asm/detect_mc.a65'
+    icl 'asm/detect_axlon.a65'
+    icl 'asm/detect_sdx.a65'
+
+PRINT:
+    ldx #$00
+    sta ICBUFA,X
+    tya
+    sta ICBUFA+1,X
+    lda #$ff
+    sta ICBUFL,X
+    lda #$09
+    sta ICCMD,X
+    lda ICCHID,x
+    bmi ExitPRINT
+    jmp CIOV
+ExitPRINT:
+    rts
+
+//
+//
+
+; Strings
+
+MIDICAR_EXIST:
+    dta 'MIDICar exist :)',$9B
+MIDICAR_NOT_FOUND:
+    dta 'MIDICar not found :(',$9B
+AXLON_FOUND:
+    dta 'AXLON extention is not supported :(',$9B
+SDX_FOUND:
+    dta 'SDX user must wait :P',$9B
+
+    ini START
