@@ -1,0 +1,45 @@
+hlpptr = $88
+
+  lda #0
+  sta result
+  sta result+1
+  sta result+2
+  sta result+3
+
+  ldy #0
+  lda (hlpptr),y
+  sta fnlen
+  beq endGetFileExt
+  tay
+
+dotSearch:
+  lda (hlpptr),y
+  cmp #'.'
+  beq endDotSearch
+  dey
+  bne dotSearch
+  beq endGetFileExt
+
+endDotSearch:
+  sty extst
+  lda fnlen
+  sec
+  sbc extst
+  cmp #4
+  bcs endGetFileExt
+
+  iny
+  tax
+
+copyExt2Result:
+  lda (hlpptr),y
+  sta result,x
+  iny
+  dex
+  bne copyExt2Result
+
+endGetFileExt:
+  rts
+
+fnlen .byte 0
+extst .byte 0

@@ -8,66 +8,62 @@ Uses
   CIO;
 {$I-}
 
-const
-  CHARS_ADDR      = $3000;
-  DLIST_ADDR      = $3400;
-  SCREEN_ADDR     = $3448;
-  SCREEN_WORK     = SCREEN_ADDR+19*40;
-  SCREEN_TIME     = SCREEN_WORK+17*40;
-  SCREEN_STATUS   = SCREEN_TIME+20;
-  SCREEN_FOOT     = SCREEN_STATUS+40;
-  UVMETER_ADDR    = $2BC0;
-
-  START_INFO_ADDR = $2C00;
-  TRACK_DATA_ADDR = $2E00;
-  MIDI_DATA_ADDR  = $4000;
-  FREE_MEM        = (($8000-$4000)+($d000-$a800)+($ff00-$e000)) div 1024;
-
-  f_clear = %00100000;
-
-  ps_colorSet = %001;
-  ps_view     = %010;
-  ps_loop     = %100;
+{$i type.inc}
+{$i const.inc}
 
 {$r player.rc}
 
 var
   channelScrAdr:array[0..15] of word;
-  scradr:Word absolute $d4;
+  playlistScrAdr:array[0..15] of word;
+  playerStatus:Byte absolute $4A;
+  totalXMS:Byte absolute $4B;
+  scradr:Word absolute $D4;
+  MCBaseAddr:Word absolute $D8;
+  pls:^Byte absolute $DA;
   _tm:Byte absolute $14;
   otm:Byte;
   chn:Byte;
-  TPtr:^Byte;
-  TPS:Word;
-  sec:Byte;
-  TrkStat:Byte;
-  v,i,c:Byte;
+  YFile,shFile,curFile,totalFiles:Byte;
+  v:shortint;
+  // i,c:Byte;
+  firstTime:Boolean = True;
   isStopped:Boolean = False;
-  fn:PString;
-  oldNMIVec:Pointer;
-  playerStatus:Byte absolute $4a;
-  totalXMS:Byte;
+  curdev:TDevString;
+  fn:TFilename absolute $500;
+  outstr:TFilename absolute $580;
+  last_bank:Byte;
+  last_adr:Word;
 
+{$i myNMI.inc}
 {$i helpers.inc}
 {$i status.inc}
 {$i init.inc}
 {$i load.inc}
+{$i inputline.inc}
+{$i playlist_asm.inc}
 {$i fileselect.inc}
+{$i playlist.inc}
 
 begin
   init;
 
-  if paramCount>0 then
+  // if paramCount>0 then
+  // begin
+  //   fn:=paramStr(1);
+  //   preparePlaylist;
+  // end
+  // else
   begin
-    fn:=ParamStr(1);
-    _bank:=totalXMS;
-    _adr:=$4000;
-    loadSong;
+    joinStrings(curDev,'*.*');
+    gotoNEntry(0);
+    _adr:=$ffff; _bank:=$fe; addToPlaylist(outStr);
+    choicePlaylistFile;
+    // fileSelect(outStr);
   end;
 
   setNMI;
 
-  clearStatus;
   clearUVMeters;
 
 // Player loop
@@ -83,9 +79,9 @@ begin
     if _tm<>otm then
     begin
       otm:=_tm;
-      scradr:=screen_time+6; putHex(@_totalTicks,8);
+      scradr:=screen_time+11; putHex(@_totalTicks,8);
 
-      {$i uvmeters.inc}
+      asm  icl 'asms/uvmeters.a65' end;
     end;
 
     {$i keyboard.inc}

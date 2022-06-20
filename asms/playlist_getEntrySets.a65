@@ -1,0 +1,9 @@
+getEntrySets:
+PTRREG = $88
+
+    ldy #2
+loop:
+    lda (pls),y
+    sta (PTRREG),y
+    dey
+    bpl loop

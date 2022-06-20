@@ -1,0 +1,54 @@
+    ldy #0
+loop:
+    lda scan2asc,y
+    beq skip
+    cmp keyscan
+    beq found
+skip:
+    iny
+    cpy #64
+    bne loop
+
+notFound:
+    lda #0
+    sta Result
+    rts
+
+found:
+    tya
+    add #32
+    sta Result
+
+    rts
+
+scan2asc:        // from 32 to 95
+    .byte 33   //   space
+    .byte 95   // ! exclamation mark
+    .byte 0  // " quote mark
+    .byte 90   // # hash
+    .byte 0  // $ dolar
+    .byte 93   // % percent
+    .byte 0  // & and
+    .byte 0  // '
+    .byte 0  // (
+    .byte 0  // )
+    .byte 7    // * star
+    .byte 0  // + plus
+    .byte 0  //  comma
+    .byte 14   // - hypen
+    .byte 34   // . dot
+    .byte 38   // / slash
+    .byte 50,31,30,26,24,29,27,51,53,48 // 0-9 digits
+    .byte 66   // :colon
+    .byte 0  // ; semicolon
+    .byte 54   // < less sign
+    .byte 0  // = equal
+    .byte 55   // > more sign
+    .byte 102  // ? question mark
+    .byte 0  // @ at
+    .byte 63,21,18,58,42,56,61,57,13,1,5,0,37,35,8,10,47,40,62,45,11,16,46,22,43,23 // A-Z letters
+    .byte 0  // [
+    .byte 70   // \ backslash
+    .byte 0  // ]
+    .byte 0  // ^
+    .byte 78    // _ underscore mark

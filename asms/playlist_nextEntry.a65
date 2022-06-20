@@ -1,0 +1,26 @@
+nextEntry:
+  ldy #3
+loop:
+  lda (pls),y
+  cmp #$9B
+  beq endEntry
+  iny
+  bne loop
+
+endEntry:
+  cpy #3
+  bne moveEntryPtr
+
+  lda #0
+  sta result
+  rts
+
+moveEntryPtr:
+  iny
+  tya
+  add pls
+  sta pls
+  scc:inc pls+1
+
+  lda #1
+  sta result

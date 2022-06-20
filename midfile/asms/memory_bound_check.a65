@@ -1,0 +1,65 @@
+  lda _adr            // get LSB of address
+  beq checkMemType    // zero means, we crossing the page. Check block bounds
+  rts
+
+checkMemType
+  lda _adr+1          // get MSB of address
+  ldy _bank           // get current bank index
+  bne checkXMSBound   // zero, means we checking bounds in base memory
+                      // otherwise, we checking bound of extended memory
+
+// base memory bounds check
+// 1nd, $d800..$ff00
+check1Bound:
+  cmp #$ff
+  bne check2Bound
+
+  lda #$a8
+  sta _adr+1
+  rts
+
+// 2st, $a800..$cfff
+check2bound:
+  cmp #$d0
+  bne check3Bound
+
+  lda #$40
+  sta _adr+1
+  rts
+
+// 3nd, $4000..$8000
+check3Bound
+  cmp #$80
+  beq outOfMem
+  rts
+
+// extended memory bound check
+
+checkXMSBound         // extender memory window $4000..$7fff
+  cmp #$80            // the bank's memory area ends at $7fff
+  beq switchXMSBank   // if MSB addres is out of this address, we need switch bank
+
+  rts
+
+switchXMSBank:
+  dey             // decrement current bank index
+  beq switch2Conv // if zero, meand we back to conventional memory
+
+  lda $100,y      // get bank set
+  sty _bank       // store current bank index
+  sta PORTB       // set PORTB (switch bank)
+  lda #$40        // set MSB address to the begining of bank
+  sta _adr+1
+  rts
+
+switch2Conv:
+  sty _bank
+  lda #$fe        // switch to conventional memory and turn off ROM
+  sta PORTB
+  lda #$a8        // set MSB address
+  sta _adr+1
+  rts
+
+outOfMem:
+  lda #ERR_NOT_ENOUGHT_MEMORY
+  sta SYSTEM.IOResult

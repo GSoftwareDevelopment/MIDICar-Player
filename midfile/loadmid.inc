@@ -18,29 +18,32 @@ var
 
   procedure _bget(dest:pointer);
   begin
-{$IFNDEF USE_CIO}
-    BlockRead(f,dest,loadSize,v);
-{$ELSE}
     BGet(CIO_CHN,dest,loadSize);
-{$ENDIF}
+  end;
+
+  procedure checkLoadSize;
+  begin
+    loadSize:=0;
+    repeat
+      memBoundCheck;
+      if IOResult<>1 then exit;
+
+      if hi(_adr)>=$d8 then loadSize:=$ff00
+      else if hi(_adr)>=$c0 then loadSize:=$d000
+      else if hi(_adr)>=$a8 then loadSize:=$c000
+      else if hi(_adr)>=$40 then loadSize:=$8000;
+      dec(loadSize,_adr);
+      // result:=loadSize=0;
+      if loadSize>len then loadSize:=len;
+      until loadSize<>0;
   end;
 
 begin
-// {$I-}
-{$IFNDEF USE_CIO}
-  Assign(f,fn);
-  Reset(f,1);
-{$ELSE}
   Opn(CIO_CHN,4,0,fn);
-{$ENDIF}
   if IOResult>127 then
   begin
     result:=IOResult;
-{$IFNDEF USE_CIO}
-  Close(f);
-{$ELSE}
-  Cls(1);
-{$ENDIF}
+    Cls(1);
     exit;
   end;
 
@@ -50,17 +53,16 @@ begin
 
   while (IOResult=1) {and (not EOF(F))} and (trackCount<totalTracks) do
   begin
-{$IFNDEF USE_CIO}
-    BlockRead(f,chunkTag,4,v);
-    if (v<>4) then break;
-{$ELSE}
     BGet(CIO_CHN,@chunkTag,4);
-{$ENDIF}
     Len:=ReadLongBI;
     if chunkTag=TAG_MTHD then
     begin
       format:=readWordBI;
-      if (format<>MID_0) and (format<>MID_1) then exit(ERR_UNSUPPORTED_FORMAT);
+      if (format<>MID_0) and (format<>MID_1) then
+      begin
+        IOResult:=ERR_UNSUPPORTED_FORMAT;
+        break;
+      end;
       totalTracks:=readWordBI;
       v:=readWordBI;
       if (v and $8000)=0 then
@@ -93,20 +95,8 @@ begin
       while Len>0 do
       begin
         loadProcess(trackCount);
-        memBoundCheck;
-        if IOResult<>1 then
-        begin
-          IOResult:=ERR_NOT_ENOUGHT_MEMORY;
-          break;
-        end;
-
-        if hi(_adr)>=$d8 then loadSize:=$ff00
-        else if hi(_adr)>=$c0 then loadSize:=$d000
-        else if hi(_adr)>=$a8 then loadSize:=$c000
-        else if hi(_adr)>=$40 then loadSize:=$8000;
-        dec(loadSize,_adr);
-        if loadSize=0 then continue;
-        if loadSize>len then loadSize:=len;
+        checkLoadSize;
+        if IOResult<>1 then break;
 
         if hi(_adr)>=$c0 then
         begin
@@ -116,23 +106,15 @@ begin
         else
           _bget(_ptr);
 
-{$IFNDEF USE_CIO}
-        if v<>loadSize then exit(IOResult);
-{$ELSE}
         if IOResult<>1 then break;
-{$ENDIF}
 
         inc(_adr,loadSize);
         Dec(Len,loadSize);
       end;
-
       inc(trkData,1);
-    end;
+    end else
+      IOResult:=ERR_NOT_A_MIDI_FILE;
   end;
-{$IFNDEF USE_CIO}
-  Close(f);
-{$ELSE}
+  result:=IOResult;
   Cls(1);
-{$ENDIF}
-  if IOResult<>1 then result:=0;
 end;

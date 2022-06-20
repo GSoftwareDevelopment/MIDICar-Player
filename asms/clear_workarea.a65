@@ -1,0 +1,12 @@
+  ldy #0
+  lda #0
+loop1:
+  sta SCREEN_WORK,y
+  sta SCREEN_WORK+$100,y
+  iny
+  bne loop1
+  ldy #$A8
+loop2:
+  sta SCREEN_WORK+$1FF,y
+  dey
+  bne loop2

@@ -1,30 +1,29 @@
+  regptr = $88
+
   lda s+1
-  sta $d7
+  sta regptr+1
   lda s
-  sta $d6
+  sta regptr
 
   ldy #0
-  lda ($d6),y
+  lda (regptr),y
   beq exitPutText
 
-  pha
-  tay
-
-  inc $d6
-  bne putText
-  inc $d7
+  pha:tay
+  dey
+  inc regptr
+  sne:inc regptr+1
 
 putText:
-  lda ($d6),y   // get string character
-  sta ($d4),y   // put on screen
+  lda (regptr),y   // get string character
+  sta (scradr),y   // put on screen
   dey
   bpl putText
 
   pla
   clc
-  adc $d4
-  sta $d4
-  bcc exitPutText
-  inc $d5
+  adc scradr
+  sta scradr
+  scc:inc scradr+1
 
 exitPutText:

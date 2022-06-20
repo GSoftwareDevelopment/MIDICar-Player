@@ -1,0 +1,46 @@
+hlpptr = $88;
+
+getEntry:
+  txa:pha
+
+  lda pls
+  sta entryptr
+  lda pls+1
+  sta entryptr+1
+
+  lda #0
+  sta result
+
+  ldx #3
+  ldy #1
+loop:
+  lda entryptr:2000,x
+  cmp #$9B
+  beq endEntry
+  sta (hlpptr),y
+  inx
+  iny
+  bne loop
+
+endEntry:
+  lda #$9B
+  sta (hlpptr),y
+
+  cpy #1
+  bne store
+  pla:tax
+  rts
+
+store:
+  txa:pha
+
+  lda #1
+  sta result
+
+  pla:tax
+  sec
+  sbc #3            // decease position by 3
+  ldy #0
+  sta (hlpptr),y    // store as string length
+
+  pla:tax

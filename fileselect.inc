@@ -1,18 +1,37 @@
-// procedure fileSelect;
-// var
-//   f:TSearchRec;
-//   fileCount:Byte;
+function fileSelect(path:PString):Byte;
+const
+  CIO_CHN = 2;
 
-// begin
-//   clearWorkarea;
-//   FindFirst('D:*.MID',faAnyFile,f);
-//   if IOResult=1 then
-//   begin
-//     while (IOResult=1) and (fileCount<32) do
-//     begin
-//     //   putText()
-//       FindNext(f);
-//     end;
-//   end;
-//   FindClose(f);
-// end;
+var
+  dentry:string[20];
+  ext:DWord;
+
+begin
+  scradr:=SCREEN_WORK; HLine;
+  scradr:=SCREEN_WORK+28; putINTText(#$4e+'Directory'~*+#$ce);
+
+  clearPlaylist;
+  _adr:=$ffff; _bank:=$fe; addToPlaylist(path);
+  statusReadDirectory;
+  
+  opn(CIO_CHN,6,0,path);
+  while IOResult=1 do
+  begin
+    getLn(CIO_CHN,dentry);
+    if dentry[1]>='0' then break;               // end of directory (first digit of free sectors)
+    reduceFileName(dentry,fn);
+    ext:=getFileExt(fn);
+    if dentry[2]=':' then continue;             // directory (SpartaDOS X >=4.47; MyDOS 4.53)
+    if dentry[18]='>' then continue;            // directory (DOS XE 1.0)
+    if ext=FE_DIR then continue;             // directory (SpartaDOS 3.2; SpartaDOS X <4.47; BW-DOS 1.30)
+    if ext=FE_PLS then
+      _bank:=$fd                                // playlist file
+    else
+      _bank:=$ff;                               // MIDI and other file
+
+    addToPlaylist(fn);
+  end;
+  result:=IOResult;
+  cls(CIO_CHN);
+end;
+

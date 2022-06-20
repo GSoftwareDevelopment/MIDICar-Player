@@ -13,46 +13,50 @@ Source: loader.a65
     11 = E456			CIOV    = $E456
     12
     13 				START:
-    14 FFFF> 8000-8184> 20 CB +     jsr detect_sdx
+    14 FFFF> 8000-821B> 20 D3 +     jsr detect_sdx
     15 8003 C9 FF		    cmp #$ff
     16 8005 F0 0A		    beq no_sdx
-    17 8007 A9 6F		    lda #<SDX_FOUND
-    18 8009 A0 81		    ldy #>SDX_FOUND
-    19 800B 20 09 81		    jsr PRINT
-    20 800E 4C 33 80		    jmp exit2DOS
+    17 8007 A9 06		    lda #<SDX_FOUND
+    18 8009 A0 82		    ldy #>SDX_FOUND
+    19 800B 20 A0 81		    jsr PRINT
+    20 800E 4C 3B 80		    jmp exit2DOS
     21
     22 8011			no_sdx:
-    23 8011 20 97 80		    jsr detect_axlon
+    23 8011 20 9F 80		    jsr detect_axlon
     24 8014 C0 00		    cpy #$00
     25 8016 F0 0A		    beq no_axlon
-    26 8018 A9 4B		    lda #<AXLON_FOUND
+    26 8018 A9 E2		    lda #<AXLON_FOUND
     27 801A A0 81		    ldy #>AXLON_FOUND
-    28 801C 20 09 81		    jsr PRINT
-    29 801F 4C 33 80		    jmp exit2DOS
+    28 801C 20 A0 81		    jsr PRINT
+    29 801F 4C 3B 80		    jmp exit2DOS
     30
     31 8022			no_axlon:
-    32 8022 20 36 80		    jsr detect_MC
-    33 8025 B0 05		    bcs MCNotFound
-    34
-    35 8027 84 D8		    sty MCBASE
-    36 8029 86 D9		    stx MCBASE+1
-    37 802B 60			    rts
+    32 8022 20 11 81		    jsr detect_xms
+    33 8025 A9 FE		    lda #$fe
+    34 8027 8D 00 01		    sta $0100
+    35
+    36 802A 20 3E 80		    jsr detect_MC
+    37 802D B0 05		    bcs MCNotFound
     38
-    39 				    ; lda #<MIDICAR_EXIST
-    40 				    ; ldy #>MIDICAR_EXIST
-    41 				    ; jmp PRINT
+    39 802F 84 D8		    sty MCBASE
+    40 8031 86 D9		    stx MCBASE+1
+    41 8033 60			    rts
     42
-    43 802C			MCNotFound:
-    44 802C A9 36		    lda #<MIDICAR_NOT_FOUND
-    45 802E A0 81		    ldy #>MIDICAR_NOT_FOUND
-    46 8030 20 09 81		    jsr PRINT
-    47
-    48 8033			exit2DOS:
-    49 8033 6C 0A 00		    jmp (DOSVEC)
-    50
-    51 				;
-    52
-    53 8036			    icl 'asm/detect_mc.a65'
+    43 				    ; lda #<MIDICAR_EXIST
+    44 				    ; ldy #>MIDICAR_EXIST
+    45 				    ; jmp PRINT
+    46
+    47 8034			MCNotFound:
+    48 8034 A9 CD		    lda #<MIDICAR_NOT_FOUND
+    49 8036 A0 81		    ldy #>MIDICAR_NOT_FOUND
+    50 8038 20 A0 81		    jsr PRINT
+    51
+    52 803B			exit2DOS:
+    53 803B 6C 0A 00		    jmp (DOSVEC)
+    54
+    55 				;
+    56
+    57 803E			    icl 'asm/detect_mc.a65'
 Source: detect_mc.a65
      1
      2 = 0016			MC_SETUP = $16
@@ -62,116 +66,116 @@ Source: detect_mc.a65
      6 				; C - MC found
      7 				; A,Y - base of MC
      8
-     9 8036			detect_MC:
-    10 8036 A2 D5		    ldx #$d5
+     9 803E			detect_MC:
+    10 803E A2 D5		    ldx #$d5
     11
-    12 8038			MCBegin:
-    13 8038 A0 00		    ldy #$00
+    12 8040			MCBegin:
+    13 8040 A0 00		    ldy #$00
     14
-    15 803A			detectLoop:
-    16 803A 8E 3F 80		    stx *+5
-    17 803D B9 00 D5		    lda $d500,y
-    18 8040 F0 04		    beq test1
-    19 8042 C9 02		    cmp #$02
-    20 8044 D0 2C		    bne next
+    15 8042			detectLoop:
+    16 8042 8E 47 80		    stx *+5
+    17 8045 B9 00 D5		    lda $d500,y
+    18 8048 F0 04		    beq test1
+    19 804A C9 02		    cmp #$02
+    20 804C D0 2C		    bne next
     21
-    22 8046			test1:
-    23 8046 8D 52 80		    sta repval
-    24 8049 8E 50 80		    stx *+7
+    22 804E			test1:
+    23 804E 8D 5A 80		    sta repval
+    24 8051 8E 58 80		    stx *+7
     25
-    26 804C			loop:
-    27 804C C8			    iny
-    28 804D C8			    iny
-    29 804E B9 00 D5		    lda $d500,y
-    30 8051 C9 00		    cmp repval:#00
-    31 8053 D0 1D		    bne next
-    32 8055 98			    tya
-    33 8056 29 1F		    and #$1f
-    34 8058 C9 1E		    cmp #$1e
-    35 805A D0 F0		    bne loop
+    26 8054			loop:
+    27 8054 C8			    iny
+    28 8055 C8			    iny
+    29 8056 B9 00 D5		    lda $d500,y
+    30 8059 C9 00		    cmp repval:#00
+    31 805B D0 1D		    bne next
+    32 805D 98			    tya
+    33 805E 29 1F		    and #$1f
+    34 8060 C9 1E		    cmp #$1e
+    35 8062 D0 F0		    bne loop
     36
-    37 805C 98			    tya
-    38 805D 29 E0		    and #%11100000
-    39 805F A8			    tay
+    37 8064 98			    tya
+    38 8065 29 E0		    and #%11100000
+    39 8067 A8			    tay
     40
-    41 8060			test2:
-    42 8060 A9 16		    lda #MC_SETUP
-    43 8062 8E 67 80		    stx *+5
-    44 8065 99 00 D5		    sta $d500,y
+    41 8068			test2:
+    42 8068 A9 16		    lda #MC_SETUP
+    43 806A 8E 6F 80		    stx *+5
+    44 806D 99 00 D5		    sta $d500,y
     45
-    46 8068 8E 6D 80		    stx *+5
-    47 806B B9 00 D5		    lda $d500,y
-    48 806E C9 02		    cmp #$02
-    49 8070 F0 15		    beq found
+    46 8070 8E 75 80		    stx *+5
+    47 8073 B9 00 D5		    lda $d500,y
+    48 8076 C9 02		    cmp #$02
+    49 8078 F0 15		    beq found
     50
-    51 8072			next:
-    52 8072 98			    tya
-    53 8073 29 E0		    and #%11100000
-    54 8075 18			    clc
-    55 8076 69 20		    adc #$20
-    56 8078 B0 04		    bcs changeMSBBase
-    57 807A A8			    tay
-    58 807B 4C 3A 80		    jmp detectLoop
+    51 807A			next:
+    52 807A 98			    tya
+    53 807B 29 E0		    and #%11100000
+    54 807D 18			    clc
+    55 807E 69 20		    adc #$20
+    56 8080 B0 04		    bcs changeMSBBase
+    57 8082 A8			    tay
+    58 8083 4C 42 80		    jmp detectLoop
     59
-    60 807E			changeMSBBase:
-    61 807E E0 D1		    cpx #$d1
-    62 8080 F0 0F		    beq notFound
-    63 8082 A2 D1		    ldx #$d1
-    64 8084 4C 38 80		    jmp MCBegin
+    60 8086			changeMSBBase:
+    61 8086 E0 D1		    cpx #$d1
+    62 8088 F0 0F		    beq notFound
+    63 808A A2 D1		    ldx #$d1
+    64 808C 4C 40 80		    jmp MCBegin
     65
     66 				; ------------------
     67
-    68 8087			found:
-    69 8087 A9 03		    lda #MC_RESET
-    70 8089 8E 8E 80		    stx *+5
-    71 808C 99 00 D5		    sta $d500,y
-    72 808F 18			    clc
-    73 8090 60			    rts
+    68 808F			found:
+    69 808F A9 03		    lda #MC_RESET
+    70 8091 8E 96 80		    stx *+5
+    71 8094 99 00 D5		    sta $d500,y
+    72 8097 18			    clc
+    73 8098 60			    rts
     74
-    75 8091			notfound:
-    76 8091 A2 00		    ldx #0
-    77 8093 A0 00		    ldy #0
-    78 8095 38			    sec
-    79 8096 60			    rts
-    54 8097			    icl 'asm/detect_axlon.a65'
+    75 8099			notfound:
+    76 8099 A2 00		    ldx #0
+    77 809B A0 00		    ldy #0
+    78 809D 38			    sec
+    79 809E 60			    rts
+    58 809F			    icl 'asm/detect_axlon.a65'
 Source: detect_axlon.a65
      1 = 4000			ext_b  = $4000       ;cokolwiek z zakresu $4000-$7FFF
      2 = CFFF			axlon  = $cfff
      3 = 0600			bsav   = $0600
      4
      5 				; procedura
-     6 8097			detect_axlon
-     7 8097 A2 FF		       ldx #$ff      ;zapamiętanie bajtów ext
-     8 8099 8E FF CF		_p0    stx axlon
-     9 809C AD 00 40		       lda ext_b
-    10 809F 9D 00 06		       sta bsav,x
-    11 80A2 8E 00 40		       stx ext_b     ;oznaczenie bankow
-    12 80A5 CA			       dex           ;koniecznie w kolejnosci malejacej
-    13 80A6 E0 FF		       cpx #$ff
-    14 80A8 D0 EF		       bne _p0
+     6 809F			detect_axlon
+     7 809F A2 FF		       ldx #$ff      ;zapamiętanie bajtów ext
+     8 80A1 8E FF CF		_p0    stx axlon
+     9 80A4 AD 00 40		       lda ext_b
+    10 80A7 9D 00 06		       sta bsav,x
+    11 80AA 8E 00 40		       stx ext_b     ;oznaczenie bankow
+    12 80AD CA			       dex           ;koniecznie w kolejnosci malejacej
+    13 80AE E0 FF		       cpx #$ff
+    14 80B0 D0 EF		       bne _p0
     15
-    16 80AA E8			       inx
+    16 80B2 E8			       inx
     17
-    18 80AB E8			_p1    inx           ;sprawdzenie numerow bankow
-    19 80AC F0 08		       beq _x1
-    20 80AE 8E FF CF		       stx axlon
-    21 80B1 EC 00 40		       cpx ext_b
-    22 80B4 F0 F5		       beq _p1       ;pierwsza niezgodnosc przerywa petle
+    18 80B3 E8			_p1    inx           ;sprawdzenie numerow bankow
+    19 80B4 F0 08		       beq _x1
+    20 80B6 8E FF CF		       stx axlon
+    21 80B9 EC 00 40		       cpx ext_b
+    22 80BC F0 F5		       beq _p1       ;pierwsza niezgodnosc przerywa petle
     23
-    24 80B6 CA			_x1    dex           ;odliczamy bank podstawowy
-    25 80B7 8A			       txa
-    26 80B8 A8			       tay
+    24 80BE CA			_x1    dex           ;odliczamy bank podstawowy
+    25 80BF 8A			       txa
+    26 80C0 A8			       tay
     27
-    28 80B9 A2 00		       ldx #$00      ;przywrocenie wartosci
-    29 80BB 8E FF CF		_p2    stx axlon
-    30 80BE BD 00 06		       lda bsav,x
-    31 80C1 8D 00 40		       sta ext_b
-    32 80C4 E8			       inx
-    33 80C5 D0 F4		       bne _p2
+    28 80C1 A2 00		       ldx #$00      ;przywrocenie wartosci
+    29 80C3 8E FF CF		_p2    stx axlon
+    30 80C6 BD 00 06		       lda bsav,x
+    31 80C9 8D 00 40		       sta ext_b
+    32 80CC E8			       inx
+    33 80CD D0 F4		       bne _p2
     34
-    35 80C7 8E FF CF		       stx axlon     ;ustaw bank podstawowy
-    36 80CA 60			       rts
-    55 80CB			    icl 'asm/detect_sdx.a65'
+    35 80CF 8E FF CF		       stx axlon     ;ustaw bank podstawowy
+    36 80D2 60			       rts
+    59 80D3			    icl 'asm/detect_sdx.a65'
 Source: detect_sdx.a65
      1 				; sparta_detect.asm
      2 				; (c) idea by KMK, code: mikey
@@ -182,18 +186,18 @@ Source: detect_sdx.a65
      7 = 00F0			p0      = $f0
      8 = 07EB			fsymbol = $07EB
      9
-    10 80CB			detect_sdx
+    10 80D3			detect_sdx
     11
     12 				; if peek($700) = 'S' and bit($701) sets V then we're SDX
     13
-    14 80CB AD 00 07		    lda $0700
-    15 80CE C9 53		    cmp #$53         ; 'S'
-    16 80D0 D0 2C		    bne no_sparta
-    17 80D2 AD 01 07		    lda $0701
-    18 80D5 C9 40		    cmp #$40
-    19 80D7 90 25		    bcc no_sparta
-    20 80D9 C9 44		    cmp #$44
-    21 80DB 90 0F		    bcc _oldsdx
+    14 80D3 AD 00 07		    lda $0700
+    15 80D6 C9 53		    cmp #$53         ; 'S'
+    16 80D8 D0 2C		    bne no_sparta
+    17 80DA AD 01 07		    lda $0701
+    18 80DD C9 40		    cmp #$40
+    19 80DF 90 25		    bcc no_sparta
+    20 80E1 C9 44		    cmp #$44
+    21 80E3 90 0F		    bcc _oldsdx
     22
     23 				; we're running 4.4 - the old method is INVALID as of 4.42
     24
@@ -210,37 +214,37 @@ Source: detect_sdx.a65
     35 				;    lda (p0),y
     36 				;    sta $72
     37
-    38 80DD A9 01		    lda #<sym_t
-    39 80DF A2 81		    ldx #>sym_t
-    40 80E1 20 EB 07		    jsr fsymbol
-    41 80E4 85 F0		    sta p0
-    42 80E6 86 F1		    stx p0+1
-    43 80E8 A0 06		    ldy #$06
-    44 80EA D0 0F		    bne _fv
+    38 80E5 A9 09		    lda #<sym_t
+    39 80E7 A2 81		    ldx #>sym_t
+    40 80E9 20 EB 07		    jsr fsymbol
+    41 80EC 85 F0		    sta p0
+    42 80EE 86 F1		    stx p0+1
+    43 80F0 A0 06		    ldy #$06
+    44 80F2 D0 0F		    bne _fv
     45
     46 				; we're running SDX, find (DOSVEC)-$150
     47
-    48 80EC A5 0A		_oldsdx         lda $a
-    49 80EE 38			    sec
-    50 80EF E9 50		    sbc #<$150
-    51 80F1 85 F0		    sta p0
-    52 80F3 A5 0B		    lda $b
-    53 80F5 E9 01		    sbc #>$150
-    54 80F7 85 F1		    sta p0+1
+    48 80F4 A5 0A		_oldsdx         lda $a
+    49 80F6 38			    sec
+    50 80F7 E9 50		    sbc #<$150
+    51 80F9 85 F0		    sta p0
+    52 80FB A5 0B		    lda $b
+    53 80FD E9 01		    sbc #>$150
+    54 80FF 85 F1		    sta p0+1
     55
     56 				; ok, hopefully we have established the address.
     57 				; now peek at it. return the value.
     58
-    59 80F9 A0 00		    ldy #0
-    60 80FB B1 F0		_fv lda (p0),y
-    61 80FD 60			    rts
+    59 8101 A0 00		    ldy #0
+    60 8103 B1 F0		_fv lda (p0),y
+    61 8105 60			    rts
     62
-    63 80FE			no_sparta
-    64 80FE A9 FF		    lda #$ff
-    65 8100 60			    rts
+    63 8106			no_sparta
+    64 8106 A9 FF		    lda #$ff
+    65 8108 60			    rts
     66
-    67 8101			sym_t
-    68 8101 54 5F 20 20 20 20 +     .byte 'T_      '
+    67 8109			sym_t
+    68 8109 54 5F 20 20 20 20 +     .byte 'T_      '
     69 				;sym_comtab2
     70 				;    .byte 'COMTAB2 '
     71
@@ -248,34 +252,138 @@ Source: detect_sdx.a65
     73 				; if A=$FE -> SDX is in OSROM mode
     74 				; if A=$00 -> SDX doesn't use any XMS banks
     75 				; if A=anything else -> BANKED mode, and A is the bank number
-    56
-    57 8109			PRINT:
-    58 8109 A2 00		    ldx #$00
-    59 810B 9D 44 03		    sta ICBUFA,X
-    60 810E 98			    tya
-    61 810F 9D 45 03		    sta ICBUFA+1,X
-    62 8112 A9 FF		    lda #$ff
-    63 8114 9D 48 03		    sta ICBUFL,X
-    64 8117 A9 09		    lda #$09
-    65 8119 9D 42 03		    sta ICCMD,X
-    66 811C BD 40 03		    lda ICCHID,x
-    67 811F 30 03		    bmi ExitPRINT
-    68 8121 4C 56 E4		    jmp CIOV
-    69 8124			ExitPRINT:
-    70 8124 60			    rts
-    71
-    72 				//
-    73 				//
-    74
-    75 				; Strings
+    60 8111			    icl 'asm/detect_xms.a65'
+Source: detect_xms.a65
+     1 8111			detect_xms:
+     2
+     3 8111			    .local
+     4
+     5 = 0600			bsav	= $0600
+     6 = 0101			banks   = $0101
+     7 = 4000			ext_b	= $4000		;cokolwiek z zakresu $4000-$7FFF
+     8 = D40B			vcount  = $D40B
+     9 = D301			portb   = $D301
+    10 = 004B			result  = $4B
+    11
+    12 8111 8A 48		    txa:pha
+    13
+    14 8113 AD 01 D3			lda portb
+    15 8116 48				pha
+    16
+    17 8117 AD 0B D4 D0 FB		lda:rne vcount
+    18
+    19 811C AD 00 40			lda ext_b
+    20 811F 48				pha
+    21
+    22 8120 A2 0F			ldx #$0f	;zapamiętanie bajtów ext (z 16 bloków po 64k)
+    23 8122 20 93 81		_p0	jsr setpb
+    24 8125 AD 00 40			lda ext_b
+    25 8128 9D 00 06			sta bsav,x
+    26 812B CA				dex
+    27 812C 10 F4			bpl _p0
+    28
+    29 812E A2 0F			ldx #$0f	;wyzerowanie ich (w oddzielnej pętli, bo nie wiadomo
+    30 8130 20 93 81		_p1	jsr setpb	;które kombinacje bitów PORTB wybierają te same banki)
+    31 8133 A9 00			lda #$00
+    32 8135 8D 00 40			sta ext_b
+    33 8138 CA				dex
+    34 8139 10 F5			bpl _p1
+    35
+    36 813B 8E 01 D3			stx portb	;eliminacja pamięci podstawowej
+    37 813E 8E 00 40			stx ext_b
+    38 8141 86 00			stx $00		;niezbędne dla niektórych rozszerzeń do 256k
+    39
+    40 8143 A0 00			ldy #$00	;pętla zliczająca bloki 64k
+    41 8145 A2 0F			ldx #$0f
+    42 8147 20 93 81		_p2	jsr setpb
+    43 814A AD 00 40			lda ext_b	;jeśli ext_b jest różne od zera, blok 64k już zliczony
+    44 814D D0 23			bne _n2
+    45
+    46 814F CE 00 40			dec ext_b	;w przeciwnym wypadku zaznacz jako zliczony
+    47
+    48 8152 AD 00 40			lda ext_b	;sprawdz, czy sie zaznaczyl; jesli nie -> cos nie tak ze sprzetem
+    49 8155 10 1B			bpl _n2
+    50
+    51 8157 AD 01 D3			lda portb	;wpisz wartość PORTB do tablicy dla banku 0
+    52
+    53 815A 29 FE			and #$fe
+    54
+    55 815C 99 01 01			sta banks,y
+    56 815F 49 04			eor #%00000100	;uzupełnij wartości dla banków 1, 2, 3
+    57 8161 99 02 01			sta banks+1,y
+    58 8164 49 0C			eor #%00001100
+    59 8166 99 03 01			sta banks+2,y
+    60 8169 49 04			eor #%00000100
+    61 816B 99 04 01			sta banks+3,y
+    62 816E C8				iny
+    63 816F C8				iny
+    64 8170 C8				iny
+    65 8171 C8				iny
+    66
+    67 8172 CA			_n2	dex
+    68 8173 10 D2			bpl _p2
+    69
+    70 8175 A2 0F			ldx #$0f	;przywrócenie zawartości ext
+    71 8177 20 93 81		_p3	jsr setpb
+    72 817A BD 00 06			lda bsav,x
+    73 817D 8D 00 40			sta ext_b
+    74 8180 CA				dex
+    75 8181 10 F4			bpl _p3
     76
-    77 8125			MIDICAR_EXIST:
-    78 8125 4D 49 44 49 43 61 +     dta 'MIDICar exist :)',$9B
-    79 8136			MIDICAR_NOT_FOUND:
-    80 8136 4D 49 44 49 43 61 +     dta 'MIDICar not found :(',$9B
-    81 814B			AXLON_FOUND:
-    82 814B 41 58 4C 4F 4E 20 +     dta 'AXLON extention is not supported :(',$9B
-    83 816F			SDX_FOUND:
-    84 816F 53 44 58 20 75 73 +     dta 'SDX user must wait :P',$9B
-    85
-    86 02E2-02E3> 00 80		    ini START
+    77 8183 8E 01 D3			stx portb	;X=$FF
+    78
+    79 8186 68				pla
+    80 8187 8D 00 40			sta ext_b
+    81
+    82 818A 68				pla
+    83 818B 8D 01 D3			sta portb
+    84
+    85 818E 84 4B			sty Result
+    86
+    87 8190 68 AA		stop	pla:tax
+    88
+    89 8192 60				rts
+    90
+    91 				; podprogramy
+    92 8193 8A			setpb	txa		;zmiana kolejności bitów: %0000dcba -> %cba000d0
+    93 8194 4A				lsr
+    94 8195 6A				ror
+    95 8196 6A				ror
+    96 8197 6A				ror
+    97 8198 69 01			adc #$01	;ustawienie bitu nr 1 w zaleznosci od stanu C
+    98 819A 09 01			ora #$01	;ustawienie bitu sterującego OS ROM na wartosc domyslna
+    99 819C 8D 01 D3			sta portb
+   100 819F 60				rts
+   101
+   102 				    .endl
+    61
+    62 81A0			PRINT:
+    63 81A0 A2 00		    ldx #$00
+    64 81A2 9D 44 03		    sta ICBUFA,X
+    65 81A5 98			    tya
+    66 81A6 9D 45 03		    sta ICBUFA+1,X
+    67 81A9 A9 FF		    lda #$ff
+    68 81AB 9D 48 03		    sta ICBUFL,X
+    69 81AE A9 09		    lda #$09
+    70 81B0 9D 42 03		    sta ICCMD,X
+    71 81B3 BD 40 03		    lda ICCHID,x
+    72 81B6 30 03		    bmi ExitPRINT
+    73 81B8 4C 56 E4		    jmp CIOV
+    74 81BB			ExitPRINT:
+    75 81BB 60			    rts
+    76
+    77 				//
+    78 				//
+    79
+    80 				; Strings
+    81
+    82 81BC			MIDICAR_EXIST:
+    83 81BC 4D 49 44 49 43 61 +     dta 'MIDICar exist :)',$9B
+    84 81CD			MIDICAR_NOT_FOUND:
+    85 81CD 4D 49 44 49 43 61 +     dta 'MIDICar not found :(',$9B
+    86 81E2			AXLON_FOUND:
+    87 81E2 41 58 4C 4F 4E 20 +     dta 'AXLON extention is not supported :(',$9B
+    88 8206			SDX_FOUND:
+    89 8206 53 44 58 20 75 73 +     dta 'SDX user must wait :P',$9B
+    90
+    91 02E2-02E3> 00 80		    ini START

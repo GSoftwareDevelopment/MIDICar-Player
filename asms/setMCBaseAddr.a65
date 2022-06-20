@@ -1,0 +1,21 @@
+    .macro m@setMCBase name
+      sty :name
+      stx :name+1
+    .endm
+
+    txa:pha
+
+    ldy MCBaseAddr
+    ldx MCBaseAddr+1
+
+    m@setMCBase MAIN.MC6850.MC6850_INIT.MCBASESTATE
+    m@setMCBase MAIN.MC6850.MC6850_Send2.MCBaseState
+    m@setMCBase MAIN.MIDI_FIFO.FIFO_PUSHDIRECT2MC6850.MCBaseState
+    m@setMCBase MAIN.MIDI_FIFO.FIFO_FLUSH.MCBaseState
+
+    iny
+    m@setMCBase MAIN.MC6850.MC6850_Send2.MCBaseBuf
+    m@setMCBase MAIN.MIDI_FIFO.FIFO_PUSHDIRECT2MC6850.MCBaseBuf
+    m@setMCBase MAIN.MIDI_FIFO.FIFO_FLUSH.MCBaseBuf
+
+    pla:tax

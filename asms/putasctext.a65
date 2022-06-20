@@ -1,0 +1,35 @@
+  regptr = $88
+
+  txa:pha
+
+  ldy #0
+  lda (regptr),y
+  beq exitPutText
+
+  pha:tay
+  dey
+  inc regptr
+  sne:inc regptr+1
+
+putText:
+  lda (regptr),y   // get string character
+
+atasci2antic:
+  asl
+  adc #$c0
+  spl:eor #$40
+  lsr
+  scc:eor #$80
+
+  sta (scradr),y   // put on screen
+  dey
+  bpl putText
+
+  pla
+  clc
+  adc scradr
+  sta scradr
+  scc:inc scradr+1
+
+exitPutText:
+  pla:tax

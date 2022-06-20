@@ -58,12 +58,19 @@ procedure ProcessMIDI;
 
 implementation
 Uses
-  {$IFDEF USE_CIO}CIO,{$ENDIF}
+  CIO,
   {$IFDEF USE_FIFO}MIDI_FIFO,{$ENDIF}
   MC6850;
 
-{$i int_timer.inc}
-{$i memboundcheck.inc}
+procedure int_timer; Interrupt; Assembler;
+asm
+  icl 'midfile/asms/int_timer.a65'
+end;
+
+procedure memBoundCheck; Assembler;
+asm
+  icl 'midfile/asms/memory_bound_check.a65'
+end;
 
 {$i loadmid.inc}
 {$i settempo.inc}

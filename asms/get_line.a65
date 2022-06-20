@@ -1,0 +1,29 @@
+  txa:pha
+
+  lda chn
+  :4 asl @
+  tax
+
+  lda #5
+  sta iccmd,x
+
+  lda buf+1
+  sta icbufa+1,x
+  lda buf
+  add #1
+  sta icbufa,x
+  scc:inc icbufa+1,X
+
+  lda #$80
+  sta icbufl,x
+  lda #0
+  sta icbufl+1,x
+
+  m@call	ciov
+  sty MAIN.SYSTEM.IOResult
+
+  lda icbufl,x
+  ldy #0
+  sta (buf),y
+
+  pla:tax

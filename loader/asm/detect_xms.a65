@@ -1,0 +1,102 @@
+detect_xms:
+
+    .local
+
+bsav	= $0600
+banks   = $0101
+ext_b	= $4000		;cokolwiek z zakresu $4000-$7FFF
+vcount  = $D40B
+portb   = $D301
+result  = $4B
+
+    txa:pha
+
+	lda portb
+	pha
+
+	lda:rne vcount
+
+	lda ext_b
+	pha
+
+	ldx #$0f	;zapamiętanie bajtów ext (z 16 bloków po 64k)
+_p0	jsr setpb
+	lda ext_b
+	sta bsav,x
+	dex
+	bpl _p0
+
+	ldx #$0f	;wyzerowanie ich (w oddzielnej pętli, bo nie wiadomo
+_p1	jsr setpb	;które kombinacje bitów PORTB wybierają te same banki)
+	lda #$00
+	sta ext_b
+	dex
+	bpl _p1
+
+	stx portb	;eliminacja pamięci podstawowej
+	stx ext_b
+	stx $00		;niezbędne dla niektórych rozszerzeń do 256k
+
+	ldy #$00	;pętla zliczająca bloki 64k
+	ldx #$0f
+_p2	jsr setpb
+	lda ext_b	;jeśli ext_b jest różne od zera, blok 64k już zliczony
+	bne _n2
+
+	dec ext_b	;w przeciwnym wypadku zaznacz jako zliczony
+
+	lda ext_b	;sprawdz, czy sie zaznaczyl; jesli nie -> cos nie tak ze sprzetem
+	bpl _n2
+
+	lda portb	;wpisz wartość PORTB do tablicy dla banku 0
+
+	and #$fe
+
+	sta banks,y
+	eor #%00000100	;uzupełnij wartości dla banków 1, 2, 3
+	sta banks+1,y
+	eor #%00001100
+	sta banks+2,y
+	eor #%00000100
+	sta banks+3,y
+	iny
+	iny
+	iny
+	iny
+
+_n2	dex
+	bpl _p2
+
+	ldx #$0f	;przywrócenie zawartości ext
+_p3	jsr setpb
+	lda bsav,x
+	sta ext_b
+	dex
+	bpl _p3
+
+	stx portb	;X=$FF
+
+	pla
+	sta ext_b
+
+	pla
+	sta portb
+
+	sty Result
+
+stop	pla:tax
+
+	rts
+
+; podprogramy
+setpb	txa		;zmiana kolejności bitów: %0000dcba -> %cba000d0
+	lsr
+	ror
+	ror
+	ror
+	adc #$01	;ustawienie bitu nr 1 w zaleznosci od stanu C
+	ora #$01	;ustawienie bitu sterującego OS ROM na wartosc domyslna
+	sta portb
+	rts
+
+    .endl

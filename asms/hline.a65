@@ -1,0 +1,6 @@
+  ldy #39
+  lda #$4a
+loop:
+  sta (scradr),y
+  dey
+  bpl loop

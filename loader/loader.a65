@@ -29,6 +29,10 @@ no_sdx:
     jmp exit2DOS
 
 no_axlon:
+    jsr detect_xms
+    lda #$fe
+    sta $0100
+
     jsr detect_MC
     bcs MCNotFound
 
@@ -53,6 +57,7 @@ exit2DOS:
     icl 'asm/detect_mc.a65'
     icl 'asm/detect_axlon.a65'
     icl 'asm/detect_sdx.a65'
+    icl 'asm/detect_xms.a65'
 
 PRINT:
     ldx #$00

@@ -1,0 +1,7 @@
+  tay // ldy spaces
+  sne:rts
+  lda #0
+loop:
+  dey
+  sta (scradr),y
+  bne loop

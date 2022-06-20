@@ -1,9 +1,3 @@
-{
-
-}
-
-procedure int_timer; Interrupt; Assembler;
-asm
     lda _timerStatus
     bmi skip
 
@@ -52,4 +46,3 @@ skip:
 //   ldy regy:#$00
 
   pla
-end;

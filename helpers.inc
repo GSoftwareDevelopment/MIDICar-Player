@@ -1,48 +1,22 @@
 const
   colors:Array[0..1,0..4] of byte = (
-    (0,0,10,0,10),
-    (10,10,0,0,0)
+    ($A8,$00,$0A,$08,$0A),
+    ($A8,$0A,$00,$02,$00)
   );
 
   GM_RESET: array[0..5] of byte = ($f0, $7e, $7f, $09, $01, $f7);
 
-  k_l     = 0;
-  k_plus  = 6;
-  k_p     = 10;
-  k_minus = 14;
-  k_eq    = 15;
-  k_esc   = 28;
-  k_space = 33;
-  k_m     = 37;
-  k_invers= 39;
-  k_s     = 62;
+{$i keys.inc}
 
 var
   keyb:byte absolute $2fc;
   puttextinvert:byte;
 
-  NMIEN:Byte absolute $D40E;
-  NMIVEC:Pointer absolute $fffa;
   SDMACTL:Byte;
   DMACTL:Byte absolute $d400;
-  CHBASE:Byte absolute 756;
+  SDLST:Word absolute $230;
+  CHBASE:Byte absolute $2f4;
   SOUNDR:Byte absolute $41;
-
-procedure MyNMI; Interrupt; Assembler;
-asm
-  icl 'asms/nmi.a65'
-end;
-
-procedure setNMI;
-begin
-  oldNMIVec:=NMIVEC;
-  NMIEN:=$00; NMIVEC:=@MyNMI; NMIEN:=$40;
-end;
-
-procedure unsetNMI;
-begin
-  NMIEN:=$00; NMIVEC:=oldNMIVec; NMIEN:=$40;
-end;
 
 procedure setColors;
 var p:pointer;
@@ -53,27 +27,24 @@ begin
   move(p,pointer(708),5);
 end;
 
-procedure putINTText(s:PString); Assembler;
+procedure invers(chars:byte); Register; Assembler;
+asm
+  icl 'asms/invers.a65'
+end;
+
+procedure putSpaces(spaces:byte); Register; Assembler;
+asm
+  icl 'asms/put_spaces.a65'
+end;
+
+procedure putINTText(s:PString); Register; Assembler;
 asm
   icl 'asms/putinttext.a65'
 end;
 
-procedure PutASCText(s:PString);
-var
-  l,c:byte;
-
-begin
-  l:=byte(s[0]);
-  while l>0 do
-  begin
-    inc(s);
-    c:=byte(s^);
-    if c<32 then inc(c,64)
-    else if c<96 then dec(c,32);
-    poke(scradr,c or puttextinvert);
-    inc(scradr);
-    dec(l);
-  end;
+procedure PutASCText(s:PString); Register; Assembler;
+asm
+  icl 'asms/putasctext.a65'
 end;
 
 procedure PutHex(var v; n:byte); Assembler;
@@ -81,11 +52,6 @@ asm
   icl 'asms/puthex.a65'
 end;
 
-{
-  the following procedure is based on code from this page
-  https://unfinishedbitness.info/2014/09/26/6502-string-to-integer-and-reverse/
-  It is modified to avoid leading zeros.
-}
 procedure putInt(value:smallint); assembler;
 asm
   icl 'asms/int2str.a65'
@@ -113,31 +79,72 @@ begin
   Reset_MIDI;
 end;
 
-procedure clearWorkArea;
+procedure hline; assembler;
+asm
+  icl 'asms/hline.a65'
+end;
+
+procedure clearWorkArea; assembler;
+asm
+  icl 'asms/clear_workarea.a65'
+end;
+
+procedure resetMemoryPtr;
 begin
-  fillchar(pointer(SCREEN_WORK),SCREEN_TIME-SCREEN_WORK-40,0);
+  last_bank:=totalXMS;
+  if totalXMS>0 then
+    last_adr:=$4000
+  else
+    last_adr:=$d800;
+end;
+
+procedure clearPlaylist;
+begin
+  pls:=pointer(PLAYLIST_ADDR);
+  fillchar(pls,$C00,$9B);
+  totalFiles:=0; resetMemoryPtr; curfile:=0; YFile:=0; shFile:=0;
+  chn:=0;
+  while (chn<16) do
+  begin
+    scradr:=playlistScrAdr[chn];
+    putSpaces(PLAYLIST_VISIBLE_CHARS+2);
+    inc(chn);
+  end;
+end;
+
+procedure drawPlaylistSelection;
+begin
+  scradr:=playlistScrAdr[YFile]; invers(32);
 end;
 
 procedure isLooped;
 begin
-  scradr:=SCREEN_TIME+4;
+  scradr:=SCREEN_TIME+6;
   if (playerStatus and ps_loop)<>0 then
-    putINTText(#$3e+#$3f)
+    putINTText(#$7e+#$7f)
   else
-    putINTText(#$00+#$00);
+    putINTText(#$fe+#$ff);
 end;
 
 procedure clearStatus;
 var
   l:byte;
+  memAvailable:word;
 
 begin
   fillchar(pointer(SCREEN_TIME),60,0);
+  scradr:=SCREEN_TIME+1; putINTText(#$fb+#0+#$fc+#0+#$fd);
   isLooped;
+  scradr:=SCREEN_STATUS; HLine;
+  memAvailable:=(word(totalXMS)*16)+FREE_MEM;
+  if memAvailable<1000 then scradr:=SCREEN_STATUS+30;
+  if memAvailable<100 then scradr:=SCREEN_STATUS+31;
+  if memAvailable<10 then scradr:=SCREEN_STATUS+32;
+  putINTText('Mem:'~); putInt(memAvailable); putINTText('KB'~);
   l:=length(fn);
   if l=0 then exit;
   if l>16 then fn[0]:=#16;
-  scradr:=SCREEN_STATUS+(39-l); putASCText(fn);
+  scradr:=SCREEN_STATUS+(30-l); putASCText(fn);
 end;
 
 procedure clearUVMeters;
@@ -147,15 +154,54 @@ begin
     chn:=0;
     repeat
       scradr:=channelScrAdr[chn];
-      fillChar(pointer(scradr),4,$41);
+      asm
+        ldy #3
+        lda #$41
+      VClr:
+        sta (scradr),y
+        dey
+        bpl VClr
+      end;
       inc(chn);
     until chn=16;
   end;
+end;
+
+//
+//
+
+function getFileExt(fn:PString):DWord; Register; assembler;
+asm
+  icl 'asms/get_file_ext.a65'
+end;
+
+procedure reduceFileName(var inFN; outFN:PString); Register; Assembler;
+asm
+  icl 'asms/reduce_filename.a65'
+end;
+
+function isDeviceSpec(fn:PString):Boolean; Register; Assembler;
+asm
+  icl 'asms/isDeviceSpec.a65'
+end;
+
+procedure getDeviceSpec(fn:PString; var spec:String); Register; Assembler;
+asm
+  icl 'asms/getDeviceSpec.a65'
+end;
+
+procedure joinStrings(s1:PString; s2:PString); Register; Assembler;
+asm
+  icl 'asms/joinStrings.a65'
+end;
+
+procedure getLn(chn:byte; buf:PString); register; Assembler;
+asm
+  icl 'asms/get_line.a65'
 end;
 
 procedure exit2DOS;
 begin
   stopMIDI;
   Cls(0); Opn(0,12,0,'E:'); SOUNDR:=1;
-  halt;
 end;

@@ -1,30 +1,52 @@
-if (playerStatus and ps_view)<>0 then
-begin
-  chn:=0;
-  repeat
-    scradr:=channelScrAdr[chn];
-    c:=chnVolume[chn];
-    if c<>0 then
-    begin
-      if c>4 then dec(c,4) else c:=0;
-      chnVolume[chn]:=c;
-      v:=(c shr 1) and %00111100;
-      asm
-        clc
-        lda #<UVMETER_ADDR
-        adc v
-        sta $d6
-        lda #>UVMETER_ADDR
-        sta $d7
-        ldy #3
-      loop:
-        lda ($d6),y
-        sta ($d4),y
-        dey
-        bpl loop
-      end;
-    end;
+hlpptr = $D6
+  lda playerStatus
+  and #ps_view
+  bne updateUVMeter
+  rts
 
-    inc(chn);
-  until (chn=16);
-end;
+updateUVMeter:
+  txa:pha
+
+  ldx #0
+uvmeterLoop:
+  lda MIDFILES.adr.CHNVOLUME,x
+  beq dontUpdate
+
+  cmp #4
+  bpl decVol
+  lda #0
+  beq storeVol
+decVol:
+  sub #4
+storeVol:
+  sta MIDFILES.adr.CHNVOLUME,x
+
+  lsr @
+  and #%00111100
+
+  add #<UVMETER_ADDR
+  sta hlpptr
+  lda #>UVMETER_ADDR
+  sta hlpptr+1
+
+  txa
+  asl @
+  tay
+  lda adr.CHANNELSCRADR,y
+  sta scradr
+  lda adr.CHANNELSCRADR+1,y
+  sta scradr+1
+
+  ldy #3
+loop:
+  lda (hlpptr),y
+  sta (scradr),y
+  dey
+  bpl loop
+
+dontUpdate:
+  inx
+  cpx #16
+  bne uvmeterLoop
+
+  pla:tax

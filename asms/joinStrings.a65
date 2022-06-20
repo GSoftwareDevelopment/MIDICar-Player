@@ -1,0 +1,35 @@
+JoinStrings:
+
+    txa:pha
+
+    ldy #0
+    lda (s1),y
+    sta devlen
+    ldx #1
+
+copyS1:
+    iny
+    lda (s1),y
+    sta adr.outstr,x
+    inx
+    cpy devlen:#00
+    bne copyS1
+
+nextCopy:
+    ldy #0
+    lda (s2),y
+    sta fnlen
+
+copyS2:
+    iny
+    lda (s2),y
+    sta adr.outstr,x
+    inx
+    cpy fnlen:#00
+    bne copyS2
+
+    dex
+    stx adr.outstr
+
+    pla:tax
+    rts

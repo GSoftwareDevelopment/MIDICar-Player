@@ -1,4 +1,6 @@
 // store `scradr` value as a operand of opcode
+  txa:pha
+
   lda scradr
   sta screen
   lda scradr+1
@@ -49,6 +51,7 @@ calcEndAddr:
   inc scradr+1
 
 stop:
+  pla:tax
   rts
 
 _vofs

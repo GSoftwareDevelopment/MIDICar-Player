@@ -1,0 +1,22 @@
+fnreg   = $88
+specreg = $8c
+
+getDeviceSpec:
+  ldy #2
+colonLoop:
+  lda (fnreg),y
+  cmp #':'
+  beq foundSpec
+  iny
+  cpy #4
+  bne colonLoop
+
+specNotFound:
+  lda #0
+  sta result
+  rts
+
+foundSpec:
+  lda #1
+  sta result
+  rts

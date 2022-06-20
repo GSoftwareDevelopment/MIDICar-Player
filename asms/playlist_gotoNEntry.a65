@@ -1,0 +1,20 @@
+gotoNEntry:
+    txa:pha
+
+    lda #<PLAYLIST_ADDR
+    sta pls
+    lda #>PLAYLIST_ADDR
+    sta pls+1
+
+    ldx nEntry
+    beq exitGotoNEntry
+
+loop:
+    jsr nextEntry
+    beq exitGotoNEntry
+    dex
+    bne loop
+
+exitGotoNEntry:
+
+    pla:tax

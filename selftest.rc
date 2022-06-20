@@ -1,2 +1,0 @@
-TRACK_DATA_ADDR rcdata 'resources/selftest.mti';
-MIDI_DATA_ADDR rcdata 'resources/selftest.rmd';

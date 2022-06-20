@@ -1,52 +1,33 @@
-procedure loadSong;
+function loadSong(filename:PString):Byte;
+const
+  th:array[0..3] of byte = ($29,$1c,$1d,$1e);
+
 var
-  err:byte;
-  t:byte;
+  thi:byte;
 
   procedure loadPrc(v:byte);
   begin
-    poke(SCREEN_STATUS,$5c+t);
-    inc(t); if t=4 then t:=0;
+    poke(SCREEN_STATUS,th[thi]);
+    inc(thi); if thi=4 then thi:=0;
     if v>0 then
     begin
-      scradr:=SCREEN_STATUS+11;
+      puttextinvert:=128;
+      scradr:=SCREEN_STATUS+10;
       putInt(v-1); poke(scradr,$8f); inc(scradr);
       putInt(totalTracks);
-      poke(scradr,$80);
+      poke(scradr,$ce);
+      puttextinvert:=0;
     end;
   end;
 
 begin
-  // scradr:=screen_time; PutASCText(fn);
   clearStatus;
-  statusLoading; puttextinvert:=128;
-  loadProcess:=@loadPrc; t:=0;
-  err:=LoadMid(fn);
-  if err<>0 then
-  begin
-    scradr:=SCREEN_STATUS;
-    if err<128 then
-    case err of
-      ERR_UNSUPPORTED_FORMAT: PutINTText(' Unsupported format '~*);
-      ERR_NOT_ENOUGHT_MEMORY: PutINTText(' Not enought memory '~*);
-    end
-    else
-    begin
-      PutINTText(' I/O Error #'*~); putInt(err); poke(scradr,$80);
-    end;
-    while keyb=255 do ;
-    puttextinvert:=0;
-    totalTracks:=0; exit;
-  end;
-  move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
-  puttextinvert:=0;
-
-  // statusCalculating;
-  // _totalTicks:=100000000; FIFO2Null:=true;
-  // cTrk:=totalTracks; playingTracks:=cTrk;
-  // repeat
-  //   loadPrc(0);
-  //   processMIDI;
-  // until playingTracks=0;
-  // FIFO2Null:=false;
+  statusLoading;
+  loadProcess:=@loadPrc; thi:=0;
+  result:=LoadMid(filename);
+  clearStatus;
+  if (result and %11111100)<>0 then
+    totalTracks:=0
+  else
+    move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
 end;

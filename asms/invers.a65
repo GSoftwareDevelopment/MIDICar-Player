@@ -1,0 +1,9 @@
+  tay // ldy spaces
+  sne:rts
+  dey
+loop:
+  lda (scradr),y
+  eor #$80
+  sta (scradr),y
+  dey
+  bpl loop

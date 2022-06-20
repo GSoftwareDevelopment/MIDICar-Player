@@ -2,6 +2,38 @@ if keyb<>255 then
 begin
   case keyb of
     k_esc: break;
+    k_return: choicePlaylistFile;
+    k_up,k_down:
+      begin
+        drawPlaylistSelection;
+        v:=0;
+        if (keyb=k_up) then
+        begin
+          if YFile>0 then
+            dec(YFile)
+          else
+            if shFile>0 then v:=-1;
+        end;
+        if (keyb=k_down) then
+        begin
+          if YFile<15 then
+            inc(YFile)
+          else
+            if shFile<totalFiles-YFile-1 then v:=1;
+        end;
+        if v<>0 then
+        begin
+          inc(shFile,v);
+          gotoNEntry(shFile);
+          showPlaylist;
+        end;
+        curFile:=shFile+YFile;
+        if curFile>=totalFiles then curFile:=totalFiles-1;
+        // scradr:=SCREEN_WORK+8; putINT(curFile);
+        // poke(scradr,$0f); inc(scradr); putINT(totalFiles-1);
+        // poke(scradr,$41);
+        drawPlaylistSelection;
+      end;
     k_l:
       begin
         playerStatus:=playerStatus xor ps_loop;
@@ -9,10 +41,9 @@ begin
       end;
     k_m:
       begin
+        clearUVMeters;
         playerStatus:=playerStatus xor ps_view;
-        clearWorkArea;
-        if playerStatus and ps_view<>0 then
-          clearUVMeters;
+        // if playerStatus and ps_view=0 then
       end;
     k_invers:
       begin
@@ -27,11 +58,11 @@ begin
           StatusPause;
       end;
     k_s: statusStopped;
-    k_minus, k_plus, k_eq:
+    k_delete, k_clear, k_insert:
       begin
-        if keyb=k_minus then inc(tempoShift,20000);
-        if keyb=k_plus then dec(tempoShift,20000);
-        if keyb=k_eq then tempoShift:=0;
+        if keyb=k_clear then inc(tempoShift,20000);
+        if keyb=k_insert then dec(tempoShift,20000);
+        if keyb=k_delete then tempoShift:=0;
         setTempo;
       end;
   end;
