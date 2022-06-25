@@ -1,7 +1,7 @@
 hlpptr = $D6
   lda playerStatus
   and #ps_view
-  beq dontUpdateUVMeter
+  bne dontUpdateUVMeter
 
 updateUVMeter:
   txa:pha

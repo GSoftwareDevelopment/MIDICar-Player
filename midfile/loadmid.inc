@@ -33,7 +33,6 @@ var
       else if hi(_adr)>=$a8 then loadSize:=$c000
       else if hi(_adr)>=$40 then loadSize:=$8000;
       dec(loadSize,_adr);
-      // result:=loadSize=0;
       if loadSize>len then loadSize:=len;
       until loadSize<>0;
   end;
@@ -51,7 +50,7 @@ begin
   trackCount:=0;
   totalTracks:=255;
 
-  while (IOResult=1) {and (not EOF(F))} and (trackCount<totalTracks) do
+  while (IOResult=1) and (trackCount<totalTracks) do
   begin
     BGet(CIO_CHN,@chunkTag,4);
     Len:=ReadLongBI;

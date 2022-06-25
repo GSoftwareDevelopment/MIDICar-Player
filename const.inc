@@ -6,7 +6,8 @@ const
   SCREEN_STATUS   = SCREEN_TIME+20;
   SCREEN_FOOT     = SCREEN_STATUS+40;
   UVMETER_ADDR    = $3B00;
-  DLIST_ADDR      = $3FB7;
+  HELPSCR_ADDR    = UVMETER_ADDR+$40;
+  DLIST_ADDR      = $3FB4;
 
   PLAYLIST_ADDR   = $2000;
   START_INFO_ADDR = $2C00;
@@ -16,10 +17,16 @@ const
 
   f_clear = %00100000;
 
-  ps_colorSet = %001;
-  ps_view     = %010;
-  ps_loop     = %100;
+  ps_colorSet = %0001;
+  ps_view     = %0010;
+  ps_loop     = %1100;
 
-  PLAYLIST_VISIBLE_CHARS = 30;
-  fe_PLS = $504c5300;
+  ps_playonce = %0000;
+  ps_repeatone= %0100;
+  ps_repeatall= %1000;
+  ps_shuffle  = %1100;
+
+  LIST_VISIBLE_CHARS = 30;
+  // fe_PLS = $504c5300;
   fe_DIR = $a4a9b200;
+  fe_MID = $4d494400;

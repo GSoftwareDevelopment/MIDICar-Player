@@ -13,8 +13,9 @@ colonLoop:
 
 specNotFound:
   lda #0
-  tay
-  sta (specreg),y
+  ; tay
+  ; sta (specreg),y
+  sta result
   rts
 
 foundSpec:
@@ -28,3 +29,6 @@ copySpec:
   sta (specreg),y
   dey
   bne copySpec
+
+  lda #1
+  sta result

@@ -98,58 +98,32 @@ begin
     last_adr:=$d800;
 end;
 
-procedure clearPlaylist;
-begin
-  pls:=pointer(PLAYLIST_ADDR);
-  fillchar(pls,$C00,$9B);
-  totalFiles:=0; resetMemoryPtr; curfile:=0; YFile:=0; shFile:=0;
-  chn:=0;
-  while (chn<16) do
-  begin
-    scradr:=playlistScrAdr[chn];
-    putSpaces(PLAYLIST_VISIBLE_CHARS+2);
-    inc(chn);
-  end;
-end;
-
-procedure drawPlaylistSelection;
-begin
-  scradr:=playlistScrAdr[YFile]; invers(32);
-end;
-
-procedure isLooped;
-begin
-  scradr:=SCREEN_TIME+6;
-  if (playerStatus and ps_loop)<>0 then
-    putINTText(#$7e+#$7f)
-  else
-    putINTText(#$fe+#$ff);
-end;
-
 procedure clearStatus;
 var
   l:byte;
-  memAvailable:word;
+  oscradr,memAvailable:word;
 
 begin
   fillchar(pointer(SCREEN_TIME),60,0);
-  scradr:=SCREEN_TIME+1; putINTText(#$fb+#0+#$fc+#0+#$fd);
-  isLooped;
+  scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
+  statusLoop;
   scradr:=SCREEN_STATUS; HLine;
   memAvailable:=(word(totalXMS)*16)+FREE_MEM;
+  if memAvailable<10000 then scradr:=SCREEN_STATUS+29;
   if memAvailable<1000 then scradr:=SCREEN_STATUS+30;
   if memAvailable<100 then scradr:=SCREEN_STATUS+31;
   if memAvailable<10 then scradr:=SCREEN_STATUS+32;
+  oscradr:=scradr;
   putINTText('Mem:'~); putInt(memAvailable); putINTText('KB'~);
   l:=length(fn);
   if l=0 then exit;
   if l>16 then fn[0]:=#16;
-  scradr:=SCREEN_STATUS+(30-l); putASCText(fn);
+  scradr:=oscradr-l-1; putASCText(fn);
 end;
 
 procedure clearUVMeters;
 begin
-  if playerStatus and ps_view<>0 then
+  if (playerStatus and ps_view=0) or firstTime then
   begin
     chn:=0;
     repeat
@@ -165,39 +139,6 @@ begin
       inc(chn);
     until chn=16;
   end;
-end;
-
-//
-//
-
-function getFileExt(fn:PString):DWord; Register; assembler;
-asm
-  icl 'asms/get_file_ext.a65'
-end;
-
-procedure reduceFileName(var inFN; outFN:PString); Register; Assembler;
-asm
-  icl 'asms/reduce_filename.a65'
-end;
-
-function isDeviceSpec(fn:PString):Boolean; Register; Assembler;
-asm
-  icl 'asms/isDeviceSpec.a65'
-end;
-
-procedure getDeviceSpec(fn:PString; var spec:String); Register; Assembler;
-asm
-  icl 'asms/getDeviceSpec.a65'
-end;
-
-procedure joinStrings(s1:PString; s2:PString); Register; Assembler;
-asm
-  icl 'asms/joinStrings.a65'
-end;
-
-procedure getLn(chn:byte; buf:PString); register; Assembler;
-asm
-  icl 'asms/get_line.a65'
 end;
 
 procedure exit2DOS;

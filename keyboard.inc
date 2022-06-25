@@ -1,11 +1,28 @@
 if keyb<>255 then
 begin
+  if isHelp then
+  begin
+    isHelp:=False;
+    dpoke(DLIST_ADDR+25,SCREEN_WORK);
+    keyb:=255;
+  end;
   case keyb of
     k_esc: break;
-    k_return: choicePlaylistFile;
+    k_h: showHelp;
+    k_return: choiceListFile;
+    k_space:
+      begin
+        drawListSelection;
+        gotoNEntry(curFile);
+        getEntrySets(p_bank);
+        p_bank:=p_bank xor $80;
+        setEntrySets(p_bank);
+        showList;
+        drawListSelection;
+      end;
     k_up,k_down:
       begin
-        drawPlaylistSelection;
+        drawListSelection;
         v:=0;
         if (keyb=k_up) then
         begin
@@ -24,40 +41,48 @@ begin
         if v<>0 then
         begin
           inc(shFile,v);
-          gotoNEntry(shFile);
-          showPlaylist;
+          showList;
         end;
         curFile:=shFile+YFile;
         if curFile>=totalFiles then curFile:=totalFiles-1;
-        // scradr:=SCREEN_WORK+8; putINT(curFile);
-        // poke(scradr,$0f); inc(scradr); putINT(totalFiles-1);
-        // poke(scradr,$41);
-        drawPlaylistSelection;
+        drawListSelection;
       end;
     k_l:
       begin
-        playerStatus:=playerStatus xor ps_loop;
-        isLooped;
+        v:=(playerStatus+4) and ps_loop;
+        playerStatus:=(playerStatus and (not ps_loop)) or v;
+        statusLoop;
       end;
     k_m:
       begin
         clearUVMeters;
         playerStatus:=playerStatus xor ps_view;
-        // if playerStatus and ps_view=0 then
       end;
     k_invers:
       begin
         playerStatus:=playerStatus xor ps_colorSet;
         setColors;
       end;
-    k_p:
+    k_z, k_b:
+      begin
+        if keyb=k_z then playDir:=255;
+        if keyb=k_b then playDir:=1;
+        StatusPause;
+        playingTracks:=0;
+      end;
+    k_x:
+      begin
+        statusStopped;
+        statusPlaying;
+      end;
+    k_c:
       begin
         if _timerStatus and f_counter<>0 then
           StatusPlaying
         else
           StatusPause;
       end;
-    k_s: statusStopped;
+    k_v: statusStopped;
     k_delete, k_clear, k_insert:
       begin
         if keyb=k_clear then inc(tempoShift,20000);

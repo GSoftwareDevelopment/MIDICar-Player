@@ -3,3 +3,4 @@ DLIST_ADDR rcasm 'resources/dlist.asm';
 SCREEN_ADDR rcdata 'resources/header-gr8.obj';
 SCREEN_FOOT rcdata 'resources/footer-gr8-3.obj';
 UVMETER_ADDR rcdata 'resources/uvmeter.obj';
+HELPSCR_ADDR rcdata 'resources/help.obj';

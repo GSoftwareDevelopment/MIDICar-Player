@@ -18,8 +18,7 @@ begin
 {$IFDEF USE_FIFO}
   FIFO_Reset;
 {$ENDIF}
-  fn:=paramstr(0); getDeviceSpec(fn,curDev);
-  if curDev='' then curDev:='D:';
+  if not getDeviceSpec(paramstr(0),curDev) then curDev:='D:';
   fn:='';
 
   clearWorkArea;
@@ -45,6 +44,6 @@ begin
 
   resetMemoryPtr;
   otm:=_tm;
-  setColors; DMACTL:=34; SOUNDR:=0;
+  setColors; DMACTL:=34; SOUNDR:=0; playDir:=1;
   isStopped:=True;
 end;
