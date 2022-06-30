@@ -1,28 +1,74 @@
 if keyb<>255 then
 begin
-  if isHelp then
+  if playerStatus and ps_isHelp<>0 then
   begin
-    isHelp:=False;
+    playerStatus:=playerStatus xor ps_isHelp;
     dpoke(DLIST_ADDR+25,SCREEN_WORK);
     keyb:=255;
   end;
+  if stateInputLine=1 then
+    do_inputLine
+  else
+    if keyb=k_ESC then break;
+
   case keyb of
-    k_esc: break;
-    k_h: showHelp;
-    k_return: choiceListFile;
+    k_h:
+      begin
+        playerStatus:=playerStatus xor ps_isHelp;
+        dpoke(DLIST_ADDR+25,HELPSCR_ADDR);
+      end;
+    k_return:
+      begin
+        if choiceListFile then
+        begin
+        //   if p_bank=$fd then IOResult:=loadPlaylist(outStr);
+          if p_bank=$fe then
+          begin
+            drawListSelection;
+            init_inputLine;
+          end;
+          if p_bank=$ff then
+          begin
+            statusStopped;
+            IOResult:=loadSong(outStr);
+            stateInputLine:=2;
+          end;
+        end;
+        if stateInputLine=2 then
+        begin
+          if (p_bank=$fe) then
+          begin
+            drawListSelection;
+            if resultInputLine then
+            begin
+              fn:=outStr;
+              if not getDeviceSpec(outstr,curDev) then joinStrings(curDev,fn);
+              IOResult:=fileSelect(outStr);
+              playerStatus:=playerStatus or ps_isRefresh;
+            end;
+          end;
+          if IOResult and %11111100<>0 then statusError(IOResult);
+          if p_bank=$ff then statusPlaying;
+          stateInputLine:=0;
+        end;
+      end;
     k_space:
       begin
-        drawListSelection;
         gotoNEntry(curFile);
+        getEntry(outStr);
         getEntrySets(p_bank);
-        p_bank:=p_bank xor $80;
-        setEntrySets(p_bank);
-        showList;
-        drawListSelection;
+        if (p_bank<>$fe) and (p_bank and $7f<>0) then
+        begin
+          drawListSelection;
+          p_bank:=p_bank xor $80;
+          setEntrySets(p_bank);
+          showEntry;
+          drawListSelection;
+        end;
       end;
     k_up,k_down:
       begin
-        drawListSelection;
+        if playerStatus and ps_isRefresh=0 then drawListSelection;
         v:=0;
         if (keyb=k_up) then
         begin
@@ -33,7 +79,7 @@ begin
         end;
         if (keyb=k_down) then
         begin
-          if YFile<15 then
+          if YFile<LIST_VISIBLE_ITEMS-1 then
             inc(YFile)
           else
             if shFile<totalFiles-YFile-1 then v:=1;
@@ -41,11 +87,12 @@ begin
         if v<>0 then
         begin
           inc(shFile,v);
-          showList;
+          playerStatus:=playerStatus or ps_isRefresh;
+          // showList;
         end;
         curFile:=shFile+YFile;
         if curFile>=totalFiles then curFile:=totalFiles-1;
-        drawListSelection;
+        if playerStatus and ps_isRefresh=0 then drawListSelection;
       end;
     k_l:
       begin

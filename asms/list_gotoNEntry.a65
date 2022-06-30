@@ -2,9 +2,9 @@ gotoNEntry:
     txa:pha
 
     lda #<PLAYLIST_ADDR
-    sta pls
+    sta fileList
     lda #>PLAYLIST_ADDR
-    sta pls+1
+    sta fileList+1
 
     ldx nEntry
     beq exitGotoNEntry

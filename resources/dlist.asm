@@ -8,7 +8,7 @@ dl_start
 
         dta DL_BLANK1
 
-        dta DL_MODE_40x24T2 + DL_LMS, A(MAIN.SCREEN_WORK)
+        dta DL_MODE_40x24T2 + DL_LMS, A(MAIN.SCREEN_WORK), DL_BLANK1
     :17 dta DL_MODE_40x24T2, DL_BLANK1
 
         dta DL_MODE_20x12T5 + DL_LMS, A(MAIN.SCREEN_TIME)

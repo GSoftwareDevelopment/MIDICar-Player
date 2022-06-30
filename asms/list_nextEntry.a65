@@ -1,7 +1,7 @@
 nextEntry:
   ldy #3
 loop:
-  lda (pls),y
+  lda (fileList),y
   cmp #$9B
   beq endEntry
   iny
@@ -18,9 +18,9 @@ endEntry:
 moveEntryPtr:
   iny
   tya
-  add pls
-  sta pls
-  scc:inc pls+1
+  add fileList
+  sta fileList
+  scc:inc fileList+1
 
   lda #1
   sta result

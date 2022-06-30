@@ -9,13 +9,13 @@ ptrreg = $88;
 
   ldy #0
   lda MAIN.MIDFILES._bank
-  sta (pls),y
+  sta (fileList),y
   iny
   lda MAIN.MIDFILES._adr
-  sta (pls),y
+  sta (fileList),y
   iny
   lda MAIN.MIDFILES._adr+1
-  sta (pls),y
+  sta (fileList),y
   iny
 
   lda ptrreg
@@ -26,7 +26,7 @@ ptrreg = $88;
   ldx #1
 loop:
   lda eptr:$2000,x
-  sta (pls),y
+  sta (fileList),y
   iny
   inx
   cpx fnlen:#00
@@ -34,13 +34,13 @@ loop:
 
 storeEOFN:
   lda #$9B
-  sta (pls),y
+  sta (fileList),y
   iny
 
   tya
-  add pls
-  sta pls
-  scc:inc pls+1
+  add fileList
+  sta fileList
+  scc:inc fileList+1
 
   inc totalFiles
 

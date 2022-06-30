@@ -14,29 +14,42 @@ Uses
 {$r player.rc}
 
 var
-  channelScrAdr:array[0..15] of word;
-  playlistScrAdr:array[0..15] of word;
   playerStatus:Byte absolute $4A;
   totalXMS:Byte absolute $4B;
   scradr:Word absolute $D4;
   MCBaseAddr:Word absolute $D8;
-  pls:Pointer absolute $DA;
   _tm:Byte absolute $14;
-  otm:Byte;
-  chn:Byte;
-  YFile,shFile,curFile,totalFiles:Byte;
-  curPlay,playDir:Byte;
-  v:shortint;
-  // i,c:Byte;
-  firstTime:Boolean = True;
-  isStopped:Boolean = False;
-  isHelp:Boolean = False;
-  curdev:TDevString;
+  otm:Byte absolute $13;
+  ctm:Byte absolute $12;
+  chn:Byte absolute $D6;
+  v:shortint absolute $D7;
+
+  fileList:Pointer absolute $DA;
+  YFile:Byte absolute $400;
+  shFile:Byte absolute $401;
+  curFile:Byte absolute $402;
+  totalFiles:Byte absolute $403;
+
+  curPlay:Byte absolute $404;
+  playDir:Byte absolute $405;
+
+  last_bank:Byte absolute $40a;
+  last_adr:Word absolute $40b;
+
+  playlistScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
+
+  curdev:TDevString absolute $4fc;
   fn:TFilename absolute $500;
   outstr:TFilename absolute $580;
-  last_bank:Byte;
-  last_adr:Word;
 
+  ilch:Byte absolute $D6;
+  ilpos:Byte absolute $450;
+  ilscradr:Word absolute $451;
+  ilvcrs:Boolean absolute $453;
+  resultInputLine:boolean;
+  stateInputLine:Byte;
+
+{$i screen.inc}
 procedure statusLoop; Forward;
 {$i filestr.inc}
 {$i myNMI.inc}
@@ -50,7 +63,6 @@ procedure statusLoop; Forward;
 
 {$i init.inc}
 // {$i playlist.inc}
-{$i help.inc}
 
 begin
   init;
@@ -66,7 +78,8 @@ begin
     joinStrings(curDev,'*.*');
     gotoNEntry(0);
     _adr:=$ffff; _bank:=$fe; addToList(outStr);
-    choiceListFile;
+    shFile:=0; YFile:=0; curFile:=0;
+    choiceListFile; stateInputLine:=2; resultInputLine:=true; keyb:=k_RETURN;
   end;
 
   setNMI;
@@ -74,7 +87,7 @@ begin
 // Player loop
   Repeat
     processMIDI;
-    if not isStopped and (playingTracks=0) then
+    if (playerStatus and ps_isStopped=0) and (playingTracks=0) then
     begin
       v:=playerStatus and ps_loop;
       statusStopped;
@@ -95,19 +108,40 @@ begin
               end;
               curFile:=curPlay;
               choiceListFile;
-            until curPlay<>255;
+              if p_bank=$ff then
+                IOResult:=loadSong(outStr)
+              else
+                continue;
+            until IOResult<>1;
+            clearStatus;
+            if IOResult and %11111100<>0 then statusError(IOResult);
+            if totalTracks<>0 then
+              statusPlaying;
             playDir:=1;
           end;
-        if totalTracks<>0 then statusPlaying;
       end;
     end;
 
     if _tm<>otm then
     begin
       otm:=_tm;
+      if playerStatus and ps_isRefresh<>0 then
+      begin
+        playerStatus:=playerStatus xor ps_isRefresh;
+        showList;
+        drawListSelection;
+      end;
       scradr:=screen_time+12; putHex(@_totalTicks,8);
 
       asm  icl 'asms/uvmeters.a65' end;
+      if stateInputLine=1 then
+        if _tm-ctm>10 then
+        begin
+          ctm:=_tm;
+          ilvcrs:=not ilvcrs;
+          show_inputLine;
+        end;
+
     end;
 
     {$i keyboard.inc}

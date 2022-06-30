@@ -15,28 +15,29 @@ end;
 
 procedure statusPlaying;
 begin
+  scradr:=SCREEN_TIME;
   if totalTracks>0 then
   begin
-    scradr:=SCREEN_TIME; putINTText(#$3b+#0+#$fc+#0+#$fd);
+    putINTText(#$3b+#0+#$fc+#0+#$fd);
     scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Playing'*~+#$ce);
-    if isStopped then
+    if (playerStatus and ps_isStopped)<>0 then
     begin
       initTimer;
-      isStopped:=false;
+      playerStatus:=playerStatus xor ps_isStopped;
     end
     else
       _timerStatus:=_timerStatus and not f_counter;
   end
   else
   begin
-    scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
+    putINTText(#$fb+#0+#$fc+#0+#$fd);
     scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'No song'*~+#$ce);
   end;
 end;
 
 procedure statusPause;
 begin
-  if isStopped then exit;
+  if (playerStatus and ps_isStopped)<>0 then exit;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$3c+#0+#$fd);
   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+' Pause '*~+#$ce);
   _timerStatus:=_timerStatus or f_counter;
@@ -45,8 +46,8 @@ end;
 procedure statusStopped;
 begin
   if totalTracks=0 then exit;
-  if isStopped then exit;
-  isStopped:=true;
+  if (playerStatus and ps_isStopped)<>0 then exit;
+  playerStatus:=playerStatus or ps_isStopped;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$3d);
   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Stopped'*~+#$ce);
   StopMIDI;
@@ -73,7 +74,7 @@ end;
 procedure statusError(err:byte);
 begin
   keyb:=255;
-  scradr:=SCREEN_STATUS;
+  scradr:=SCREEN_STATUS+1;
   case err of
     ERR_UNSUPPORTED_FORMAT: PutINTText(#$4e+'Unsupported format'~*+#$ce);
     ERR_NOT_ENOUGHT_MEMORY: PutINTText(#$4e+'Not enought memory'~*+#$ce);

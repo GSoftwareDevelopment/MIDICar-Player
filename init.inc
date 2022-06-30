@@ -30,11 +30,11 @@ begin
   MIDTracks:=Pointer(TRACK_DATA_ADDR);
   // MIDData:=Pointer(MIDI_DATA_ADDR);
 
-  for cTrk:=0 to 15 do
-  begin
-    channelScrAdr[cTrk]:=SCREEN_WORK+42+cTrk*40;
-    playlistScrAdr[cTrk]:=SCREEN_WORK+48+cTrk*40;
-  end;
+  // for chn:=0 to 15 do
+  // begin
+  //   channelScrAdr[chn]:=SCREEN_WORK+42+chn*40;
+  //   playlistScrAdr[chn]:=SCREEN_WORK+48+chn*40;
+  // end;
 
   asm
     lda $14
@@ -45,5 +45,10 @@ begin
   resetMemoryPtr;
   otm:=_tm;
   setColors; DMACTL:=34; SOUNDR:=0; playDir:=1;
-  isStopped:=True;
+  playerStatus:=(playerStatus and %1111) or ps_isStopped;
+  // isHelp:=False;
+  // isStopped:=True;
+  thi:=255;
+  stateInputLine:=0;
+  resultInputLine:=false;
 end;

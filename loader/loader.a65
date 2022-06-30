@@ -1,6 +1,6 @@
     org $8000
 
-BOOT?   = $09
+; BOOT?   = $09
 DOSVEC  = $0A
 MCBASE  = $D8
 
@@ -40,16 +40,21 @@ no_axlon:
     stx MCBASE+1
     rts
 
-    ; lda #<MIDICAR_EXIST
-    ; ldy #>MIDICAR_EXIST
-    ; jmp PRINT
+    lda #<MIDICAR_EXIST
+    ldy #>MIDICAR_EXIST
+    jmp PRINT
 
 MCNotFound:
+    lda #$60
+    sta MCBASE
+    lda #$04
+    sta MCBASE+1
     lda #<MIDICAR_NOT_FOUND
     ldy #>MIDICAR_NOT_FOUND
     jsr PRINT
 
 exit2DOS:
+    rts
     jmp (DOSVEC)
 
 ;

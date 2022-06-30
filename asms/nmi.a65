@@ -19,13 +19,9 @@ COLPM0 = $d012
     STA NMIRES
 
     inc RTCLOK+2
-    bne end_rtclk
-    inc RTCLOK+1
-    bne end_rtclk
-    inc RTCLOK
-
 end_rtclk:
 
+skipTHI:
 // fragment systemowej procedury kopiowania rejestrów kolorów
 //    ldx #$08
 //colloop:

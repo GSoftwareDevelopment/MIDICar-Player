@@ -1,14 +1,9 @@
 function loadSong(filename:PString):Byte;
-const
-  th:array[0..3] of byte = ($29,$1c,$1d,$1e);
-
-var
-  thi:byte;
 
   procedure loadPrc(v:byte);
   begin
-    poke(SCREEN_STATUS,th[thi]);
-    inc(thi); if thi=4 then thi:=0;
+    // poke(SCREEN_STATUS,th[thi]);
+    // inc(thi); if thi=4 then thi:=0;
     if v>0 then
     begin
       puttextinvert:=128;
@@ -21,13 +16,20 @@ var
   end;
 
 begin
+  _bank:=last_bank; _adr:=last_adr;
   clearStatus;
   statusLoading;
   loadProcess:=@loadPrc; thi:=0;
   result:=LoadMid(filename);
+  thi:=255;
   clearStatus;
   if (result and %11111100)<>0 then
-    totalTracks:=0
+  begin
+    curPlay:=255; totalTracks:=0;
+  end
   else
+  begin
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
+    curPlay:=curFile;
+  end;
 end;

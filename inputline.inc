@@ -1,52 +1,56 @@
-function inputLine(var ln:String):Boolean;
-var
-  pos,ch:byte;
-  oscradr:word;
-  otm:byte;
-  vcrs:boolean;
 
-  procedure showLine;
-  begin
-    ln[0]:=char(pos);
-    scradr:=oscradr;
-    putSpaces(32); inc(scradr);
-    putASCText(ln);
-  end;
-
+procedure show_inputLine;
 begin
-  pos:=length(ln);
-  fillchar(ln[pos+1],127-pos,$9b);
-  keyb:=255; vcrs:=true;
-  oscradr:=scradr; showLine; otm:=_tm;
-  repeat
-    if _tm-otm>10 then
-    begin
-      otm:=_tm;
-      if vcrs then invers(1);
-      vcrs:=not vcrs;
-    end;
-    if keyb=255 then continue;
+  outstr[0]:=char(ilpos);
+  scradr:=ilscradr;
+  putASCText(outstr);
+  if ilvcrs then ilch:=$80 else ilch:=$00;
+  poke(scradr,ilch);
+  inc(scradr); putSpaces(31-ilpos);
+end;
 
-    if keyb=k_ESC then exit(false);
-    if pos>0 then
+procedure init_inputLine;
+begin
+  ilpos:=length(outstr);
+  fillchar(outstr[ilpos+1],127-ilpos,$9b);
+  keyb:=255; ilvcrs:=true;
+  ilscradr:=playlistScrAdr[YFile]+2;
+  show_inputLine; ctm:=_tm;
+  stateInputLine:=1;
+  resultInputLine:=false;
+end;
+
+procedure do_inputLine;
+begin
+  if ilpos>0 then
+  begin
+    if (keyb=k_ESC) or (keyb=k_RETURN) then
     begin
-      if keyb=k_RETURN then exit(true);
-      if (keyb=k_delete) then
+      if keyb=k_ESC then
       begin
-        ln[pos]:=#$9B;
-        dec(pos);
+        ilpos:=byte(fn[0]);
+        outstr:=fn;
       end;
+      ilvcrs:=false; show_inputLine;
+      stateInputLine:=2;
+      resultInputLine:=(keyb=K_RETURN);
+      keyb:=k_RETURN; exit;
     end;
-    if pos<30 then
+    if (keyb=k_delete) then
     begin
-      ch:=keyscan2asc(keyb);
-      if ch<>0 then
-      begin
-        inc(pos);
-        ln[pos]:=char(ch);
-      end;
+      outstr[ilpos]:=#$9B;
+      dec(ilpos);
     end;
-    showLine;
-    keyb:=255;
-  until false;
+  end;
+  if ilpos<30 then
+  begin
+    ilch:=keyscan2asc(keyb);
+    if ilch<>0 then
+    begin
+      inc(ilpos);
+      outstr[ilpos]:=char(ilch);
+    end;
+  end;
+  show_inputLine;
+  keyb:=255;
 end;

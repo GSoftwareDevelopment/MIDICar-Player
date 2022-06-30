@@ -1,4 +1,5 @@
 hlpptr = $88
+result = $4f8
 
   lda #0
   sta result
@@ -30,6 +31,7 @@ endDotSearch:
 
   iny
   tax
+  beq endGetFileExt
 
 copyExt2Result:
   lda (hlpptr),y

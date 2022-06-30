@@ -1,4 +1,5 @@
 const
+  SCREEN_ADRSES   = $0410;
   CHARS_ADDR      = $3000;
   SCREEN_ADDR     = $3400;
   SCREEN_WORK     = SCREEN_ADDR+19*40;
@@ -7,7 +8,9 @@ const
   SCREEN_FOOT     = SCREEN_STATUS+40;
   UVMETER_ADDR    = $3B00;
   HELPSCR_ADDR    = UVMETER_ADDR+$40;
-  DLIST_ADDR      = $3FB4;
+  DLIST_ADDR      = $3FB3;
+
+  SCREEN_CHANNELS = SCREEN_WORK+42;
 
   PLAYLIST_ADDR   = $2000;
   START_INFO_ADDR = $2C00;
@@ -26,7 +29,13 @@ const
   ps_repeatall= %1000;
   ps_shuffle  = %1100;
 
+  ps_isRefresh = %10000000;
+  ps_isStopped = %01000000;
+  ps_isHelp    = %00100000;
+
   LIST_VISIBLE_CHARS = 30;
+  LIST_VISIBLE_ITEMS = 16;
+  
   // fe_PLS = $504c5300;
   fe_DIR = $a4a9b200;
   fe_MID = $4d494400;

@@ -26,28 +26,28 @@ var
   _event:Byte             absolute _trkRegs+8;
 
 //
-  MIDData:Pointer;
-  MIDTracks:TByteArray;
-  format:byte;
-  totalTracks:byte;
-  tickDiv:Word;
-  ms_per_qnote:longint;
+  MIDData:Pointer         ;
+  MIDTracks:TByteArray    ;
+  format:byte             ;
+  totalTracks:byte        ;
+  tickDiv:Word            ;
+  ms_per_qnote:longint    ;
 // The following variables are informational only
 // they are not used in the file playback process
 {$IFDEF USE_SUPPORT_VARS}
-  fps:Byte;
-  fsd:Byte;
-  tactNum:Byte;
-  tactDenum:Byte;
-  ticks_per_qnote:Byte;
-  ticks_per_32nd:Byte;
-  BPM:Word;
+  fps:Byte                ;
+  fsd:Byte                ;
+  tactNum:Byte            ;
+  tactDenum:Byte          ;
+  ticks_per_qnote:Byte    ;
+  ticks_per_32nd:Byte     ;
+  BPM:Word                ;
 {$ENDIF}
-  chnVolume:Array[0..15] of byte;
-  oldTimerVec:Pointer;
+  chnVolume:Array[0..15] of byte ;
+  oldTimerVec:Pointer     ;
 
-  loadProcess:TLoadingProcess;
-  tempoShift:Longint;
+  loadProcess:TLoadingProcess ;
+  tempoShift:Longint      ;
 
 //
 function LoadMID(fn:PString):shortint;

@@ -1,0 +1,33 @@
+clearUVMeter:
+  txa:pha
+
+  lda #<SCREEN_CHANNELS
+  sta scradr
+  lda #>SCREEN_CHANNELS
+  sta scradr+1
+
+  ldx #0
+clearLoop:
+  ldy #3
+  lda #$41
+VClr:
+  sta (scradr),y
+  dey
+  sta (scradr),y
+  dey
+  sta (scradr),y
+  dey
+  sta (scradr),y
+  dey
+
+dontClear:
+  lda scradr
+  add #40
+  sta scradr
+  scc:inc scradr+1
+
+  inx
+  cpx #16
+  bne clearLoop
+
+  pla:tax

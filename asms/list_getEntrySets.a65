@@ -3,7 +3,7 @@ PTRREG = $88
 
     ldy #2
 loop:
-    lda (pls),y
+    lda (fileList),y
     sta (PTRREG),y
     dey
     bpl loop

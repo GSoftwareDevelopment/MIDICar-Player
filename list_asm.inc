@@ -31,14 +31,14 @@ end;
 procedure clearList;
 begin
   resetMemoryPtr;
-  pls:=pointer(PLAYLIST_ADDR);
+  fileList:=pointer(PLAYLIST_ADDR);
   totalFiles:=0; curfile:=0; YFile:=0; shFile:=0;
   chn:=0;
-  while (chn<16) do
+  while (chn<LIST_VISIBLE_ITEMS) do
   begin
     scradr:=playlistScrAdr[chn];
     putSpaces(32);
     inc(chn);
   end;
-  fillchar(pls,$C00,$9B);
+  fillchar(fileList,$C00,$9B);
 end;

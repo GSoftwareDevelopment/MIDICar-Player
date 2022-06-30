@@ -1,0 +1,23 @@
+colptr = $88
+
+  lda colors
+  sta colptr
+  lda colors+1
+  sta colptr+1
+
+  lda playerStatus
+  and #ps_colorSet
+  beq skip
+  lda colptr
+  add #5
+  sta colptr
+  scc:inc colptr+1
+
+skip:
+  ldy #4
+copyColors:
+  lda (colptr),y
+  sta $D016,y
+  sta 708,y
+  dey
+  bpl copyColors

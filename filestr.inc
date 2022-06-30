@@ -1,7 +1,7 @@
 //
 //
 
-function getFileExt(fn:PString):DWord; Register; assembler;
+procedure getFileExt(fn:PString); Register; assembler;
 asm
   icl 'asms/get_file_ext.a65'
 end;

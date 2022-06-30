@@ -4,7 +4,12 @@ hlpptr = $D6
   bne dontUpdateUVMeter
 
 updateUVMeter:
-  txa:pha
+  stx regx // txa:pha
+
+  lda #<SCREEN_CHANNELS
+  sta scradr
+  lda #>SCREEN_CHANNELS
+  sta scradr+1
 
   ldx #0
 uvmeterLoop:
@@ -28,25 +33,30 @@ storeVol:
   lda #>UVMETER_ADDR
   sta hlpptr+1
 
-  txa
-  asl @
-  tay
-  lda adr.CHANNELSCRADR,y
-  sta scradr
-  lda adr.CHANNELSCRADR+1,y
-  sta scradr+1
-
-  ldy #3
-loop:
+  ldy #3            //2
+  lda (hlpptr),y    //5*
+  sta (scradr),y    //6
+  dey               //2
   lda (hlpptr),y
   sta (scradr),y
   dey
-  bpl loop
+  lda (hlpptr),y
+  sta (scradr),y
+  dey
+  lda (hlpptr),y
+  sta (scradr),y
+  dey
+                    //15*+39*
 
 dontUpdate:
+  lda scradr        //3
+  add #40           //4
+  sta scradr        //3
+  scc:inc scradr+1  //2**+5
+
   inx
   cpx #16
   bne uvmeterLoop
 
-  pla:tax
+  ldx regx:#00 // pla:tax
 dontUpdateUVMeter

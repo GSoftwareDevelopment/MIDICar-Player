@@ -4,12 +4,12 @@ const
   CIO_CHN = 1;
 
 var
-{$IFNDEF USE_CIO}
-  f:File;
-{$ENDIF}
   trackCount:byte;
   chunkTag:TTag;
-  v,top,endAdr,loadSize:Word;
+  v:Word;
+  top:Word;
+  endAdr:Word;
+  loadSize:Word;
   Len:Longint;
   trkData:PMIDTrack;
   RBuf:TByteArray absolute $4000;

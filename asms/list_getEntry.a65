@@ -3,9 +3,9 @@ hlpptr = $88;
 getEntry:
   txa:pha
 
-  lda pls
+  lda fileList
   sta entryptr
-  lda pls+1
+  lda fileList+1
   sta entryptr+1
 
   lda #0
