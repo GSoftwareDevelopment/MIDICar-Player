@@ -109,8 +109,7 @@ FPEXP	.ds 1
 	RCDATA 'resources/screen_addresses.obj' SCREEN_ADRSES 0 0 0 0 0 0 0 0
 	RCDATA 'resources/font_blk.fnt' CHARS_ADDR 0 0 0 0 0 0 0 0
 	RCASM 'resources/dlist.asm' DLIST_ADDR 0 0 0 0 0 0 0 0
-	RCDATA 'resources/header-gr8.obj' SCREEN_ADDR 0 0 0 0 0 0 0 0
-	RCDATA 'resources/footer-gr8-3.obj' SCREEN_FOOT 0 0 0 0 0 0 0 0
+	RCDATA 'resources/graph.obj' SCREEN_HEAD 0 0 0 0 0 0 0 0
 	RCDATA 'resources/uvmeter.obj' UVMETER_ADDR 0 0 0 0 0 0 0 0
 	RCDATA 'resources/help.obj' HELPSCR_ADDR 0 0 0 0 0 0 0 0
 .endl
@@ -365,31 +364,6 @@ RESULT	= DATAORIGIN+$000C
 	rts						; ret
 .endl
 
-.local	PARAMSTR					; FUNCTION | ASSEMBLER
-	sta I
-
-; -------------------  ASM Block 00000045  -------------------
-
-	@cmdline i
-
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
-
-@exit
-
-; ------------------------------------------------------------
-
-I	= DATAORIGIN+$000D
-adr.RESULT	= [DATAORIGIN+$000E] .array [33]
-.var RESULT	= adr.RESULT .word
-
-@VarData	= I
-@VarDataSize	= 34
-
-	rts						; ret
-.endl
-
 ; ------------------------------------------------------------
 
 __PORTB_BANKS	= $0101
@@ -483,7 +457,7 @@ RNDSEED	= DATAORIGIN+$0009
 
 ; ------------------------------------------------------------
 
-SETUP	= DATAORIGIN+$002F
+SETUP	= DATAORIGIN+$000D
 
 @VarData	= SETUP
 @VarDataSize	= 1
@@ -701,7 +675,7 @@ endFlush:
 FIFO_HEAD	= $FD
 FIFO_TAIL	= $FE
 FIFO_BYTE	= $FF
-FIFO2NULL	= DATAORIGIN+$0030
+FIFO2NULL	= DATAORIGIN+$000E
 FIFO_ADDR	= $0600
 adr.FIFO_BUF	= $0600
 .var FIFO_BUF	= adr.FIFO_BUF .word
@@ -747,10 +721,10 @@ _TIMERSTATUS	= $F5
 
 ; ------------------------------------------------------------
 
-CHN	= DATAORIGIN+$0031
-AX1	= DATAORIGIN+$0032
-AX2	= DATAORIGIN+$0033
-DEVICE	= DATAORIGIN+$0034
+CHN	= DATAORIGIN+$000F
+AX1	= DATAORIGIN+$0010
+AX2	= DATAORIGIN+$0011
+DEVICE	= DATAORIGIN+$0012
 
 @VarData	= CHN
 @VarDataSize	= 5
@@ -789,7 +763,7 @@ DEVICE	= DATAORIGIN+$0034
 
 ; ------------------------------------------------------------
 
-CHN	= DATAORIGIN+$0036
+CHN	= DATAORIGIN+$0014
 
 @VarData	= CHN
 @VarDataSize	= 1
@@ -889,7 +863,7 @@ CNT	= :EAX
 
 .local	LOADMID						; FUNCTION
 
-	jmp l_019B
+	jmp l_019A
 
 .local	READWORDBI					; FUNCTION
 
@@ -918,7 +892,7 @@ CNT	= :EAX
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0070
+RESULT	= DATAORIGIN+$004E
 	rts						; ret
 .endl
 
@@ -954,7 +928,7 @@ RESULT	= DATAORIGIN+$0070
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0072
+RESULT	= DATAORIGIN+$0050
 	rts						; ret
 .endl
 
@@ -976,7 +950,7 @@ RESULT	= DATAORIGIN+$0072
 
 ; ------------------------------------------------------------
 
-DEST	= DATAORIGIN+$0076
+DEST	= DATAORIGIN+$0054
 
 @VarData	= DEST
 @VarDataSize	= 2
@@ -1002,7 +976,7 @@ DEST	= DATAORIGIN+$0076
 	sta LOADSIZE+1
 
 ; --- RepeatUntilProlog
-l_01BD
+l_01BC
 
 ; optimize FAIL ('MEMBOUNDCHECK', loadmid.inc), line = 28
 
@@ -1012,59 +986,59 @@ l_01BD
 
 	lda SYSTEM.IORESULT
 	cmp #$01
-	jeq l_01D0
+	jeq l_01CF
 	jmp @exit					; exit
-l_01D0
+l_01CF
 
 ; optimize OK (loadmid.inc), line = 31
 
 	lda _ADR+1
 	cmp #$D8
-	jcc l_01E4
+	jcc l_01E3
 	lda #$00
 	sta LOADSIZE
 	lda #$FF
 	sta LOADSIZE+1
-	jmp l_01F2
-l_01E4
+	jmp l_01F1
+l_01E3
 
 ; optimize OK (loadmid.inc), line = 32
 
 	lda _ADR+1
 	cmp #$C0
-	jcc l_0203
+	jcc l_0202
 	lda #$00
 	sta LOADSIZE
 	lda #$D0
 	sta LOADSIZE+1
-	jmp l_0211
-l_0203
+	jmp l_0210
+l_0202
 
 ; optimize OK (loadmid.inc), line = 33
 
 	lda _ADR+1
 	cmp #$A8
-	jcc l_0222
+	jcc l_0221
 	lda #$00
 	sta LOADSIZE
 	lda #$C0
 	sta LOADSIZE+1
-	jmp l_0230
-l_0222
+	jmp l_022F
+l_0221
 
 ; optimize OK (loadmid.inc), line = 34
 
 	lda _ADR+1
 	cmp #$40
-	jcc l_0241
+	jcc l_0240
 	lda #$00
 	sta LOADSIZE
 	lda #$80
 	sta LOADSIZE+1
-l_0241
-l_0230
-l_0211
-l_01F2
+l_0240
+l_022F
+l_0210
+l_01F1
 
 ; optimize OK (loadmid.inc), line = 35
 
@@ -1100,19 +1074,19 @@ L4	bvc L5
 	ora #$01
 L5
 	.ENDL
-	jmi l_025B
-	jeq l_025B
+	jmi l_025A
+	jeq l_025A
 	lda LEN
 	sta LOADSIZE
 	lda LEN+1
 	sta LOADSIZE+1
-l_025B
+l_025A
 
 ; optimize OK (loadmid.inc), line = 37
 
 	lda LOADSIZE+1
 	ora LOADSIZE
-	jeq l_01BD
+	jeq l_01BC
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -1124,7 +1098,7 @@ l_025B
 	rts						; ret
 	eif
 .endl
-l_019B
+l_019A
 
 ; optimize OK (loadmid.inc), line = 41
 
@@ -1143,7 +1117,7 @@ l_019B
 ; optimize OK (loadmid.inc), line = 42
 
 	lda SYSTEM.IORESULT
-	jpl l_0287
+	jpl l_0286
 
 ; optimize OK (loadmid.inc), line = 44
 
@@ -1154,7 +1128,7 @@ l_019B
 	lda #$01
 	jsr CIO.CLS
 	jmp @exit					; exit
-l_0287
+l_0286
 
 ; optimize OK (loadmid.inc), line = 49
 
@@ -1174,8 +1148,8 @@ l_0287
 	sta TOTALTRACKS
 
 ; --- WhileProlog
-	jmp l_02A1
-l_02A2
+	jmp l_02A0
+l_02A1
 
 ; optimize OK (loadmid.inc), line = 55
 
@@ -1207,16 +1181,16 @@ l_02A2
 
 	lda CHUNKTAG+3
 	eor #$64
-	jne l_02BA
+	jne l_02B9
 	lda CHUNKTAG+2
 	eor #$68
-	jne l_02BA
+	jne l_02B9
 	lda CHUNKTAG+1
 	eor #$54
-	jne l_02BA
+	jne l_02B9
 	lda CHUNKTAG
 	eor #$4D
-	jne l_02BA
+	jne l_02B9
 
 ; optimize FAIL ('READWORDBI', loadmid.inc), line = 59
 
@@ -1226,16 +1200,16 @@ l_02A2
 
 ; optimize OK (loadmid.inc), line = 60
 
-	jeq l_02DD
+	jeq l_02DC
 	cmp #$01
-	jeq l_02DD
+	jeq l_02DC
 
 ; optimize OK (loadmid.inc), line = 62
 
 	lda #$64
 	sta SYSTEM.IORESULT
-	jmp b_02A2					; break
-l_02DD
+	jmp b_02A1					; break
+l_02DC
 
 ; optimize FAIL ('READWORDBI', loadmid.inc), line = 65
 
@@ -1253,7 +1227,7 @@ l_02DD
 
 ; optimize OK (loadmid.inc), line = 67
 
-	jmi l_0301
+	jmi l_0300
 
 ; optimize OK (loadmid.inc), line = 68
 
@@ -1261,24 +1235,24 @@ l_02DD
 	sta TICKDIV
 	lda V+1
 	sta TICKDIV+1
-l_0301
-	jmp l_0312
-l_02BA
+l_0300
+	jmp l_0311
+l_02B9
 
 ; optimize OK (loadmid.inc), line = 83
 
 	lda CHUNKTAG+3
 	eor #$6B
-	jne l_0322
+	jne l_0321
 	lda CHUNKTAG+2
 	eor #$72
-	jne l_0322
+	jne l_0321
 	lda CHUNKTAG+1
 	eor #$54
-	jne l_0322
+	jne l_0321
 	lda CHUNKTAG
 	eor #$4D
-	jne l_0322
+	jne l_0321
 
 ; optimize FAIL (0, loadmid.inc), line = 85
 
@@ -1321,8 +1295,8 @@ l_02BA
 
  ldy _bank \ lda $100,y \ sta PORTB 
 ; --- WhileProlog
-	jmp l_033C
-l_033D
+	jmp l_033B
+l_033C
 
 ; optimize FAIL (':TMP', loadmid.inc), line = 96
 
@@ -1344,15 +1318,15 @@ l_033D
 
 	lda SYSTEM.IORESULT
 	cmp #$01
-	jeq l_0354
-	jmp b_033D					; break
-l_0354
+	jeq l_0353
+	jmp b_033C					; break
+l_0353
 
 ; optimize OK (loadmid.inc), line = 100
 
 	lda _ADR+1
 	cmp #$C0
-	jcc l_0368
+	jcc l_0367
 
 ; optimize OK (loadmid.inc), line = 102
 
@@ -1379,8 +1353,8 @@ l_0354
 	.local +MAIN.SYSTEM.MOVE_0153
 	m@INLINE
 	.endl
-	jmp l_037B
-l_0368
+	jmp l_037A
+l_0367
 
 ; optimize OK (loadmid.inc), line = 106
 
@@ -1389,15 +1363,15 @@ l_0368
 	lda _PTR+1
 	sta _BGET.DEST+1
 	jsr _BGET
-l_037B
+l_037A
 
 ; optimize OK (loadmid.inc), line = 108
 
 	lda SYSTEM.IORESULT
 	cmp #$01
-	jeq l_0390
-	jmp b_033D					; break
-l_0390
+	jeq l_038F
+	jmp b_033C					; break
+l_038F
 
 ; optimize OK (loadmid.inc), line = 110
 
@@ -1422,7 +1396,7 @@ l_0390
 	lda LEN+3
 	sbc #$00
 	sta LEN+3
-l_033C
+l_033B
 
 ; optimize OK (loadmid.inc), line = 94
 
@@ -1431,9 +1405,9 @@ l_033C
 	ora LEN+2
 	ora LEN+1
 	ora LEN
-	jne l_033D
+	jne l_033C
 @
-b_033D
+b_033C
 
 ; optimize OK (loadmid.inc), line = 113
 
@@ -1442,27 +1416,27 @@ b_033D
 	sta TRKDATA
 	scc
 	inc TRKDATA+1
-	jmp l_03AB
-l_0322
+	jmp l_03AA
+l_0321
 
 ; optimize OK (loadmid.inc), line = 115
 
 	lda #$66
 	sta SYSTEM.IORESULT
-l_03AB
-l_0312
-l_02A1
+l_03AA
+l_0311
+l_02A0
 
 ; optimize OK (loadmid.inc), line = 53
 
 	lda SYSTEM.IORESULT
 	cmp #$01
-	jne l_02A2w
+	jne l_02A1w
 	lda TRACKCOUNT
 	cmp TOTALTRACKS
-	jcc l_02A2
-l_02A2w
-b_02A2
+	jcc l_02A1
+l_02A1w
+b_02A1
 
 ; optimize OK (loadmid.inc), line = 117
 
@@ -1477,18 +1451,18 @@ b_02A2
 
 ; ------------------------------------------------------------
 
-FN	= DATAORIGIN+$005A
-RESULT	= DATAORIGIN+$005C
+FN	= DATAORIGIN+$0038
+RESULT	= DATAORIGIN+$003A
 LOADBUF_SIZE	= $4000
 CIO_CHN	= $01
-TRACKCOUNT	= DATAORIGIN+$005D
-CHUNKTAG	= DATAORIGIN+$005E
-V	= DATAORIGIN+$0062
-TOP	= DATAORIGIN+$0064
-ENDADR	= DATAORIGIN+$0066
-LOADSIZE	= DATAORIGIN+$0068
-LEN	= DATAORIGIN+$006A
-TRKDATA	= DATAORIGIN+$006E
+TRACKCOUNT	= DATAORIGIN+$003B
+CHUNKTAG	= DATAORIGIN+$003C
+V	= DATAORIGIN+$0040
+TOP	= DATAORIGIN+$0042
+ENDADR	= DATAORIGIN+$0044
+LOADSIZE	= DATAORIGIN+$0046
+LEN	= DATAORIGIN+$0048
+TRKDATA	= DATAORIGIN+$004C
 TRKDATA.STATUS	= DATAORIGIN+$0000
 TRKDATA.BANK	= DATAORIGIN+$0001
 TRKDATA.PTR	= DATAORIGIN+$0002
@@ -1628,7 +1602,7 @@ adr.RBUF	= $4000
 
 	lda _RATIO
 	cmp #$10
-	jcc l_0429
+	jcc l_0428
 	lda #$00
 	sta RATIO
 	sta RATIO+1
@@ -1636,7 +1610,7 @@ adr.RBUF	= $4000
 	sta RATIO+2
 	lda #$41
 	sta RATIO+3
-l_0429
+l_0428
 
 ; optimize OK (settempo.inc), line = 29
 
@@ -1709,11 +1683,11 @@ l_0429
   
 ; ------------------------------------------------------------
 
-FREQ	= DATAORIGIN+$0078
-_FREQ	= DATAORIGIN+$007C
-FDIV	= DATAORIGIN+$0080
-RATIO	= DATAORIGIN+$0081
-_RATIO	= DATAORIGIN+$0085
+FREQ	= DATAORIGIN+$0056
+_FREQ	= DATAORIGIN+$005A
+FDIV	= DATAORIGIN+$005E
+RATIO	= DATAORIGIN+$005F
+_RATIO	= DATAORIGIN+$0063
 
 @VarData	= FREQ
 @VarDataSize	= 14
@@ -1732,7 +1706,7 @@ _RATIO	= DATAORIGIN+$0085
 
 .local	PROCESSTRACK					; PROCEDURE | KEEP
 
-	jmp l_0463
+	jmp l_0462
 
 .local	READB						; PROCEDURE | INLINE
 
@@ -1816,11 +1790,11 @@ _RATIO	= DATAORIGIN+$0085
 ; optimize OK (events.inc), line = 15
 
 	lda EVENT
-	jeq l_049E
+	jeq l_049D
 	lda _EVENT
 	and #$F0
 	cmp #$90
-	jne l_049E
+	jne l_049D
 
 ; optimize OK (events.inc), line = 16
 
@@ -1829,7 +1803,7 @@ _RATIO	= DATAORIGIN+$0085
 	tay
 	lda MC6850.MC_BYTE
 	sta adr.CHNVOLUME,y
-l_049E
+l_049D
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -1877,8 +1851,8 @@ l_049E
 	jsr MIDI_FIFO.FIFO_WRITEBYTE
 
 ; --- WhileProlog
-	jmp l_04BD
-l_04BE
+	jmp l_04BC
+l_04BD
 
 ; optimize FAIL ('m@INLINE', events.inc), line = 40
 
@@ -1893,12 +1867,12 @@ l_04BE
 ; optimize FAIL (0, events.inc), line = 46
 
 	dec _TMP
-l_04BD
+l_04BC
 
 ; optimize OK (events.inc), line = 38
 
 	lda _TMP
-	jne l_04BE
+	jne l_04BD
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -1927,7 +1901,7 @@ l_04BD
 
 	lda EVENT
 	cmp #$2F
-	jne l_04E8
+	jne l_04E7
 
 ; optimize FAIL (0, events.inc), line = 63
 
@@ -1938,14 +1912,14 @@ l_04BD
 	lda _STATUS
 	ora #$40
 	sta _STATUS
-	jmp l_0500
-l_04E8
+	jmp l_04FF
+l_04E7
 
 ; optimize OK (events.inc), line = 66
 
 	lda EVENT
 	cmp #$51
-	jne l_0512
+	jne l_0511
 
 ; optimize FAIL ('READ24', events.inc), line = 68
 
@@ -1965,12 +1939,12 @@ l_04E8
 ; optimize FAIL ('SETTEMPO', events.inc), line = 70
 
 	jsr SETTEMPO
-	jmp l_0522
-l_0512
+	jmp l_0521
+l_0511
 
 ; --- WhileProlog
-	jmp l_0524
-l_0525
+	jmp l_0523
+l_0524
 
 ; optimize FAIL (0, events.inc), line = 85
 
@@ -1985,14 +1959,14 @@ l_0525
 ; optimize FAIL ('MEMBOUNDCHECK', events.inc), line = 87
 
 	jsr MEMBOUNDCHECK
-l_0524
+l_0523
 
 ; optimize OK (events.inc), line = 83
 
 	lda _TMP
-	jne l_0525
-l_0522
-l_0500
+	jne l_0524
+l_0521
+l_04FF
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -2004,18 +1978,18 @@ l_0500
 	rts						; ret
 	eif
 .endl
-l_0463
+l_0462
 
 ; -------------------  ASM Block 00000075  -------------------
 
  ldy _bank \ lda $100,y \ sta PORTB 
 ; --- RepeatUntilProlog
-l_053C
+l_053B
 
 ; optimize OK (processtrack.inc), line = 33
 
 	lda _STATUS
-	jmi l_0552
+	jmi l_0551
 
 ; optimize FAIL ('READVARL', processtrack.inc), line = 35
 
@@ -2024,11 +1998,11 @@ l_053C
 ; optimize OK (processtrack.inc), line = 36
 
 	lda _DELTA+3
-	jmi l_0564
+	jmi l_0563
 	ora _DELTA+2
 	ora _DELTA+1
 	ora _DELTA
-	jeq l_0564
+	jeq l_0563
 
 ; optimize OK (processtrack.inc), line = 38
 
@@ -2044,23 +2018,23 @@ l_053C
 	lda _TRACKTIME+3
 	adc _DELTA+3
 	sta _TRACKTIME+3
-	jmp b_053C					; break
-l_0564
-	jmp l_0578
-l_0552
+	jmp b_053B					; break
+l_0563
+	jmp l_0577
+l_0551
 
 ; optimize OK (processtrack.inc), line = 43
 
 	lda _STATUS
 	and #$7F
 	sta _STATUS
-l_0578
+l_0577
 
 ; optimize OK (processtrack.inc), line = 45
 
 	ldy #$00
 	lda (_PTR),y
-	jpl l_059B
+	jpl l_059A
 
 ; optimize FAIL ('m@INLINE', processtrack.inc), line = 47
 
@@ -2069,72 +2043,72 @@ l_0578
 	.endl
 	lda EVENT
 	sta _EVENT
-	jmp l_05AC
-l_059B
+	jmp l_05AB
+l_059A
 
 ; optimize OK (processtrack.inc), line = 50
 
 	lda _EVENT
 	sta EVENT
-l_05AC
+l_05AB
 
 ; optimize OK (processtrack.inc), line = 52
 
 	lda #$BF
 	cmp _EVENT
-	jcc l_05C4
+	jcc l_05C3
 
 ; optimize FAIL ('EVENTMIDI3', processtrack.inc), line = 54
 
 	jsr EVENTMIDI3
-	jmp l_05CF
-l_05C4
+	jmp l_05CE
+l_05C3
 	lda #$DF
 	cmp _EVENT
-	jcc l_05E1
+	jcc l_05E0
 
 ; optimize FAIL ('EVENTMIDI2', processtrack.inc), line = 56
 
 	jsr EVENTMIDI2
-	jmp l_05EC
-l_05E1
+	jmp l_05EB
+l_05E0
 	lda #$EF
 	cmp _EVENT
-	jcc l_05FE
+	jcc l_05FD
 
 ; optimize FAIL ('EVENTMIDI3', processtrack.inc), line = 58
 
 	jsr EVENTMIDI3
-	jmp l_0609
-l_05FE
+	jmp l_0608
+l_05FD
 	lda #$F7
 	cmp _EVENT
-	jcc l_061B
+	jcc l_061A
 
 ; optimize FAIL ('EVENTSYSEX', processtrack.inc), line = 60
 
 	jsr EVENTSYSEX
-	jmp l_0626
-l_061B
+	jmp l_0625
+l_061A
 	lda _EVENT
 	cmp #$FF
-	jne l_0638
+	jne l_0637
 
 ; optimize FAIL ('EVENTMETA', processtrack.inc), line = 61
 
 	jsr EVENTMETA
-l_0638
-l_0626
-l_0609
-l_05EC
-l_05CF
+l_0637
+l_0625
+l_0608
+l_05EB
+l_05CE
 
 ; optimize OK (processtrack.inc), line = 63
 
 	lda _STATUS
 	and #$40
-	jeq l_053C
-b_053C
+	jeq l_053B
+b_053B
 
 ; optimize OK (processtrack.inc), line = 65
 
@@ -2166,15 +2140,15 @@ EVENT	= $FF
 ; optimize OK (processmidi.inc), line = 31
 
 	lda _TIMERSTATUS
-	jpl l_0672
+	jpl l_0671
 	jmp @exit					; exit
-l_0672
+l_0671
 
 ; optimize OK (processmidi.inc), line = 32
 
 	lda CTRK
 	cmp TOTALTRACKS
-	jne l_0689
+	jne l_0688
 
 ; optimize OK (processmidi.inc), line = 34
 
@@ -2187,8 +2161,8 @@ l_0672
 	sta CURTRACKPTR
 	lda MIDTRACKS+1
 	sta CURTRACKPTR+1
-	jmp l_069C
-l_0689
+	jmp l_069B
+l_0688
 
 ; optimize FAIL (0, processmidi.inc), line = 39
 
@@ -2201,7 +2175,7 @@ l_0689
 	sta CURTRACKPTR
 	scc
 	inc CURTRACKPTR+1
-l_069C
+l_069B
 
 ; -------------------  ASM Block 00000076  -------------------
 
@@ -2446,18 +2420,18 @@ _PTR	= $E2
 _ADR	= $E2
 _TRACKTIME	= $E4
 _EVENT	= $E8
-MIDDATA	= DATAORIGIN+$0037
-adr.MIDTRACKS	= [DATAORIGIN+$0039] .array [1]
+MIDDATA	= DATAORIGIN+$0015
+adr.MIDTRACKS	= [DATAORIGIN+$0017] .array [1]
 .var MIDTRACKS	= adr.MIDTRACKS .word
-FORMAT	= DATAORIGIN+$003A
-TOTALTRACKS	= DATAORIGIN+$003B
-TICKDIV	= DATAORIGIN+$003C
-MS_PER_QNOTE	= DATAORIGIN+$003E
-adr.CHNVOLUME	= [DATAORIGIN+$0042] .array [16]
+FORMAT	= DATAORIGIN+$0018
+TOTALTRACKS	= DATAORIGIN+$0019
+TICKDIV	= DATAORIGIN+$001A
+MS_PER_QNOTE	= DATAORIGIN+$001C
+adr.CHNVOLUME	= [DATAORIGIN+$0020] .array [16]
 .var CHNVOLUME	= adr.CHNVOLUME .word
-OLDTIMERVEC	= DATAORIGIN+$0052
-LOADPROCESS	= DATAORIGIN+$0054
-TEMPOSHIFT	= DATAORIGIN+$0056
+OLDTIMERVEC	= DATAORIGIN+$0030
+LOADPROCESS	= DATAORIGIN+$0032
+TEMPOSHIFT	= DATAORIGIN+$0034
 
 .endl							; UNIT MIDFILES
 
@@ -2585,8 +2559,8 @@ S	= :EDX
 
 ; ------------------------------------------------------------
 
-V	= DATAORIGIN+$008A
-N	= DATAORIGIN+$008C
+V	= DATAORIGIN+$0079
+N	= DATAORIGIN+$007B
 
 @VarData	= V
 @VarDataSize	= 3
@@ -2611,7 +2585,7 @@ N	= DATAORIGIN+$008C
 
 ; ------------------------------------------------------------
 
-VALUE	= DATAORIGIN+$008D
+VALUE	= DATAORIGIN+$007C
 
 @VarData	= VALUE
 @VarDataSize	= 2
@@ -2918,8 +2892,8 @@ thumblr:
 
 ; ------------------------------------------------------------
 
-KEYSCAN	= DATAORIGIN+$0093
-RESULT	= DATAORIGIN+$0094
+KEYSCAN	= DATAORIGIN+$0082
+RESULT	= DATAORIGIN+$0083
 
 @VarData	= KEYSCAN
 @VarDataSize	= 1
@@ -2960,13 +2934,13 @@ GM_RESET:
 
 .local	STOPMIDI					; PROCEDURE
 
-; optimize OK (helpers.inc), line = 33
+; optimize OK (helpers.inc), line = 34
 
 	lda MIDFILES._TIMERSTATUS
 	ora #$80
 	sta MIDFILES._TIMERSTATUS
 
-; optimize OK (helpers.inc), line = 34
+; optimize OK (helpers.inc), line = 35
 
 	lda #$00
 	sta MIDFILES._TOTALTICKS
@@ -2976,7 +2950,7 @@ GM_RESET:
 	lda #$01
 	sta MIDFILES._SUBCNT
 
-; optimize OK (helpers.inc), line = 35
+; optimize OK (helpers.inc), line = 36
 
 	sei
 	mva MIDFILES.OLDTIMERVEC VTIMR1
@@ -2987,7 +2961,7 @@ GM_RESET:
 	sta irqen
 	cli
 
-; optimize FAIL ('RESET_MIDI', helpers.inc), line = 36
+; optimize FAIL ('RESET_MIDI', helpers.inc), line = 37
 
 	jsr RESET_MIDI
 @exit
@@ -3004,32 +2978,32 @@ GM_RESET:
 
 .local	RESETMEMORYPTR					; PROCEDURE
 
-; optimize OK (helpers.inc), line = 41
+; optimize OK (helpers.inc), line = 42
 
 	lda TOTALXMS
 	sta LAST_BANK
 
-; optimize OK (helpers.inc), line = 42
+; optimize OK (helpers.inc), line = 43
 
 	lda TOTALXMS
-	jeq l_0754
+	jeq l_0753
 
-; optimize OK (helpers.inc), line = 43
+; optimize OK (helpers.inc), line = 44
 
 	lda #$00
 	sta LAST_ADR
 	lda #$40
 	sta LAST_ADR+1
-	jmp l_0762
-l_0754
+	jmp l_0761
+l_0753
 
-; optimize OK (helpers.inc), line = 45
+; optimize OK (helpers.inc), line = 46
 
 	lda #$00
 	sta LAST_ADR
 	lda #$D8
 	sta LAST_ADR+1
-l_0762
+l_0761
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3044,17 +3018,17 @@ l_0762
 
 .local	CLEARSTATUS					; PROCEDURE
 
-; optimize OK (helpers.inc), line = 55
+; optimize OK (helpers.inc), line = 56
 
 	lda #$00
 	ldy #$3B
-	sta:rpl $39C8,y-
+	sta:rpl $3AB8,y-
 
-; optimize OK (helpers.inc), line = 56
+; optimize OK (helpers.inc), line = 57
 
-	lda #$C8
+	lda #$B8
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$02
 	sta PUTINTTEXT.S
@@ -3062,19 +3036,19 @@ l_0762
 	sta PUTINTTEXT.S+1
 	jsr PUTINTTEXT
 
-; optimize FAIL ('STATUSLOOP', helpers.inc), line = 57
+; optimize FAIL ('STATUSLOOP', helpers.inc), line = 58
 
 	jsr STATUSLOOP
 
-; optimize OK (helpers.inc), line = 58
+; optimize OK (helpers.inc), line = 59
 
-	lda #$DC
+	lda #$CC
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	jsr HLINE
 
-; optimize OK (helpers.inc), line = 59
+; optimize OK (helpers.inc), line = 60
 
 	lda #$10
 	sta :ecx
@@ -3092,21 +3066,21 @@ l_0762
 	adc #$00
 	sta MEMAVAILABLE+1
 
-; optimize OK (helpers.inc), line = 60
+; optimize OK (helpers.inc), line = 61
 
 	cmp #$27
 	bne @+
 	lda MEMAVAILABLE
 	cmp #$10
 @
-	jcs l_0799
-	lda #$F9
+	jcs l_0798
+	lda #$E9
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
-l_0799
+l_0798
 
-; optimize OK (helpers.inc), line = 61
+; optimize OK (helpers.inc), line = 62
 
 	lda MEMAVAILABLE+1
 	cmp #$03
@@ -3114,47 +3088,47 @@ l_0799
 	lda MEMAVAILABLE
 	cmp #$E8
 @
-	jcs l_07B1
-	lda #$FA
+	jcs l_07B0
+	lda #$EA
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
-l_07B1
-
-; optimize OK (helpers.inc), line = 62
-
-	lda MEMAVAILABLE+1
-	jne l_07C9
-	lda MEMAVAILABLE
-	cmp #$64
-	jcs l_07C9
-	lda #$FB
-	sta SCRADR
-	lda #$39
-	sta SCRADR+1
-l_07C9
+l_07B0
 
 ; optimize OK (helpers.inc), line = 63
 
 	lda MEMAVAILABLE+1
-	jne l_07E1
+	jne l_07C8
 	lda MEMAVAILABLE
-	cmp #$0A
-	jcs l_07E1
-	lda #$FC
+	cmp #$64
+	jcs l_07C8
+	lda #$EB
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
-l_07E1
+l_07C8
 
 ; optimize OK (helpers.inc), line = 64
+
+	lda MEMAVAILABLE+1
+	jne l_07E0
+	lda MEMAVAILABLE
+	cmp #$0A
+	jcs l_07E0
+	lda #$EC
+	sta SCRADR
+	lda #$3A
+	sta SCRADR+1
+l_07E0
+
+; optimize OK (helpers.inc), line = 65
 
 	lda SCRADR
 	sta OSCRADR
 	lda SCRADR+1
 	sta OSCRADR+1
 
-; optimize OK (helpers.inc), line = 65
+; optimize OK (helpers.inc), line = 66
 
 	lda #$09
 	sta PUTINTTEXT.S
@@ -3172,27 +3146,27 @@ l_07E1
 	sta PUTINTTEXT.S+1
 	jsr PUTINTTEXT
 
-; optimize OK (helpers.inc), line = 66
+; optimize OK (helpers.inc), line = 67
 
 	lda adr.FN
 	sta L
 
-; optimize OK (helpers.inc), line = 67
-
-	jne l_0809
-	jmp @exit					; exit
-l_0809
-
 ; optimize OK (helpers.inc), line = 68
+
+	jne l_0808
+	jmp @exit					; exit
+l_0808
+
+; optimize OK (helpers.inc), line = 69
 
 	lda L
 	cmp #$11
-	jcc l_081E
+	jcc l_081D
 	lda #$10
 	sta adr.FN+$00
-l_081E
+l_081D
 
-; optimize OK (helpers.inc), line = 69
+; optimize OK (helpers.inc), line = 70
 
 	lda OSCRADR
 	ldy OSCRADR+1
@@ -3212,9 +3186,9 @@ l_081E
 
 ; ------------------------------------------------------------
 
-L	= DATAORIGIN+$0095
-OSCRADR	= DATAORIGIN+$0096
-MEMAVAILABLE	= DATAORIGIN+$0098
+L	= DATAORIGIN+$0084
+OSCRADR	= DATAORIGIN+$0085
+MEMAVAILABLE	= DATAORIGIN+$0087
 
 @VarData	= L
 @VarDataSize	= 5
@@ -3251,11 +3225,11 @@ MEMAVAILABLE	= DATAORIGIN+$0098
 
 .local	EXIT2DOS					; PROCEDURE
 
-; optimize FAIL ('STOPMIDI', helpers.inc), line = 80
+; optimize FAIL ('STOPMIDI', helpers.inc), line = 81
 
 	jsr STOPMIDI
 
-; optimize OK (helpers.inc), line = 81
+; optimize OK (helpers.inc), line = 82
 
 	lda #$00
 	jsr CIO.CLS
@@ -3288,9 +3262,9 @@ MEMAVAILABLE	= DATAORIGIN+$0098
 
 ; optimize OK (status.inc), line = 11
 
-	lda #$CE
+	lda #$BE
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 
 ; optimize OK (status.inc), line = 12
@@ -3331,15 +3305,15 @@ adr.SLOOP	= CODEORIGIN+$010A
 
 ; optimize OK (status.inc), line = 18
 
-	lda #$C8
+	lda #$B8
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 
 ; optimize OK (status.inc), line = 19
 
 	lda MIDFILES.TOTALTRACKS
-	jeq l_087F
+	jeq l_087E
 
 ; optimize OK (status.inc), line = 21
 
@@ -3351,9 +3325,9 @@ adr.SLOOP	= CODEORIGIN+$010A
 
 ; optimize OK (status.inc), line = 22
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$2E
 	sta PUTINTTEXT.S
@@ -3365,7 +3339,7 @@ adr.SLOOP	= CODEORIGIN+$010A
 
 	lda PLAYERSTATUS
 	and #$40
-	jeq l_089E
+	jeq l_089D
 
 ; optimize FAIL ('MIDFILES.INITTIMER', status.inc), line = 25
 
@@ -3376,17 +3350,17 @@ adr.SLOOP	= CODEORIGIN+$010A
 	lda PLAYERSTATUS
 	eor #$40
 	sta PLAYERSTATUS
-	jmp l_08B3
-l_089E
+	jmp l_08B2
+l_089D
 
 ; optimize OK (status.inc), line = 29
 
 	lda MIDFILES._TIMERSTATUS
 	and #$7F
 	sta MIDFILES._TIMERSTATUS
-l_08B3
-	jmp l_08C9
-l_087F
+l_08B2
+	jmp l_08C8
+l_087E
 
 ; optimize OK (status.inc), line = 33
 
@@ -3398,15 +3372,16 @@ l_087F
 
 ; optimize OK (status.inc), line = 34
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
+	lda #$39
 	sta PUTINTTEXT.S
 	lda #$80
 	sta PUTINTTEXT.S+1
 	jsr PUTINTTEXT
-l_08C9
+l_08C8
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3425,15 +3400,15 @@ l_08C9
 
 	lda PLAYERSTATUS
 	and #$40
-	jeq l_08EB
+	jeq l_08EA
 	jmp @exit					; exit
-l_08EB
+l_08EA
 
 ; optimize OK (status.inc), line = 41
 
-	lda #$C8
+	lda #$B8
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$44
 	sta PUTINTTEXT.S
@@ -3443,9 +3418,9 @@ l_08EB
 
 ; optimize OK (status.inc), line = 42
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$4B
 	sta PUTINTTEXT.S
@@ -3475,17 +3450,17 @@ l_08EB
 ; optimize OK (status.inc), line = 48
 
 	lda MIDFILES.TOTALTRACKS
-	jne l_091A
+	jne l_0919
 	jmp @exit					; exit
-l_091A
+l_0919
 
 ; optimize OK (status.inc), line = 49
 
 	lda PLAYERSTATUS
 	and #$40
-	jeq l_0933
+	jeq l_0932
 	jmp @exit					; exit
-l_0933
+l_0932
 
 ; optimize OK (status.inc), line = 50
 
@@ -3495,9 +3470,9 @@ l_0933
 
 ; optimize OK (status.inc), line = 51
 
-	lda #$C8
+	lda #$B8
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$56
 	sta PUTINTTEXT.S
@@ -3507,9 +3482,9 @@ l_0933
 
 ; optimize OK (status.inc), line = 52
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$5D
 	sta PUTINTTEXT.S
@@ -3563,9 +3538,9 @@ l_0933
 
 ; optimize OK (status.inc), line = 61
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$68
 	sta PUTINTTEXT.S
@@ -3588,9 +3563,9 @@ l_0933
 
 ; optimize OK (status.inc), line = 66
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda #$73
 	sta PUTINTTEXT.S
@@ -3619,9 +3594,9 @@ l_0933
 
 ; optimize OK (status.inc), line = 77
 
-	lda #$DD
+	lda #$CD
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 
 ; optimize OK (status.inc), line = 78
@@ -3629,7 +3604,7 @@ l_0933
 	lda ERR
 	sta @CASETMP_0003
 	cmp #$64
-	jne l_0981
+	jne l_0980
 @
 
 ; optimize OK (status.inc), line = 79
@@ -3641,9 +3616,9 @@ l_0933
 	jsr PUTINTTEXT
 
 	jmp a_0003
-l_0981
+l_0980
 	cmp #$65
-	jne l_098C
+	jne l_098B
 @
 
 ; optimize OK (status.inc), line = 80
@@ -3655,9 +3630,9 @@ l_0981
 	jsr PUTINTTEXT
 
 	jmp a_0003
-l_098C
+l_098B
 	cmp #$66
-	jne l_0997
+	jne l_0996
 @
 
 ; optimize OK (status.inc), line = 81
@@ -3669,7 +3644,7 @@ l_098C
 	jsr PUTINTTEXT
 
 	jmp a_0003
-l_0997
+l_0996
 
 ; optimize OK (status.inc), line = 83
 
@@ -3701,13 +3676,13 @@ l_0997
 a_0003
 
 ; --- WhileProlog
-l_09B5
+l_09B4
 
 ; optimize OK (status.inc), line = 87
 
 	lda KEYB
 	cmp #$FF
-	jeq l_09B5
+	jeq l_09B4
 
 ; optimize FAIL ('CLEARSTATUS', status.inc), line = 88
 
@@ -3715,8 +3690,8 @@ l_09B5
 
 ; ------------------------------------------------------------
 
-ERR	= DATAORIGIN+$009A
-@CASETMP_0003	= DATAORIGIN+$009B
+ERR	= DATAORIGIN+$0089
+@CASETMP_0003	= DATAORIGIN+$008A
 
 @VarData	= ERR
 @VarDataSize	= 2
@@ -3735,14 +3710,14 @@ ERR	= DATAORIGIN+$009A
 
 .local	LOADSONG					; FUNCTION
 
-	jmp l_09C6
+	jmp l_09C5
 
 .local	LOADPRC						; PROCEDURE
 	sta V
 
 ; optimize OK (load.inc), line = 7
 
-	jeq l_09DB
+	jeq l_09DA
 
 ; optimize OK (load.inc), line = 9
 
@@ -3751,9 +3726,9 @@ ERR	= DATAORIGIN+$009A
 
 ; optimize OK (load.inc), line = 10
 
-	lda #$E6
+	lda #$D6
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 
 ; optimize OK (load.inc), line = 11
@@ -3794,11 +3769,11 @@ ERR	= DATAORIGIN+$009A
 
 	lda #$00
 	sta PUTTEXTINVERT
-l_09DB
+l_09DA
 
 ; ------------------------------------------------------------
 
-V	= DATAORIGIN+$009F
+V	= DATAORIGIN+$008E
 
 @VarData	= V
 @VarDataSize	= 1
@@ -3814,7 +3789,7 @@ V	= DATAORIGIN+$009F
 	rts						; ret
 	eif
 .endl
-l_09C6
+l_09C5
 
 ; optimize OK (load.inc), line = 19
 
@@ -3865,7 +3840,7 @@ l_09C6
 
 	lda RESULT
 	and #$FC
-	jeq l_0A38
+	jeq l_0A37
 
 ; optimize OK (load.inc), line = 28
 
@@ -3873,8 +3848,8 @@ l_09C6
 	sta CURPLAY
 	lda #$00
 	sta MIDFILES.TOTALTRACKS
-	jmp l_0A4A
-l_0A38
+	jmp l_0A49
+l_0A37
 
 ; optimize OK (load.inc), line = 32
 
@@ -3898,13 +3873,13 @@ l_0A38
 
 	lda CURFILE
 	sta CURPLAY
-l_0A4A
+l_0A49
 @exit
 
 ; ------------------------------------------------------------
 
-FILENAME	= DATAORIGIN+$009C
-RESULT	= DATAORIGIN+$009E
+FILENAME	= DATAORIGIN+$008B
+RESULT	= DATAORIGIN+$008D
 
 @VarData	= FILENAME
 @VarDataSize	= 2
@@ -3979,7 +3954,7 @@ PTR	= :EDX
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$00A0
+RESULT	= DATAORIGIN+$008F
 	rts						; ret
 .endl
 
@@ -3992,7 +3967,7 @@ RESULT	= DATAORIGIN+$00A0
 
 ; ------------------------------------------------------------
 
-NENTRY	= DATAORIGIN+$00A1
+NENTRY	= DATAORIGIN+$0090
 
 @VarData	= NENTRY
 @VarDataSize	= 1
@@ -4056,17 +4031,17 @@ ENTRY	= :EDX
 	sta CHN
 
 ; --- WhileProlog
-	jmp l_0A79
-l_0A7A
+	jmp l_0A78
+l_0A79
 
 ; optimize OK (list_asm.inc), line = 45
 
 	lda CHN
 	asl @
 	tay
-	lda adr.PLAYLISTSCRADR,y
+	lda adr.LISTSCRADR,y
 	sta SCRADR
-	lda adr.PLAYLISTSCRADR+1,y
+	lda adr.LISTSCRADR+1,y
 	sta SCRADR+1
 
 ; optimize OK (list_asm.inc), line = 46
@@ -4077,13 +4052,13 @@ l_0A7A
 ; optimize FAIL (0, list_asm.inc), line = 47
 
 	inc CHN
-l_0A79
+l_0A78
 
 ; optimize OK (list_asm.inc), line = 43
 
 	lda CHN
 	cmp #$10
-	jcc l_0A7A
+	jcc l_0A79
 
 ; optimize OK (list_asm.inc), line = 49
 
@@ -4116,17 +4091,17 @@ l_0A79
 
 ; optimize OK (fileselect.inc), line = 10
 
-	lda #$F8
+	lda #$E8
 	sta SCRADR
-	lda #$36
+	lda #$37
 	sta SCRADR+1
 	jsr HLINE
 
 ; optimize OK (fileselect.inc), line = 11
 
-	lda #$14
+	lda #$04
 	sta SCRADR
-	lda #$37
+	lda #$38
 	sta SCRADR+1
 	lda #$D5
 	sta PUTINTTEXT.S
@@ -4174,8 +4149,8 @@ l_0A79
 	jsr CIO.OPN
 
 ; --- WhileProlog
-	jmp l_0ABE
-l_0ABF
+	jmp l_0ABD
+l_0ABE
 
 ; optimize OK (fileselect.inc), line = 21
 
@@ -4196,9 +4171,9 @@ l_0ABF
 
 	lda adr.FN+$01
 	cmp #$30
-	jcc l_0ADA
-	jmp b_0ABF					; break
-l_0ADA
+	jcc l_0AD9
+	jmp b_0ABE					; break
+l_0AD9
 
 ; optimize OK (fileselect.inc), line = 24
 
@@ -4224,17 +4199,17 @@ l_0ADA
 
 	lda adr.FN+$02
 	cmp #$3A
-	jne l_0AF8
-	jmp c_0ABF					; continue
-l_0AF8
+	jne l_0AF7
+	jmp c_0ABE					; continue
+l_0AF7
 
 ; optimize OK (fileselect.inc), line = 27
 
 	lda adr.FN+$12
 	cmp #$3E
-	jne l_0B0E
-	jmp c_0ABF					; continue
-l_0B0E
+	jne l_0B0D
+	jmp c_0ABE					; continue
+l_0B0D
 
 ; optimize OK (fileselect.inc), line = 28
 
@@ -4249,9 +4224,9 @@ l_0B0E
 	bne @+
 	lda EXT
 @
-	jne l_0B21
-	jmp c_0ABF					; continue
-l_0B21
+	jne l_0B20
+	jmp c_0ABE					; continue
+l_0B20
 
 ; optimize OK (fileselect.inc), line = 29
 
@@ -4266,10 +4241,10 @@ l_0B21
 	bne @+
 	lda EXT
 @
-	jne l_0B34
+	jne l_0B33
 	lda #$FF
 	sta MIDFILES._BANK
-l_0B34
+l_0B33
 
 ; optimize OK (fileselect.inc), line = 32
 
@@ -4278,15 +4253,15 @@ l_0B34
 	lda OUTSTR+1
 	sta ADDTOLIST.ENTRY+1
 	jsr ADDTOLIST
-c_0ABF
-l_0ABE
+c_0ABE
+l_0ABD
 
 ; optimize OK (fileselect.inc), line = 19
 
 	lda SYSTEM.IORESULT
 	cmp #$01
-	jeq l_0ABF
-b_0ABF
+	jeq l_0ABE
+b_0ABE
 
 ; optimize FAIL ('CLEARSTATUS', fileselect.inc), line = 34
 
@@ -4305,8 +4280,8 @@ b_0ABF
 
 ; ------------------------------------------------------------
 
-PATH	= DATAORIGIN+$00A2
-RESULT	= DATAORIGIN+$00A4
+PATH	= DATAORIGIN+$0091
+RESULT	= DATAORIGIN+$0093
 CIO_CHN	= $02
 EXT	= $04F8
 
@@ -4341,14 +4316,14 @@ EXT	= $04F8
 ; optimize OK (inputline.inc), line = 7
 
 	lda ILVCRS
-	jeq l_0B72
-	lda #$3F
+	jeq l_0B71
+	lda #$80
 	sta ILCH
-	jmp l_0B80
-l_0B72
+	jmp l_0B7F
+l_0B71
 	lda #$00
 	sta ILCH
-l_0B80
+l_0B7F
 
 ; optimize OK (inputline.inc), line = 8
 
@@ -4423,10 +4398,10 @@ l_0B80
 	lda YFILE
 	asl @
 	tay
-	lda adr.PLAYLISTSCRADR,y
+	lda adr.LISTSCRADR,y
 	add #$02
 	sta ILSCRADR
-	lda adr.PLAYLISTSCRADR+1,y
+	lda adr.LISTSCRADR+1,y
 	adc #$00
 	sta ILSCRADR+1
 
@@ -4462,22 +4437,22 @@ l_0B80
 ; optimize OK (inputline.inc), line = 25
 
 	lda ILPOS
-	jeq l_0BE6
+	jeq l_0BE5
 
 ; optimize OK (inputline.inc), line = 27
 
 	lda KEYB
 	cmp #$1C
-	jeq l_0C05x
+	jeq l_0C04x
 	cmp #$0C
-	jne l_0C05
-l_0C05x
+	jne l_0C04
+l_0C04x
 
 ; optimize OK (inputline.inc), line = 29
 
 	lda KEYB
 	cmp #$1C
-	jne l_0C18
+	jne l_0C17
 
 ; optimize OK (inputline.inc), line = 31
 
@@ -4491,7 +4466,7 @@ l_0C05x
 	lda FN+1
 	sta @move.src+1
 	@moveSTRING OUTSTR #128
-l_0C18
+l_0C17
 
 ; optimize OK (inputline.inc), line = 34
 
@@ -4520,13 +4495,13 @@ l_0C18
 	lda #$0C
 	sta KEYB
 	jmp @exit					; exit
-l_0C05
+l_0C04
 
 ; optimize OK (inputline.inc), line = 39
 
 	lda KEYB
 	cmp #$34
-	jne l_0C51
+	jne l_0C50
 
 ; optimize OK (inputline.inc), line = 41
 
@@ -4537,14 +4512,14 @@ l_0C05
 ; optimize FAIL (0, inputline.inc), line = 42
 
 	dec ILPOS
-l_0C51
-l_0BE6
+l_0C50
+l_0BE5
 
 ; optimize OK (inputline.inc), line = 45
 
 	lda ILPOS
 	cmp #$1E
-	jcs l_0C73
+	jcs l_0C72
 
 ; optimize OK (inputline.inc), line = 47
 
@@ -4555,7 +4530,7 @@ l_0BE6
 
 ; optimize OK (inputline.inc), line = 48
 
-	jeq l_0C8D
+	jeq l_0C8C
 
 ; optimize FAIL (0, inputline.inc), line = 50
 
@@ -4565,8 +4540,8 @@ l_0BE6
 
 	ldy ILPOS
 	sta adr.OUTSTR,y
-l_0C8D
-l_0C73
+l_0C8C
+l_0C72
 
 ; optimize FAIL ('SHOW_INPUTLINE', inputline.inc), line = 54
 
@@ -4595,9 +4570,9 @@ l_0C73
 	lda YFILE
 	asl @
 	tay
-	lda adr.PLAYLISTSCRADR,y
+	lda adr.LISTSCRADR,y
 	sta SCRADR
-	lda adr.PLAYLISTSCRADR+1,y
+	lda adr.LISTSCRADR+1,y
 	sta SCRADR+1
 	lda #$20
 	jsr INVERS
@@ -4632,45 +4607,45 @@ l_0C73
 
 	lda P_BANK
 	cmp #$FE
-	jne l_0CCE
+	jne l_0CCD
 	lda #$1E
 	sta V
-l_0CCE
+l_0CCD
 
 ; optimize OK (list.inc), line = 20
 
 	lda P_BANK
 	cmp #$FF
-	jne l_0CE7
+	jne l_0CE6
 	lda #$5A
 	sta V
-l_0CE7
+l_0CE6
 
 ; optimize OK (list.inc), line = 21
 
 	lda P_BANK
 	cmp #$40
-	jcs l_0D00
+	jcs l_0CFF
 
 ; optimize OK (list.inc), line = 22
 
 	lda P_ADR+1
 	ora P_ADR
-	jne l_0D12
+	jne l_0D11
 
 ; optimize OK (list.inc), line = 23
 
 	lda #$4D
 	sta V
-	jmp l_0D20
-l_0D12
+	jmp l_0D1F
+l_0D11
 
 ; optimize OK (list.inc), line = 25
 
 	lda #$5A
 	sta V
-l_0D20
-l_0D00
+l_0D1F
+l_0CFF
 
 ; optimize OK (list.inc), line = 27
 
@@ -4689,10 +4664,10 @@ l_0D00
 
 	lda adr.OUTSTR+$00
 	cmp #$1F
-	jcc l_0D40
+	jcc l_0D3F
 	lda #$1E
 	sta adr.OUTSTR+$00
-l_0D40
+l_0D3F
 
 ; optimize OK (list.inc), line = 30
 
@@ -4710,8 +4685,8 @@ l_0D40
 
 ; ------------------------------------------------------------
 
-P_BANK	= DATAORIGIN+$00A5
-P_ADR	= DATAORIGIN+$00A6
+P_BANK	= DATAORIGIN+$0097
+P_ADR	= DATAORIGIN+$0098
 
 @VarData	= P_BANK
 @VarDataSize	= 3
@@ -4738,17 +4713,17 @@ P_ADR	= DATAORIGIN+$00A6
 	sta CHN
 
 ; --- WhileProlog
-	jmp l_0D62
-l_0D63
+	jmp l_0D61
+l_0D62
 
 ; optimize OK (list.inc), line = 39
 
 	lda CHN
 	asl @
 	tay
-	lda adr.PLAYLISTSCRADR,y
+	lda adr.LISTSCRADR,y
 	sta SCRADR
-	lda adr.PLAYLISTSCRADR+1,y
+	lda adr.LISTSCRADR+1,y
 	sta SCRADR+1
 
 ; optimize OK (list.inc), line = 40
@@ -4759,15 +4734,15 @@ l_0D63
 	sta GETENTRY.FN+1
 	jsr GETENTRY
 	lda GETENTRY.RESULT
-	jeq l_0D77
+	jeq l_0D76
 
 ; optimize FAIL ('SHOWENTRY', list.inc), line = 42
 
 	jsr SHOWENTRY
-	jmp l_0D82
-l_0D77
-	jmp b_0D63					; break
-l_0D82
+	jmp l_0D81
+l_0D76
+	jmp b_0D62					; break
+l_0D81
 
 ; optimize FAIL (0, list.inc), line = 44
 
@@ -4777,14 +4752,14 @@ l_0D82
 
 	jsr NEXTENTRY
 	mva NEXTENTRY.RESULT :STACKORIGIN+1,x
-l_0D62
+l_0D61
 
 ; optimize OK (list.inc), line = 37
 
 	lda CHN
 	cmp #$10
-	jcc l_0D63
-b_0D63
+	jcc l_0D62
+b_0D62
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -4802,7 +4777,7 @@ b_0D63
 ; optimize OK (list.inc), line = 54
 
 	lda STATEINPUTLINE
-	jne l_0DA9
+	jne l_0DA8
 
 ; optimize OK (list.inc), line = 56
 
@@ -4821,7 +4796,7 @@ b_0D63
 
 ; optimize OK (list.inc), line = 58
 
-	jeq l_0DC0
+	jeq l_0DBF
 
 ; optimize OK (list.inc), line = 60
 
@@ -4843,7 +4818,7 @@ b_0D63
 	sta GETDEVICESPEC.SPEC+1
 	jsr GETDEVICESPEC
 	lda GETDEVICESPEC.RESULT
-	jne l_0DD4
+	jne l_0DD3
 
 ; optimize OK (list.inc), line = 63
 
@@ -4856,8 +4831,8 @@ b_0D63
 	lda FN+1
 	sta JOINSTRINGS.S2+1
 	jsr JOINSTRINGS
-	jmp l_0DE3
-l_0DD4
+	jmp l_0DE2
+l_0DD3
 
 ; optimize OK (list.inc), line = 65
 
@@ -4866,22 +4841,22 @@ l_0DD4
 	lda FN+1
 	sta @move.src+1
 	@moveSTRING OUTSTR #128
-l_0DE3
-l_0DC0
-	jmp l_0DF0
-l_0DA9
+l_0DE2
+l_0DBF
+	jmp l_0DEF
+l_0DA8
 
 ; optimize OK (list.inc), line = 69
 
 	lda #$00
 	sta RESULT
-l_0DF0
+l_0DEF
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$00A8
-adr.DEV	= $04F4
+RESULT	= DATAORIGIN+$009A
+adr.DEV	= [DATAORIGIN+$009B] .array [4]
 .var DEV	= adr.DEV .word
 
 @VarData	= DEV
@@ -4892,7 +4867,7 @@ adr.DEV	= $04F4
 
 .local	INIT						; PROCEDURE
 
-	jmp l_0DF8
+	jmp l_0DF7
 
 .local	SETMCBASEADDRESS				; PROCEDURE | ASSEMBLER
 
@@ -4911,113 +4886,12 @@ adr.DEV	= $04F4
 	rts						; ret
 	eif
 .endl
-l_0DF8
+l_0DF7
 
-; optimize FAIL ('SETMCBASEADDRESS', init.inc), line = 10
-
-	jsr SETMCBASEADDRESS
-
-; optimize OK (init.inc), line = 13
-
-	lda #$03
-	jsr MC6850.MC6850_INIT
-
-; optimize OK (init.inc), line = 14
-
-	lda #$16
-	jsr MC6850.MC6850_INIT
-
-; optimize OK (init.inc), line = 16
+; optimize OK (init.inc), line = 10
 
 	lda #$00
 	sta DMACTL
-
-; optimize OK (init.inc), line = 17
-
-	lda #$32
-	sta CHBASE
-
-; optimize OK (init.inc), line = 18
-
-	lda #$B3
-	sta SDLST
-	lda #$3F
-	sta SDLST+1
-
-; optimize FAIL ('MIDI_FIFO.FIFO_RESET', init.inc), line = 20
-
-	jsr MIDI_FIFO.FIFO_RESET
-
-; optimize FAIL (1, init.inc), line = 22
-
-	inx
-	mva CURDEV :STACKORIGIN,x
-	mva CURDEV+1 :STACKORIGIN+STACKWIDTH,x
-	lda #$00
-	jsr SYSTEM.PARAMSTR
-	lda SYSTEM.PARAMSTR.RESULT
-	sta GETDEVICESPEC.FN
-	lda SYSTEM.PARAMSTR.RESULT+1
-	sta GETDEVICESPEC.FN+1
-	lda :STACKORIGIN,x
-	sta GETDEVICESPEC.SPEC
-	lda :STACKORIGIN+STACKWIDTH,x
-	sta GETDEVICESPEC.SPEC+1
-	dex
-	jsr GETDEVICESPEC
-	lda GETDEVICESPEC.RESULT
-	jne l_0E1C
-	ldy #256-3
-	mva:rne CODEORIGIN+$00E2+3-256,y adr.CURDEV+3-256,y+
-l_0E1C
-	mva #$00 adr.FN
-
-; optimize FAIL ('CLEARWORKAREA', init.inc), line = 25
-
-	jsr CLEARWORKAREA
-
-; optimize FAIL ('CLEARSTATUS', init.inc), line = 26
-
-	jsr CLEARSTATUS
-
-; optimize OK (init.inc), line = 27
-
-	lda #$A0
-	sta SCRADR
-	lda #$39
-	sta SCRADR+1
-	jsr HLINE
-
-; optimize OK (init.inc), line = 28
-
-	lda #$A1
-	sta SCRADR
-	lda #$39
-	sta SCRADR+1
-	lda #$E6
-	sta PUTINTTEXT.S
-	lda #$80
-	sta PUTINTTEXT.S+1
-	jsr PUTINTTEXT
-
-; optimize OK (init.inc), line = 29
-
-	lda #$BE
-	sta SCRADR
-	lda #$39
-	sta SCRADR+1
-	lda #$F0
-	sta PUTINTTEXT.S
-	lda #$80
-	sta PUTINTTEXT.S+1
-	jsr PUTINTTEXT
-
-; optimize OK (init.inc), line = 31
-
-	lda #$00
-	sta MIDFILES.MIDTRACKS
-	lda #$2E
-	sta MIDFILES.MIDTRACKS+1
 
 ; -------------------  ASM Block 00000117  -------------------
 
@@ -5025,16 +4899,96 @@ l_0E1C
     cmp $14
     beq *-2
   
-; optimize FAIL ('RESETMEMORYPTR', init.inc), line = 47
+; optimize FAIL ('SETMCBASEADDRESS', init.inc), line = 17
+
+	jsr SETMCBASEADDRESS
+
+; optimize OK (init.inc), line = 20
+
+	lda #$03
+	jsr MC6850.MC6850_INIT
+
+; optimize OK (init.inc), line = 21
+
+	lda #$16
+	jsr MC6850.MC6850_INIT
+
+; optimize OK (init.inc), line = 23
+
+	lda #$32
+	sta CHBASE
+
+; optimize OK (init.inc), line = 24
+
+	lda #$B1
+	sta SDLST
+	lda #$3F
+	sta SDLST+1
+
+; optimize FAIL ('MIDI_FIFO.FIFO_RESET', init.inc), line = 26
+
+	jsr MIDI_FIFO.FIFO_RESET
+	ldy #256-3
+	mva:rne CODEORIGIN+$00E2+3-256,y adr.CURDEV+3-256,y+
+	mva #$00 adr.FN
+
+; optimize FAIL ('CLEARWORKAREA', init.inc), line = 31
+
+	jsr CLEARWORKAREA
+
+; optimize FAIL ('CLEARSTATUS', init.inc), line = 32
+
+	jsr CLEARSTATUS
+
+; optimize OK (init.inc), line = 33
+
+	lda #$90
+	sta SCRADR
+	lda #$3A
+	sta SCRADR+1
+	jsr HLINE
+
+; optimize OK (init.inc), line = 34
+
+	lda #$91
+	sta SCRADR
+	lda #$3A
+	sta SCRADR+1
+	lda #$E6
+	sta PUTINTTEXT.S
+	lda #$80
+	sta PUTINTTEXT.S+1
+	jsr PUTINTTEXT
+
+; optimize OK (init.inc), line = 35
+
+	lda #$AE
+	sta SCRADR
+	lda #$3A
+	sta SCRADR+1
+	lda #$F0
+	sta PUTINTTEXT.S
+	lda #$80
+	sta PUTINTTEXT.S+1
+	jsr PUTINTTEXT
+
+; optimize OK (init.inc), line = 37
+
+	lda #$00
+	sta MIDFILES.MIDTRACKS
+	lda #$2E
+	sta MIDFILES.MIDTRACKS+1
+
+; optimize FAIL ('RESETMEMORYPTR', init.inc), line = 45
 
 	jsr RESETMEMORYPTR
 
-; optimize OK (init.inc), line = 48
+; optimize OK (init.inc), line = 46
 
 	lda _TM
 	sta OTM
 
-; optimize FAIL ('SETCOLORS', init.inc), line = 49
+; optimize FAIL ('SETCOLORS', init.inc), line = 47
 
 	jsr SETCOLORS
 	lda #$22
@@ -5044,24 +4998,25 @@ l_0E1C
 	lda #$01
 	sta PLAYDIR
 
-; optimize OK (init.inc), line = 50
+; optimize OK (init.inc), line = 48
 
 	lda PLAYERSTATUS
 	and #$0F
 	ora #$40
 	sta PLAYERSTATUS
 
-; optimize OK (init.inc), line = 53
+; optimize OK (init.inc), line = 49
 
 	lda #$FF
 	sta THI
-
-; optimize OK (init.inc), line = 54
-
 	lda #$00
+	sta HLPFLG
+
+; optimize OK (init.inc), line = 50
+
 	sta STATEINPUTLINE
 
-; optimize OK (init.inc), line = 55
+; optimize OK (init.inc), line = 51
 
 	sta RESULTINPUTLINE
 
@@ -5141,7 +5096,7 @@ l_0107
 	jsr SETNMI
 
 ; --- RepeatUntilProlog
-l_0E93
+l_0E82
 
 ; optimize FAIL ('MIDFILES.PROCESSMIDI', MIDICar Player.pas), line = 89
 
@@ -5151,9 +5106,9 @@ l_0E93
 
 	lda PLAYERSTATUS
 	and #$40
-	jne l_0EB6
+	jne l_0EA5
 	lda MIDFILES.PLAYINGTRACKS
-	jne l_0EB6
+	jne l_0EA5
 
 ; optimize OK (MIDICar Player.pas), line = 92
 
@@ -5168,38 +5123,38 @@ l_0E93
 ; optimize OK (MIDICar Player.pas), line = 94
 
 	lda V
-	jeq l_0ED4
+	jeq l_0EC3
 
 ; optimize OK (MIDICar Player.pas), line = 96
 
 	sub #$05
 	svc
 	eor #$80
-	jmi l_0EE7
+	jmi l_0ED6
 
 ; optimize OK (MIDICar Player.pas), line = 97
 
 	lda CURPLAY
 	cmp #$FF
-	jeq l_0EFA
+	jeq l_0EE9
 
 ; --- RepeatUntilProlog
-l_0EFC
+l_0EEB
 
 ; optimize OK (MIDICar Player.pas), line = 100
 
 	lda CURPLAY
 	cmp #$FF
-	jne l_0F0E
+	jne l_0EFD
 	lda CURFILE
 	sta CURPLAY
-l_0F0E
+l_0EFD
 
 ; optimize OK (MIDICar Player.pas), line = 101
 
 	lda V
 	cmp #$0C
-	jne l_0F29
+	jne l_0F18
 
 ; optimize OK (MIDICar Player.pas), line = 102
 
@@ -5207,8 +5162,8 @@ l_0F0E
 	jsr SYSTEM.RANDOM_0172
 	lda SYSTEM.RANDOM_0172.RESULT
 	sta CURPLAY
-	jmp l_0F3A
-l_0F29
+	jmp l_0F29
+l_0F18
 
 ; optimize OK (MIDICar Player.pas), line = 105
 
@@ -5219,20 +5174,20 @@ l_0F29
 ; optimize OK (MIDICar Player.pas), line = 106
 
 	cmp #$01
-	jne l_0F4F
+	jne l_0F3E
 	lda TOTALFILES
 	sta CURPLAY
-l_0F4F
+l_0F3E
 
 ; optimize OK (MIDICar Player.pas), line = 107
 
 	lda CURPLAY
 	cmp TOTALFILES
-	jne l_0F6C
+	jne l_0F5B
 	lda #$01
 	sta CURPLAY
-l_0F6C
-l_0F3A
+l_0F5B
+l_0F29
 
 ; optimize OK (MIDICar Player.pas), line = 109
 
@@ -5248,7 +5203,7 @@ l_0F3A
 
 	lda P_BANK
 	cmp #$FF
-	jne l_0F8C
+	jne l_0F7B
 
 ; optimize OK (MIDICar Player.pas), line = 112
 
@@ -5259,10 +5214,10 @@ l_0F3A
 	jsr LOADSONG
 	lda LOADSONG.RESULT
 	sta SYSTEM.IORESULT
-	jmp l_0F9C
-l_0F8C
-	jmp c_0EFC					; continue
-l_0F9C
+	jmp l_0F8B
+l_0F7B
+	jmp c_0EEB					; continue
+l_0F8B
 
 ; optimize OK (MIDICar Player.pas), line = 115
 
@@ -5274,8 +5229,8 @@ l_0F9C
 @
 	tya
 	bne *+5
-c_0EFC
-	jmp l_0EFC
+c_0EEB
+	jmp l_0EEB
 
 ; optimize FAIL ('CLEARSTATUS', MIDICar Player.pas), line = 116
 
@@ -5285,35 +5240,35 @@ c_0EFC
 
 	lda SYSTEM.IORESULT
 	and #$FC
-	jeq l_0FC0
+	jeq l_0FAF
 	lda SYSTEM.IORESULT
 	jsr STATUSERROR
-l_0FC0
+l_0FAF
 
 ; optimize OK (MIDICar Player.pas), line = 118
 
 	lda MIDFILES.TOTALTRACKS
-	jeq l_0FD9
+	jeq l_0FC8
 
 ; optimize FAIL ('STATUSPLAYING', MIDICar Player.pas), line = 119
 
 	jsr STATUSPLAYING
-l_0FD9
+l_0FC8
 
 ; optimize OK (MIDICar Player.pas), line = 120
 
 	lda #$01
 	sta PLAYDIR
-l_0EFA
-l_0EE7
-l_0ED4
-l_0EB6
+l_0EE9
+l_0ED6
+l_0EC3
+l_0EA5
 
 ; optimize OK (MIDICar Player.pas), line = 125
 
 	lda _TM
 	cmp OTM
-	jeq l_0FFD
+	jeq l_0FEC
 
 ; optimize OK (MIDICar Player.pas), line = 127
 
@@ -5322,7 +5277,7 @@ l_0EB6
 ; optimize OK (MIDICar Player.pas), line = 128
 
 	lda PLAYERSTATUS
-	jpl l_101A
+	jpl l_1009
 
 ; optimize OK (MIDICar Player.pas), line = 130
 
@@ -5336,13 +5291,13 @@ l_0EB6
 ; optimize FAIL ('DRAWLISTSELECTION', MIDICar Player.pas), line = 132
 
 	jsr DRAWLISTSELECTION
-l_101A
+l_1009
 
 ; optimize OK (MIDICar Player.pas), line = 134
 
-	lda #$D4
+	lda #$C4
 	sta SCRADR
-	lda #$39
+	lda #$3A
 	sta SCRADR+1
 	lda <MIDFILES._TOTALTICKS
 	sta PUTHEX.V
@@ -5359,15 +5314,15 @@ l_101A
 
 	lda STATEINPUTLINE
 	cmp #$01
-	jne l_1042
+	jne l_1031
 
 ; optimize OK (MIDICar Player.pas), line = 138
 
 	lda _TM
 	sub CTM
 	cmp #$0A
-	jcc l_105B
-	jeq l_105B
+	jcc l_104A
+	jeq l_104A
 
 ; optimize OK (MIDICar Player.pas), line = 140
 
@@ -5387,21 +5342,24 @@ l_101A
 ; optimize FAIL ('SHOW_INPUTLINE', MIDICar Player.pas), line = 142
 
 	jsr SHOW_INPUTLINE
-l_105B
-l_1042
-l_0FFD
+l_104A
+l_1031
+l_0FEC
 
 ; optimize OK (keyboard.inc), line = 1
 
 	lda KEYB
 	cmp #$FF
-	jeq l_1084
+	jne l_107Fx
+	lda HLPFLG
+	jeq l_107F
+l_107Fx
 
 ; optimize OK (keyboard.inc), line = 3
 
 	lda PLAYERSTATUS
 	and #$20
-	jeq l_109B
+	jeq l_1096
 
 ; optimize OK (keyboard.inc), line = 5
 
@@ -5411,219 +5369,80 @@ l_0FFD
 
 ; optimize OK (keyboard.inc), line = 6
 
-	lda #$F8
-	sta $3FCC
-	lda #$36
-	sta $3FCC+1
+	lda #$E8
+	sta $3FCA
+	lda #$37
+	sta $3FCA+1
 
 ; optimize OK (keyboard.inc), line = 7
 
 	lda #$FF
 	sta KEYB
-l_109B
+	jmp l_10B1
+l_1096
 
-; optimize OK (keyboard.inc), line = 9
+; optimize OK (keyboard.inc), line = 10
 
-	lda STATEINPUTLINE
-	cmp #$01
-	jne l_10C1
-
-; optimize FAIL ('DO_INPUTLINE', keyboard.inc), line = 11
-
-	jsr DO_INPUTLINE
-	jmp l_10CC
-l_10C1
+	lda KEYB
+	cmp #$39
+	jeq l_10CFx
+	lda HLPFLG
+	cmp #$11
+	jne l_10CF
+l_10CFx
 
 ; optimize OK (keyboard.inc), line = 12
-
-	lda KEYB
-	cmp #$1C
-	jne l_10DE
-	jmp b_0E93					; break
-l_10DE
-l_10CC
-
-; optimize OK (keyboard.inc), line = 14
-
-	lda KEYB
-	sta @CASETMP_0004
-	cmp #$39
-	jne l_10EC
-@
-
-; optimize OK (keyboard.inc), line = 17
 
 	lda PLAYERSTATUS
 	eor #$20
 	sta PLAYERSTATUS
 
-; optimize OK (keyboard.inc), line = 18
+; optimize OK (keyboard.inc), line = 13
 
-	lda #$40
-	sta $3FCC
+	lda #$60
+	sta $3FCA
 	lda #$3B
-	sta $3FCC+1
+	sta $3FCA+1
 
-	jmp a_0004
-l_10EC
-	cmp #$0C
-	jne l_1102
-@
-
-; optimize FAIL ('CHOICELISTFILE', keyboard.inc), line = 22
-
-	jsr CHOICELISTFILE
-	lda CHOICELISTFILE.RESULT
-	jeq l_110C
-
-; optimize OK (keyboard.inc), line = 25
-
-	lda P_BANK
-	cmp #$FE
-	jne l_111F
-
-; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 27
-
-	jsr DRAWLISTSELECTION
-
-; optimize FAIL ('INIT_INPUTLINE', keyboard.inc), line = 28
-
-	jsr INIT_INPUTLINE
-l_111F
-
-; optimize OK (keyboard.inc), line = 30
-
-	lda P_BANK
-	cmp #$FF
-	jne l_1136
-
-; optimize FAIL ('STATUSSTOPPED', keyboard.inc), line = 32
-
-	jsr STATUSSTOPPED
-
-; optimize OK (keyboard.inc), line = 33
-
-	lda OUTSTR
-	sta LOADSONG.FILENAME
-	lda OUTSTR+1
-	sta LOADSONG.FILENAME+1
-	jsr LOADSONG
-	lda LOADSONG.RESULT
-	sta SYSTEM.IORESULT
-
-; optimize OK (keyboard.inc), line = 34
-
-	lda #$02
-	sta STATEINPUTLINE
-l_1136
-l_110C
-
-; optimize OK (keyboard.inc), line = 37
-
-	lda STATEINPUTLINE
-	cmp #$02
-	jne l_1158
-
-; optimize OK (keyboard.inc), line = 39
-
-	lda P_BANK
-	cmp #$FE
-	jne l_116B
-
-; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 41
-
-	jsr DRAWLISTSELECTION
-
-; optimize OK (keyboard.inc), line = 42
-
-	lda RESULTINPUTLINE
-	jeq l_1179
-
-; optimize OK (keyboard.inc), line = 44
-
-	lda OUTSTR
-	sta @move.src
-	lda OUTSTR+1
-	sta @move.src+1
-	@moveSTRING FN #128
-
-; optimize OK (keyboard.inc), line = 45
-
-	lda OUTSTR
-	sta GETDEVICESPEC.FN
-	lda OUTSTR+1
-	sta GETDEVICESPEC.FN+1
-	lda CURDEV
-	sta GETDEVICESPEC.SPEC
-	lda CURDEV+1
-	sta GETDEVICESPEC.SPEC+1
-	jsr GETDEVICESPEC
-	lda GETDEVICESPEC.RESULT
-	jne l_118D
-	lda CURDEV
-	sta JOINSTRINGS.S1
-	lda CURDEV+1
-	sta JOINSTRINGS.S1+1
-	lda FN
-	sta JOINSTRINGS.S2
-	lda FN+1
-	sta JOINSTRINGS.S2+1
-	jsr JOINSTRINGS
-l_118D
-
-; optimize OK (keyboard.inc), line = 46
-
-	lda OUTSTR
-	sta FILESELECT.PATH
-	lda OUTSTR+1
-	sta FILESELECT.PATH+1
-	jsr FILESELECT
-	lda FILESELECT.RESULT
-	sta SYSTEM.IORESULT
-
-; optimize OK (keyboard.inc), line = 47
-
-	lda PLAYERSTATUS
-	ora #$80
-	sta PLAYERSTATUS
-l_1179
-l_116B
-
-; optimize OK (keyboard.inc), line = 50
-
-	lda SYSTEM.IORESULT
-	and #$FC
-	jeq l_11BF
-	lda SYSTEM.IORESULT
-	jsr STATUSERROR
-l_11BF
-
-; optimize OK (keyboard.inc), line = 51
-
-	lda P_BANK
-	cmp #$FF
-	jne l_11D8
-	jsr STATUSPLAYING
-l_11D8
-
-; optimize OK (keyboard.inc), line = 52
+; optimize OK (keyboard.inc), line = 14
 
 	lda #$00
-	sta STATEINPUTLINE
-l_1158
+	sta HLPFLG
+l_10CF
+l_10B1
 
-	jmp a_0004
-l_1102
+; optimize OK (keyboard.inc), line = 16
+
+	lda STATEINPUTLINE
+	cmp #$01
+	jne l_10F5
+
+; optimize FAIL ('DO_INPUTLINE', keyboard.inc), line = 18
+
+	jsr DO_INPUTLINE
+	jmp l_1100
+l_10F5
+
+; optimize OK (keyboard.inc), line = 20
+
+	lda KEYB
+	cmp #$1C
+	jne l_1112
+	jmp b_0E82					; break
+l_1112
+
+; optimize OK (keyboard.inc), line = 21
+
+	lda KEYB
 	cmp #$21
-	jne l_11EB
-@
+	jne l_1127
 
-; optimize OK (keyboard.inc), line = 57
+; optimize OK (keyboard.inc), line = 23
 
 	lda CURFILE
 	jsr GOTONENTRY
 
-; optimize OK (keyboard.inc), line = 58
+; optimize OK (keyboard.inc), line = 24
 
 	lda OUTSTR
 	sta GETENTRY.FN
@@ -5632,7 +5451,7 @@ l_1102
 	jsr GETENTRY
 	mva GETENTRY.RESULT :STACKORIGIN+1,x
 
-; optimize OK (keyboard.inc), line = 59
+; optimize OK (keyboard.inc), line = 25
 
 	lda <P_BANK
 	sta GETENTRYSETS.PTR
@@ -5640,25 +5459,25 @@ l_1102
 	sta GETENTRYSETS.PTR+1
 	jsr GETENTRYSETS
 
-; optimize OK (keyboard.inc), line = 60
+; optimize OK (keyboard.inc), line = 26
 
 	lda P_BANK
 	cmp #$FE
-	jeq l_1216
+	jeq l_1153
 	and #$7F
-	jeq l_1216
+	jeq l_1153
 
-; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 62
+; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 28
 
 	jsr DRAWLISTSELECTION
 
-; optimize OK (keyboard.inc), line = 63
+; optimize OK (keyboard.inc), line = 29
 
 	lda P_BANK
 	eor #$80
 	sta P_BANK
 
-; optimize OK (keyboard.inc), line = 64
+; optimize OK (keyboard.inc), line = 30
 
 	lda <P_BANK
 	sta SETENTRYSETS.PTR
@@ -5666,81 +5485,83 @@ l_1102
 	sta SETENTRYSETS.PTR+1
 	jsr SETENTRYSETS
 
-; optimize FAIL ('SHOWENTRY', keyboard.inc), line = 65
+; optimize FAIL ('SHOWENTRY', keyboard.inc), line = 31
 
 	jsr SHOWENTRY
 
-; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 66
+; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 32
 
 	jsr DRAWLISTSELECTION
-l_1216
+l_1153
+l_1127
 
-	jmp a_0004
-l_11EB
+; optimize OK (keyboard.inc), line = 35
+
+	lda KEYB
 	cmp #$0E
-	beq @+
+	jeq l_1185x
 	cmp #$0F
-	jne l_1233
-@
+	jne l_1185
+l_1185x
 
-; optimize OK (keyboard.inc), line = 71
+; optimize OK (keyboard.inc), line = 37
 
 	lda PLAYERSTATUS
-	jmi l_1249
+	jmi l_119C
 	jsr DRAWLISTSELECTION
-l_1249
+l_119C
 
-; optimize OK (keyboard.inc), line = 72
+; optimize OK (keyboard.inc), line = 38
 
 	lda #$00
 	sta V
 
-; optimize OK (keyboard.inc), line = 73
+; optimize OK (keyboard.inc), line = 39
 
 	lda KEYB
 	cmp #$0E
-	jne l_1263
+	jne l_11B6
 
-; optimize OK (keyboard.inc), line = 75
+; optimize OK (keyboard.inc), line = 41
 
 	lda YFILE
-	jeq l_1276
+	jeq l_11C9
 
-; optimize FAIL (0, keyboard.inc), line = 76
+; optimize FAIL (0, keyboard.inc), line = 42
 
 	dec YFILE
-	jmp l_1284
-l_1276
+	jmp l_11D7
+l_11C9
 
-; optimize OK (keyboard.inc), line = 78
+; optimize OK (keyboard.inc), line = 44
 
 	lda SHFILE
-	jeq l_1296
+	jeq l_11E9
 	lda #$FF
 	sta V
-l_1296
-l_1284
-l_1263
+l_11E9
+l_11D7
+l_11B6
 
-; optimize OK (keyboard.inc), line = 80
+; optimize OK (keyboard.inc), line = 46
 
 	lda KEYB
 	cmp #$0F
-	jne l_12B1
+	jne l_1204
 
-; optimize OK (keyboard.inc), line = 82
+; optimize OK (keyboard.inc), line = 48
 
 	lda YFILE
 	cmp #$0F
-	jcs l_12C4
+	jcs l_1217
 
-; optimize FAIL (0, keyboard.inc), line = 83
+; optimize FAIL (0, keyboard.inc), line = 49
 
 	inc YFILE
-	jmp l_12D2
-l_12C4
+	jmp l_1225
+l_1217
 
-; optimize OK (keyboard.inc), line = 85
+; optimize OK (keyboard.inc), line = 51
 
 	lda TOTALFILES
 	sub YFILE
@@ -5773,204 +5594,211 @@ l_12C4
 	lda SHFILE
 	cmp :STACKORIGIN+10
 @
-	jcs l_12F0
+	jcs l_1243
 	lda #$01
 	sta V
-l_12F0
-l_12D2
-l_12B1
+l_1243
+l_1225
+l_1204
 
-; optimize OK (keyboard.inc), line = 87
+; optimize OK (keyboard.inc), line = 53
 
 	lda V
-	jeq l_130B
+	jeq l_125E
 
-; optimize OK (keyboard.inc), line = 89
+; optimize OK (keyboard.inc), line = 55
 
 	lda SHFILE
 	add V
 	sta SHFILE
 
-; optimize OK (keyboard.inc), line = 90
+; optimize OK (keyboard.inc), line = 56
 
 	lda PLAYERSTATUS
 	ora #$80
 	sta PLAYERSTATUS
-l_130B
+l_125E
 
-; optimize OK (keyboard.inc), line = 93
+; optimize OK (keyboard.inc), line = 59
 
 	lda SHFILE
 	add YFILE
 	sta CURFILE
 
-; optimize OK (keyboard.inc), line = 94
+; optimize OK (keyboard.inc), line = 60
 
 	cmp TOTALFILES
-	jcc l_133B
+	jcc l_128E
 	ldy TOTALFILES
 	dey
 	sty CURFILE
-l_133B
+l_128E
 
-; optimize OK (keyboard.inc), line = 95
+; optimize OK (keyboard.inc), line = 61
 
 	lda PLAYERSTATUS
-	jmi l_135E
+	jmi l_12B1
 	jsr DRAWLISTSELECTION
-l_135E
+l_12B1
+l_1185
 
-	jmp a_0004
-l_1233
-	cmp #$00
-	jne l_136B
-@
+; optimize OK (keyboard.inc), line = 63
 
-; optimize OK (keyboard.inc), line = 99
+	lda KEYB
+	jne l_12C9
+
+; optimize OK (keyboard.inc), line = 65
 
 	lda PLAYERSTATUS
 	add #$04
 	and #$0C
 	sta V
 
-; optimize OK (keyboard.inc), line = 100
+; optimize OK (keyboard.inc), line = 66
 
 	lda PLAYERSTATUS
 	and #$F3
 	ora V
 	sta PLAYERSTATUS
 
-; optimize FAIL ('STATUSLOOP', keyboard.inc), line = 101
+; optimize FAIL ('STATUSLOOP', keyboard.inc), line = 67
 
 	jsr STATUSLOOP
+l_12C9
 
-	jmp a_0004
-l_136B
+; optimize OK (keyboard.inc), line = 69
+
+	lda KEYB
 	cmp #$25
-	jne l_1393
-@
+	jne l_12FD
 
-; optimize FAIL ('CLEARUVMETERS', keyboard.inc), line = 105
+; optimize FAIL ('CLEARUVMETERS', keyboard.inc), line = 71
 
 	jsr CLEARUVMETERS
 
-; optimize OK (keyboard.inc), line = 106
+; optimize OK (keyboard.inc), line = 72
 
 	lda PLAYERSTATUS
 	eor #$02
 	sta PLAYERSTATUS
+l_12FD
 
-	jmp a_0004
-l_1393
+; optimize OK (keyboard.inc), line = 74
+
+	lda KEYB
 	cmp #$27
-	jne l_13A7
-@
+	jne l_131D
 
-; optimize OK (keyboard.inc), line = 110
+; optimize OK (keyboard.inc), line = 76
 
 	lda PLAYERSTATUS
 	eor #$01
 	sta PLAYERSTATUS
 
-; optimize FAIL ('SETCOLORS', keyboard.inc), line = 111
+; optimize FAIL ('SETCOLORS', keyboard.inc), line = 77
 
 	jsr SETCOLORS
+l_131D
 
-	jmp a_0004
-l_13A7
-	cmp #$17
-	beq @+
-	cmp #$15
-	jne l_13BD
-@
-
-; optimize OK (keyboard.inc), line = 115
+; optimize OK (keyboard.inc), line = 79
 
 	lda KEYB
 	cmp #$17
-	jne l_13CF
+	jeq l_1349x
+	cmp #$15
+	jne l_1349
+l_1349x
+
+; optimize OK (keyboard.inc), line = 81
+
+	lda KEYB
+	cmp #$17
+	jne l_135C
 	lda #$FF
 	sta PLAYDIR
-l_13CF
+l_135C
 
-; optimize OK (keyboard.inc), line = 116
+; optimize OK (keyboard.inc), line = 82
 
 	lda KEYB
 	cmp #$15
-	jne l_13E8
+	jne l_1375
 	lda #$01
 	sta PLAYDIR
-l_13E8
+l_1375
 
-; optimize FAIL ('STATUSPAUSE', keyboard.inc), line = 117
+; optimize FAIL ('STATUSPAUSE', keyboard.inc), line = 83
 
 	jsr STATUSPAUSE
 
-; optimize OK (keyboard.inc), line = 118
+; optimize OK (keyboard.inc), line = 84
 
 	lda #$00
 	sta MIDFILES.PLAYINGTRACKS
+l_1349
 
-	jmp a_0004
-l_13BD
+; optimize OK (keyboard.inc), line = 86
+
+	lda KEYB
 	cmp #$16
-	jne l_13FD
-@
+	jne l_1395
 
-; optimize FAIL ('STATUSSTOPPED', keyboard.inc), line = 122
+; optimize FAIL ('STATUSSTOPPED', keyboard.inc), line = 88
 
 	jsr STATUSSTOPPED
 
-; optimize FAIL ('STATUSPLAYING', keyboard.inc), line = 123
+; optimize FAIL ('STATUSPLAYING', keyboard.inc), line = 89
 
 	jsr STATUSPLAYING
+l_1395
 
-	jmp a_0004
-l_13FD
+; optimize OK (keyboard.inc), line = 91
+
+	lda KEYB
 	cmp #$12
-	jne l_1408
-@
+	jne l_13AC
 
-; optimize OK (keyboard.inc), line = 127
+; optimize OK (keyboard.inc), line = 93
 
 	lda MIDFILES._TIMERSTATUS
-	jpl l_141E
+	jpl l_13C3
 
-; optimize FAIL ('STATUSPLAYING', keyboard.inc), line = 129
+; optimize FAIL ('STATUSPLAYING', keyboard.inc), line = 95
 
 	jsr STATUSPLAYING
-	jmp l_1429
-l_141E
+	jmp l_13CE
+l_13C3
 
-; optimize FAIL ('STATUSPAUSE', keyboard.inc), line = 130
+; optimize FAIL ('STATUSPAUSE', keyboard.inc), line = 96
 
 	jsr STATUSPAUSE
-l_1429
+l_13CE
+l_13AC
 
-	jmp a_0004
-l_1408
+; optimize OK (keyboard.inc), line = 98
+
+	lda KEYB
 	cmp #$10
-	jne l_1433
-@
-
-; optimize FAIL ('STATUSSTOPPED', keyboard.inc), line = 132
-
+	jne l_13E3
 	jsr STATUSSTOPPED
-	jmp a_0004
-l_1433
-	cmp #$34
-	beq @+
-	cmp #$36
-	beq @+
-	cmp #$37
-	jne l_1441
-@
+l_13E3
 
-; optimize OK (keyboard.inc), line = 135
+; optimize OK (keyboard.inc), line = 99
+
+	lda KEYB
+	cmp #$34
+	jeq l_1411x
+	cmp #$36
+	jeq l_1411x
+	cmp #$37
+	jne l_1411
+l_1411x
+
+; optimize OK (keyboard.inc), line = 101
 
 	lda KEYB
 	cmp #$36
-	jne l_1453
+	jne l_1424
 	lda MIDFILES.TEMPOSHIFT
 	add #$20
 	sta MIDFILES.TEMPOSHIFT
@@ -5983,13 +5811,13 @@ l_1433
 	lda MIDFILES.TEMPOSHIFT+3
 	adc #$00
 	sta MIDFILES.TEMPOSHIFT+3
-l_1453
+l_1424
 
-; optimize OK (keyboard.inc), line = 136
+; optimize OK (keyboard.inc), line = 102
 
 	lda KEYB
 	cmp #$37
-	jne l_1469
+	jne l_143A
 	lda MIDFILES.TEMPOSHIFT
 	sub #$20
 	sta MIDFILES.TEMPOSHIFT
@@ -6002,37 +5830,185 @@ l_1453
 	lda MIDFILES.TEMPOSHIFT+3
 	sbc #$00
 	sta MIDFILES.TEMPOSHIFT+3
-l_1469
+l_143A
 
-; optimize OK (keyboard.inc), line = 137
+; optimize OK (keyboard.inc), line = 103
 
 	lda KEYB
 	cmp #$34
-	jne l_147F
+	jne l_1450
 	lda #$00
 	sta MIDFILES.TEMPOSHIFT
 	sta MIDFILES.TEMPOSHIFT+1
 	sta MIDFILES.TEMPOSHIFT+2
 	sta MIDFILES.TEMPOSHIFT+3
-l_147F
+l_1450
 
-; optimize FAIL ('MIDFILES.SETTEMPO', keyboard.inc), line = 138
+; optimize FAIL ('MIDFILES.SETTEMPO', keyboard.inc), line = 104
 
 	jsr MIDFILES.SETTEMPO
+l_1411
+l_1100
 
-l_1441
-a_0004
+; optimize OK (keyboard.inc), line = 108
 
-; optimize OK (keyboard.inc), line = 141
+	lda KEYB
+	cmp #$0C
+	jne l_146C
+
+; optimize FAIL ('CHOICELISTFILE', keyboard.inc), line = 110
+
+	jsr CHOICELISTFILE
+	lda CHOICELISTFILE.RESULT
+	jeq l_1477
+
+; optimize OK (keyboard.inc), line = 113
+
+	lda P_BANK
+	cmp #$FE
+	jne l_148A
+
+; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 115
+
+	jsr DRAWLISTSELECTION
+
+; optimize FAIL ('INIT_INPUTLINE', keyboard.inc), line = 116
+
+	jsr INIT_INPUTLINE
+l_148A
+
+; optimize OK (keyboard.inc), line = 118
+
+	lda P_BANK
+	cmp #$FF
+	jne l_14A1
+
+; optimize FAIL ('STATUSSTOPPED', keyboard.inc), line = 120
+
+	jsr STATUSSTOPPED
+
+; optimize OK (keyboard.inc), line = 121
+
+	lda OUTSTR
+	sta LOADSONG.FILENAME
+	lda OUTSTR+1
+	sta LOADSONG.FILENAME+1
+	jsr LOADSONG
+	lda LOADSONG.RESULT
+	sta SYSTEM.IORESULT
+
+; optimize OK (keyboard.inc), line = 122
+
+	lda #$02
+	sta STATEINPUTLINE
+l_14A1
+l_1477
+
+; optimize OK (keyboard.inc), line = 125
+
+	lda STATEINPUTLINE
+	cmp #$02
+	jne l_14C3
+
+; optimize OK (keyboard.inc), line = 127
+
+	lda P_BANK
+	cmp #$FE
+	jne l_14D6
+
+; optimize FAIL ('DRAWLISTSELECTION', keyboard.inc), line = 129
+
+	jsr DRAWLISTSELECTION
+
+; optimize OK (keyboard.inc), line = 130
+
+	lda RESULTINPUTLINE
+	jeq l_14E4
+
+; optimize OK (keyboard.inc), line = 132
+
+	lda OUTSTR
+	sta @move.src
+	lda OUTSTR+1
+	sta @move.src+1
+	@moveSTRING FN #128
+
+; optimize OK (keyboard.inc), line = 133
+
+	lda OUTSTR
+	sta GETDEVICESPEC.FN
+	lda OUTSTR+1
+	sta GETDEVICESPEC.FN+1
+	lda CURDEV
+	sta GETDEVICESPEC.SPEC
+	lda CURDEV+1
+	sta GETDEVICESPEC.SPEC+1
+	jsr GETDEVICESPEC
+	lda GETDEVICESPEC.RESULT
+	jne l_14F8
+	lda CURDEV
+	sta JOINSTRINGS.S1
+	lda CURDEV+1
+	sta JOINSTRINGS.S1+1
+	lda FN
+	sta JOINSTRINGS.S2
+	lda FN+1
+	sta JOINSTRINGS.S2+1
+	jsr JOINSTRINGS
+l_14F8
+
+; optimize OK (keyboard.inc), line = 134
+
+	lda OUTSTR
+	sta FILESELECT.PATH
+	lda OUTSTR+1
+	sta FILESELECT.PATH+1
+	jsr FILESELECT
+	lda FILESELECT.RESULT
+	sta SYSTEM.IORESULT
+
+; optimize OK (keyboard.inc), line = 135
+
+	lda PLAYERSTATUS
+	ora #$80
+	sta PLAYERSTATUS
+l_14E4
+l_14D6
+
+; optimize OK (keyboard.inc), line = 138
+
+	lda SYSTEM.IORESULT
+	and #$FC
+	jeq l_152A
+	lda SYSTEM.IORESULT
+	jsr STATUSERROR
+l_152A
+
+; optimize OK (keyboard.inc), line = 139
+
+	lda P_BANK
+	cmp #$FF
+	jne l_1543
+	jsr STATUSPLAYING
+l_1543
+
+; optimize OK (keyboard.inc), line = 140
+
+	lda #$00
+	sta STATEINPUTLINE
+l_14C3
+l_146C
+
+; optimize OK (keyboard.inc), line = 143
 
 	lda #$FF
 	sta KEYB
-l_1084
+l_107F
 
 ; optimize OK (MIDICar Player.pas), line = 148
 
-	jmp l_0E93
-b_0E93
+	jmp l_0E82
+b_0E82
 
 ; optimize FAIL ('UNSETNMI', MIDICar Player.pas), line = 151
 
@@ -6044,17 +6020,18 @@ b_0E93
 
 ; ------------------------------------------------------------
 
-SCREEN_ADRSES	= $0410
 CHARS_ADDR	= $3000
 SCREEN_ADDR	= $3400
-SCREEN_WORK	= $36F8
-SCREEN_TIME	= $39C8
-SCREEN_STATUS	= $39DC
-SCREEN_FOOT	= $3A04
+SCREEN_HEAD	= $3400
+SCREEN_FOOT	= $36F8
+SCREEN_WORK	= $37E8
+SCREEN_TIME	= $3AB8
+SCREEN_STATUS	= $3ACC
 UVMETER_ADDR	= $3B00
-HELPSCR_ADDR	= $3B40
-DLIST_ADDR	= $3FB3
-SCREEN_CHANNELS	= $3722
+SCREEN_ADRSES	= $3B40
+HELPSCR_ADDR	= $3B60
+DLIST_ADDR	= $3FB1
+SCREEN_CHANNELS	= $3812
 PLAYLIST_ADDR	= $2000
 START_INFO_ADDR	= $2C00
 TRACK_DATA_ADDR	= $2E00
@@ -6085,40 +6062,40 @@ CTM	= $12
 CHN	= $D6
 V	= $D7
 FILELIST	= $DA
-YFILE	= $0400
-SHFILE	= $0401
-CURFILE	= $0402
-TOTALFILES	= $0403
-CURPLAY	= $0404
-PLAYDIR	= $0405
-LAST_BANK	= $040A
-LAST_ADR	= $040B
-adr.PLAYLISTSCRADR	= $0410
-.var PLAYLISTSCRADR	= adr.PLAYLISTSCRADR .word
-adr.CURDEV	= $04FC
+YFILE	= DATAORIGIN+$0064
+SHFILE	= DATAORIGIN+$0065
+CURFILE	= DATAORIGIN+$0066
+TOTALFILES	= DATAORIGIN+$0067
+CURPLAY	= DATAORIGIN+$0068
+PLAYDIR	= DATAORIGIN+$0069
+LAST_BANK	= DATAORIGIN+$006A
+LAST_ADR	= DATAORIGIN+$006B
+adr.LISTSCRADR	= $3B40
+.var LISTSCRADR	= adr.LISTSCRADR .word
+adr.CURDEV	= [DATAORIGIN+$006D] .array [4]
 .var CURDEV	= adr.CURDEV .word
 adr.FN	= $0500
 .var FN	= adr.FN .word
 adr.OUTSTR	= $0580
 .var OUTSTR	= adr.OUTSTR .word
 ILCH	= $D6
-ILPOS	= $0450
-ILSCRADR	= $0451
-ILVCRS	= $0453
-RESULTINPUTLINE	= DATAORIGIN+$0086
-STATEINPUTLINE	= DATAORIGIN+$0087
+ILPOS	= DATAORIGIN+$0071
+ILSCRADR	= DATAORIGIN+$0072
+ILVCRS	= DATAORIGIN+$0074
+RESULTINPUTLINE	= DATAORIGIN+$0075
+STATEINPUTLINE	= DATAORIGIN+$0076
 adr.COLORS	= CODEORIGIN+$0100
 .var COLORS	= adr.COLORS .word
-PUTTEXTINVERT	= DATAORIGIN+$0088
-SDMACTL	= DATAORIGIN+$0089
+PUTTEXTINVERT	= DATAORIGIN+$0077
+SDMACTL	= DATAORIGIN+$0078
 DMACTL	= $D400
 SDLST	= $0230
 CHBASE	= $02F4
 VVBLKI	= $0222
 NMIEN	= $D40E
 NMIVEC	= $FFFA
-OLDVVBLKI	= DATAORIGIN+$008F
-OLDNMIVEC	= DATAORIGIN+$0091
+OLDVVBLKI	= DATAORIGIN+$007E
+OLDNMIVEC	= DATAORIGIN+$0080
 THI	= $1F
 K_L	= $00
 K_LEFT	= $06
@@ -6145,10 +6122,10 @@ K_H	= $39
 K_CAPS	= $3C
 K_S	= $3E
 KEYB	= $02FC
+HLPFLG	= $02DC
 SOUNDR	= $41
-P_BANK	= $040D
-P_ADR	= $040E
-@CASETMP_0004	= DATAORIGIN+$00A9
+P_BANK	= DATAORIGIN+$0094
+P_ADR	= DATAORIGIN+$0095
 @exit
 
 @halt	ldx #$00
@@ -6238,13 +6215,13 @@ ROMOFF
 
 ; ------------------------------------------------------------
 
-	org $3E80
+	org $0400
 
 DATAORIGIN
 .by  $28 $00 $18 $00 $2D $0C
 
 VARINITSIZE	= *-DATAORIGIN
-VARDATASIZE	= 170
+VARDATASIZE	= 159
 
 PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
 

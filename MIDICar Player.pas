@@ -25,27 +25,27 @@ var
   v:shortint absolute $D7;
 
   fileList:Pointer absolute $DA;
-  YFile:Byte absolute $400;
-  shFile:Byte absolute $401;
-  curFile:Byte absolute $402;
-  totalFiles:Byte absolute $403;
+  YFile:Byte;// absolute $400;
+  shFile:Byte;// absolute $401;
+  curFile:Byte;// absolute $402;
+  totalFiles:Byte;// absolute $403;
 
-  curPlay:Byte absolute $404;
-  playDir:Byte absolute $405;
+  curPlay:Byte;// absolute $404;
+  playDir:Byte;// absolute $405;
 
-  last_bank:Byte absolute $40a;
-  last_adr:Word absolute $40b;
+  last_bank:Byte;// absolute $406;
+  last_adr:Word;// absolute $407;
 
-  playlistScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
+  listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
 
-  curdev:TDevString absolute $4fc;
+  curdev:TDevString;// absolute $4fc;
   fn:TFilename absolute $500;
   outstr:TFilename absolute $580;
 
   ilch:Byte absolute $D6;
-  ilpos:Byte absolute $450;
-  ilscradr:Word absolute $451;
-  ilvcrs:Boolean absolute $453;
+  ilpos:Byte;// absolute $450;
+  ilscradr:Word;// absolute $451;
+  ilvcrs:Boolean;// absolute $453;
   resultInputLine:boolean;
   stateInputLine:Byte;
 

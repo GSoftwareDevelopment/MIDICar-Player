@@ -36,7 +36,7 @@ begin
   chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
-    scradr:=playlistScrAdr[chn];
+    scradr:=listScrAdr[chn];
     putSpaces(32);
     inc(chn);
   end;

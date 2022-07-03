@@ -1,10 +1,10 @@
 var
-  p_bank:byte absolute $40d;  //  \
-  p_adr:word absolute $40e;   //  / It is important that this order remains intact
+  p_bank:byte;// absolute $409;  //  \
+  p_adr:word;// absolute $40a;   //  / It is important that this order remains intact
 
 procedure drawListSelection;
 begin
-  scradr:=playlistScrAdr[YFile]; invers(32);
+  scradr:=listScrAdr[YFile]; invers(32);
 end;
 
 procedure showEntry;
@@ -36,7 +36,7 @@ begin
   gotoNEntry(shFile); chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
-    scradr:=playlistScrAdr[chn];
+    scradr:=listScrAdr[chn];
     if getEntry(outstr) then
       showEntry
     else
@@ -48,7 +48,7 @@ end;
 
 function choiceListFile:boolean;
 var
-  dev:TDevString absolute $4f4;
+  dev:TDevString;// absolute $4f4;
 
 begin
   if stateInputline=0 then

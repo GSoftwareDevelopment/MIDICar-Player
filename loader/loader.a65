@@ -11,38 +11,19 @@ ICBUFL  = $0348
 CIOV    = $E456
 
 START:
-    jsr detect_sdx
-    cmp #$ff
-    beq no_sdx
-    lda #<SDX_FOUND
-    ldy #>SDX_FOUND
-    jsr PRINT
-    jmp exit2DOS
-
-no_sdx:
-    jsr detect_axlon
-    cpy #$00
-    beq no_axlon
-    lda #<AXLON_FOUND
-    ldy #>AXLON_FOUND
-    jsr PRINT
-    jmp exit2DOS
-
-no_axlon:
-    jsr detect_xms
-    lda #$fe
-    sta $0100
-
+; Detect MIDICar
+step1:
     jsr detect_MC
     bcs MCNotFound
 
+MCFound:
     sty MCBASE
     stx MCBASE+1
-    rts
 
     lda #<MIDICAR_EXIST
     ldy #>MIDICAR_EXIST
-    jmp PRINT
+    jsr PRINT
+    jmp step2
 
 MCNotFound:
     lda #$60
@@ -53,8 +34,34 @@ MCNotFound:
     ldy #>MIDICAR_NOT_FOUND
     jsr PRINT
 
-exit2DOS:
+; SpartaDOS X detect
+step2:
+    jsr detect_sdx
+    cmp #$ff
+    beq step3
+    lda #<SDX_FOUND
+    ldy #>SDX_FOUND
+    jsr PRINT
+    jmp exit2DOS
+
+; AXLON Memory extention detect
+step3:
+    jsr detect_axlon
+    cpy #$00
+    beq step4
+    lda #<AXLON_FOUND
+    ldy #>AXLON_FOUND
+    jsr PRINT
+    jmp exit2DOS
+
+; Determine extended memory size (PORTB based)
+step4:
+    jsr detect_xms
+    lda #$fe
+    sta $0100
+
     rts
+exit2DOS:
     jmp (DOSVEC)
 
 ;
@@ -85,11 +92,11 @@ ExitPRINT:
 ; Strings
 
 MIDICAR_EXIST:
-    dta 'MIDICar exist :)',$9B
+    dta 'Yoppie! MIDICar found :)',$9B
 MIDICAR_NOT_FOUND:
-    dta 'MIDICar not found :(',$9B
+    dta 'Ouch! MIDICar not found :(',$9B
 AXLON_FOUND:
-    dta 'AXLON extention is not supported :(',$9B
+    dta 'Oh, AXLON extention is not supported :(',$9B
 SDX_FOUND:
     dta 'SDX user must wait :P',$9B
 

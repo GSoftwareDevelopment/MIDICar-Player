@@ -37,6 +37,7 @@ skipTHI:
     lda KEYDEL
     beq skip_keyDelay
     dec KEYDEL
+
 skip_keyDelay:
     lda SRTIMR
     beq end_key

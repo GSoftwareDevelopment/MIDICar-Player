@@ -5,6 +5,7 @@
 
 var
   keyb:byte absolute $2fc;
+  hlpflg:byte absolute $2dc;
 
   SOUNDR:Byte absolute $41;
 

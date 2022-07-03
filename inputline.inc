@@ -14,7 +14,7 @@ begin
   ilpos:=length(outstr);
   fillchar(outstr[ilpos+1],127-ilpos,$9b);
   keyb:=255; ilvcrs:=true;
-  ilscradr:=playlistScrAdr[YFile]+2;
+  ilscradr:=listScrAdr[YFile]+2;
   show_inputLine; ctm:=_tm;
   stateInputLine:=1;
   resultInputLine:=false;
