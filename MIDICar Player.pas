@@ -23,6 +23,8 @@ var
   ctm:Byte absolute $12;
   chn:Byte absolute $D6;
   v:shortint absolute $D7;
+  _v:byte absolute $D7;
+  memAvailable:longint;
 
   fileList:Pointer absolute $DA;
   YFile:Byte;// absolute $400;
@@ -48,6 +50,8 @@ var
   ilvcrs:Boolean;// absolute $453;
   resultInputLine:boolean;
   stateInputLine:Byte;
+  counter:Longint absolute $88;
+  cntBCD:Longint absolute $8c;
 
 {$i screen.inc}
 procedure statusLoop; Forward;
@@ -60,7 +64,8 @@ procedure statusLoop; Forward;
 {$i fileselect.inc}
 {$i inputline.inc}
 {$i list.inc}
-
+{$i keyboard.inc}
+{$i autostop_songchange.inc}
 {$i init.inc}
 // {$i playlist.inc}
 
@@ -87,40 +92,7 @@ begin
 // Player loop
   Repeat
     processMIDI;
-    if (playerStatus and ps_isStopped=0) and (playingTracks=0) then
-    begin
-      v:=playerStatus and ps_loop;
-      statusStopped;
-      if v<>ps_playonce then
-      begin
-        if v>ps_repeatone then
-          if curPlay<>255 then
-          begin
-            repeat
-              if curPlay=255 then curPlay:=curFile;
-              if (v=ps_shuffle) then
-                curPlay:=random(totalFiles)
-              else
-              begin
-                inc(curPlay,playDir);
-                if (curPlay=1) then curPlay:=totalFiles;
-                if (curPlay=totalFiles) then curPlay:=1;
-              end;
-              curFile:=curPlay;
-              choiceListFile;
-              if p_bank=$ff then
-                IOResult:=loadSong(outStr)
-              else
-                continue;
-            until IOResult<>1;
-            clearStatus;
-            if IOResult and %11111100<>0 then statusError(IOResult);
-            if totalTracks<>0 then
-              statusPlaying;
-            playDir:=1;
-          end;
-      end;
-    end;
+    AutoStopAndSongChange;
 
     if _tm<>otm then
     begin
@@ -131,7 +103,40 @@ begin
         showList;
         drawListSelection;
       end;
-      scradr:=screen_time+12; putHex(@_totalTicks,8);
+      counter:=_totalTicks;
+      _v:=(counter div _songTicks)-1;
+      if v<>255 then
+      begin
+      asm
+        txa
+        sta oldx
+
+        lda v
+        and #%11
+        tax
+        lda v
+        lsr @
+        lsr @
+        tay
+
+        lda progressData,x
+        sta screen_timeline,y
+
+        lda oldx:#00
+        bpl skipData ; always jump
+      progressData:
+        .byte %01000000
+        .byte %01010000
+        .byte %01010100
+        .byte %01010101
+      skipData:
+      end;
+      end;
+
+      asm
+        icl 'asms/24bin_6bcd.a65'
+      end;
+      scradr:=screen_time+14; putHex(cntBCD,6);
 
       asm  icl 'asms/uvmeters.a65' end;
       if stateInputLine=1 then
@@ -144,7 +149,30 @@ begin
 
     end;
 
-    {$i keyboard.inc}
+    if (keyb<>255) or (hlpflg<>0) then
+    begin
+      if playerStatus and ps_isHelp<>0 then toggleHelpScreen;
+      if stateInputLine=1 then
+        do_inputLine
+      else
+      begin
+        if (keyb=k_H) or (hlpflg=k_HELP) then toggleHelpScreen
+        else if keyb=k_ESC then break
+        else if keyb=k_SPACE then toggleFile
+        else if (keyb=k_UP) or (keyb=k_DOWN) then moveFileSelection
+        else if keyb=k_L then toggleLoopMode
+        else if keyb=k_M then toggleMeters
+        else if keyb=k_INVERS then toggleScreenColors;
+        playerControl;
+        if (keyb=k_CLEAR) or (keyb=k_INSERT) or (keyb=k_DELETE) then tempoControl;
+      end;
+
+      if keyb=k_RETURN then fileAction;
+
+      keyb:=255;
+      hlpflg:=0;
+    end;
+
   until false;
 
 // End player loop

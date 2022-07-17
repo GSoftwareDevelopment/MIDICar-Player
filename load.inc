@@ -1,9 +1,9 @@
 function loadSong(filename:PString):Byte;
+var
+  curLoad:Word absolute $D6;
 
   procedure loadPrc(v:byte);
   begin
-    // poke(SCREEN_STATUS,th[thi]);
-    // inc(thi); if thi=4 then thi:=0;
     if v>0 then
     begin
       puttextinvert:=128;
@@ -12,10 +12,13 @@ function loadSong(filename:PString):Byte;
       putInt(totalTracks);
       poke(scradr,$ce);
       puttextinvert:=0;
+      dec(memAvailable,curLoad);
+      updateMem;
     end;
   end;
 
 begin
+  resetMemoryPtr;
   _bank:=last_bank; _adr:=last_adr;
   clearStatus;
   statusLoading;
@@ -24,12 +27,13 @@ begin
   thi:=255;
   clearStatus;
   if (result and %11111100)<>0 then
-  begin
-    curPlay:=255; totalTracks:=0;
-  end
+    totalTracks:=0
   else
   begin
-    move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
     curPlay:=curFile;
+    move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
+    statusCalcLength;
+    determineSongLength;
+    clearStatus;
   end;
 end;

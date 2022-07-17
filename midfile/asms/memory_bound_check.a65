@@ -14,11 +14,11 @@ check1Bound:
   cmp #$ff
   bne check2Bound
 
-  lda #$a8
+  lda #$aa
   sta _adr+1
   rts
 
-// 2st, $a800..$cfff
+// 2st, $aa00..$d000
 check2bound:
   cmp #$d0
   bne check3Bound
@@ -56,7 +56,7 @@ switch2Conv:
   sty _bank
   lda #$fe        // switch to conventional memory and turn off ROM
   sta PORTB
-  lda #$a8        // set MSB address
+  lda #$d8        // set MSB address
   sta _adr+1
   rts
 

@@ -62,13 +62,13 @@ procedure MC6850_Send2; assembler; Keep;
 
 implementation
 
-procedure MC6850_Init(setup:byte); assembler;
+procedure MC6850_Init(setup:byte); assembler; Keep;
 asm
     lda setup
     sta MCBaseState:$d500
 end;
 
-procedure MC6850_Send2; assembler;
+procedure MC6850_Send2; assembler; Keep;
 asm
 wait:
     lda MCBaseState:$d500

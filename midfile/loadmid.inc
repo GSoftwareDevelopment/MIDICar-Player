@@ -4,13 +4,10 @@ const
   CIO_CHN = 1;
 
 var
-  trackCount:byte;
+  trackCount:byte absolute $de;
   chunkTag:TTag;
-  v:Word;
-  top:Word;
-  endAdr:Word;
-  loadSize:Word;
-  Len:Longint;
+  loadSize:Word absolute $d6;
+  Len:Longint absolute $e9;
   trkData:PMIDTrack;
   RBuf:TByteArray absolute $4000;
 
@@ -34,7 +31,7 @@ var
       else if hi(_adr)>=$40 then loadSize:=$8000;
       dec(loadSize,_adr);
       if loadSize>len then loadSize:=len;
-      until loadSize<>0;
+    until loadSize<>0;
   end;
 
 begin
@@ -63,11 +60,9 @@ begin
         break;
       end;
       totalTracks:=readWordBI;
-      v:=readWordBI;
-      if (v and $8000)=0 then
-        tickDiv:=v
+      tickDiv:=readWordBI;
 {$IFDEF USE_SUPPORT_VARS}
-      else
+      if (tickDiv and $8000)<>0 then
       begin
         fps:=(v shr 8) and $7F;
         case fps of
@@ -93,9 +88,9 @@ begin
 
       while Len>0 do
       begin
-        loadProcess(trackCount);
         checkLoadSize;
         if IOResult<>1 then break;
+        loadProcess(trackCount);
 
         if hi(_adr)>=$c0 then
         begin

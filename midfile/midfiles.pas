@@ -17,6 +17,8 @@ var
   _delta:Longint          absolute $f6; {f6, f7, f8, f9}
   _tmp:Byte               absolute $f6; // must by the same address as _delta!!
 
+  _songTicks:TDeltaVar    absolute $e9; {e9, ea, eb, ec}
+
 // the order of the registers MUST be the same as in the TMIDTrack record!!!
   _status:Byte            absolute _trkRegs;
   _bank:Byte              absolute _trkRegs+1;
@@ -43,7 +45,7 @@ var
   ticks_per_32nd:Byte     ;
   BPM:Word                ;
 {$ENDIF}
-  chnVolume:Array[0..15] of byte ;
+  chnVolume:Array[0..15] of byte;
   oldTimerVec:Pointer     ;
 
   loadProcess:TLoadingProcess ;
@@ -53,8 +55,9 @@ var
 function LoadMID(fn:PString):shortint;
 procedure initTimer;
 procedure setTempo;
-procedure ProcessTrack; Keep;
+procedure ProcessTrack; // Keep;
 procedure ProcessMIDI;
+procedure determineSongLength;
 
 implementation
 Uses
@@ -76,6 +79,7 @@ end;
 {$i settempo.inc}
 {$i processtrack.inc}
 {$i processmidi.inc}
+{$i determine_song_length.inc}
 
 procedure initTimer;
 begin

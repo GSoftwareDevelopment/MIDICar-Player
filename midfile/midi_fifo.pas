@@ -33,12 +33,12 @@ end;
 
 procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
 asm
-  lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
-  and #MC6850.TDRE
-  beq exitPush
-
   ldy FIFO_Tail
   cpy FIFO_Head
+  beq exitPush
+
+  lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
+  and #MC6850.TDRE
   beq exitPush
 
   lda FIFO_ADDR,y
@@ -68,7 +68,7 @@ storeInFIFO:
 exitWrite:
 end;
 
-procedure FIFO_Flush; Assembler;
+procedure FIFO_Flush; Assembler; Keep;
 asm
   sei
   // lda _timerStatus

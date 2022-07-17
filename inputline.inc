@@ -28,8 +28,7 @@ begin
     begin
       if keyb=k_ESC then
       begin
-        ilpos:=byte(fn[0]);
-        outstr:=fn;
+        ilpos:=byte(fn[0]); outstr:=fn;
       end;
       ilvcrs:=false; show_inputLine;
       stateInputLine:=2;

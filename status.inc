@@ -45,6 +45,7 @@ end;
 
 procedure statusStopped;
 begin
+  fillchar(pointer(SCREEN_TIMELINE),40,0);
   if totalTracks=0 then exit;
   if (playerStatus and ps_isStopped)<>0 then exit;
   playerStatus:=playerStatus or ps_isStopped;
@@ -61,14 +62,19 @@ begin
   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Loading '*~);
 end;
 
+procedure statusCalcLength;
+begin
+  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Calculating length'*~+#$ce);
+end;
+
 procedure statusReadDirectory;
 begin
-  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading directory '*~);
+  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading directory'*~+#$ce);
 end;
 
 // procedure statusReadPlaylist;
 // begin
-//   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading playlist '*~);
+//   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading playlist'*~+#$ce);
 // end;
 
 procedure statusError(err:byte);

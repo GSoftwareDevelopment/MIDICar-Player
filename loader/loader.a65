@@ -26,10 +26,12 @@ MCFound:
     jmp step2
 
 MCNotFound:
-    lda #$60
+    lda #$FE
     sta MCBASE
     lda #$04
     sta MCBASE+1
+    lda #$02
+    sta $4ff
     lda #<MIDICAR_NOT_FOUND
     ldy #>MIDICAR_NOT_FOUND
     jsr PRINT

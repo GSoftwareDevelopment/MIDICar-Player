@@ -1,0 +1,28 @@
+BINBCD24:
+        sed
+        lda #0
+        sta cntBCD+0
+        sta cntBCD+1
+        sta cntBCD+2
+
+        ldx #4
+loop:
+        asl counter+0
+        rol counter+1
+        rol counter+2
+        dex
+        bne loop
+
+        ldx #20
+CNVBIT:
+        asl counter+0
+        rol counter+1
+        rol counter+2
+
+        lda:adc:sta cntBCD+0
+        lda:adc:sta cntBCD+1
+        lda:adc:sta cntBCD+2
+SKIP:
+        dex
+        bne CNVBIT
+        cld

@@ -38,6 +38,7 @@ end;
 
 procedure resetMemoryPtr;
 begin
+  memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
   last_bank:=totalXMS;
   if totalXMS>0 then
     last_adr:=$4000
@@ -45,33 +46,52 @@ begin
     last_adr:=$d800;
 end;
 
+procedure updateMem;
+var
+  oscradr:word;
+  memAKB:Word;
+
+begin
+  memAKB:=memAvailable div 1024;
+  scradr:=SCREEN_STATUS+32;
+  if memAKB<10000 then scradr:=SCREEN_STATUS+33;
+  if memAKB<1000 then scradr:=SCREEN_STATUS+34;
+  if memAKB<100 then scradr:=SCREEN_STATUS+35;
+  if memAKB<10 then scradr:=SCREEN_STATUS+36;
+  oscradr:=scradr;
+  {putINTText(#$4a);} putInt(memAKB); putINTText('KB'~);
+  scradr:=oscradr;
+end;
+
 procedure clearStatus;
 var
   l:byte;
-  oscradr:word;
-  memAvailable:word;
 
 begin
   fillchar(pointer(SCREEN_TIME),60,0);
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
   statusLoop;
   scradr:=SCREEN_STATUS; HLine;
-  memAvailable:=(word(totalXMS)*16)+FREE_MEM;
-  if memAvailable<10000 then scradr:=SCREEN_STATUS+29;
-  if memAvailable<1000 then scradr:=SCREEN_STATUS+30;
-  if memAvailable<100 then scradr:=SCREEN_STATUS+31;
-  if memAvailable<10 then scradr:=SCREEN_STATUS+32;
-  oscradr:=scradr;
-  putINTText('Mem:'~); putInt(memAvailable); putINTText('KB'~);
+  updateMem;
   l:=length(fn);
   if l=0 then exit;
   if l>16 then fn[0]:=#16;
-  scradr:=oscradr-l-1; putASCText(fn);
+  scradr:=scradr-l-1; putASCText(fn);
 end;
 
 procedure clearUVMeters; Assembler;
 asm
   icl 'asms/uvmeters_clear.a65'
+end;
+
+procedure toggleHelpScreen;
+begin
+  playerStatus:=playerStatus xor ps_isHelp;
+  if playerStatus and ps_isHelp=0 then
+    dpoke(DLIST_ADDR+25,SCREEN_WORK)
+  else
+    dpoke(DLIST_ADDR+25,HELPSCR_ADDR);
+  keyb:=255;
 end;
 
 procedure exit2DOS;

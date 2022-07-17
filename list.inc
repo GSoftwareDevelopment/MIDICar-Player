@@ -13,7 +13,7 @@ var
   p_adr:word;   //  / It is important that this order remains intact
 
 begin
-  getEntrySets(@p_bank);
+  getEntrySets(p_bank);
   v:=0;
 //   if p_bank=$FD then v:=$5b; // playlist file
   if p_bank=$FE then v:=$1e; // current path
@@ -51,20 +51,17 @@ var
   dev:TDevString;// absolute $4f4;
 
 begin
-  if stateInputline=0 then
-  begin
-    gotoNEntry(curFile);
-    result:=getEntry(fn);
-    if result then
-    begin
-      getEntrySets(@p_bank);
+  if stateInputline<>0 then exit(false);
 
-      if not getDeviceSpec(fn,dev) then
-        joinStrings(curDev,fn)
-      else
-        outstr:=fn;
-    end;
-  end
-  else
-    result:=false;
+  gotoNEntry(curFile);
+  result:=getEntry(fn);
+  if result then
+  begin
+    getEntrySets(p_bank);
+
+    if not getDeviceSpec(fn,dev) then
+      joinStrings(curDev,fn)
+    else
+      outstr:=fn;
+  end;
 end;
