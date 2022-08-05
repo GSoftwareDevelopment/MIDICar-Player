@@ -1,4 +1,4 @@
-procedure toggleFile;
+procedure toggleFile; Keep;
 begin
   gotoNEntry(curFile);
   getEntry(outStr);
@@ -13,7 +13,7 @@ begin
   end;
 end;
 
-procedure moveFileSelection;
+procedure moveFileSelection; Keep;
 begin
   if playerStatus and ps_isRefresh=0 then drawListSelection;
   v:=0;
@@ -42,26 +42,42 @@ begin
   if playerStatus and ps_isRefresh=0 then drawListSelection;
 end;
 
-procedure toggleLoopMode;
+procedure toggleLoopMode; Keep;
 begin
   v:=(playerStatus+4) and ps_loop;
   playerStatus:=(playerStatus and (not ps_loop)) or v;
   statusLoop;
 end;
 
-procedure toggleMeters;
+procedure toggleMeters; Keep;
 begin
   clearUVMeters;
   playerStatus:=playerStatus xor ps_view;
 end;
 
-procedure toggleScreenColors;
+procedure toggleTimeShowMode; Keep;
+begin
+  scradr:=screen_time+14; putSpaces(6);
+  inc(timeShowMode); if timeShowMode>2 then timeShowMode:=0;
+end;
+
+procedure toggleScreenColors; Keep;
 begin
   playerStatus:=playerStatus xor ps_colorSet;
   setColors;
 end;
 
-procedure playerControl;
+procedure toggleHelpScreen;
+begin
+  playerStatus:=playerStatus xor ps_isHelp;
+  if playerStatus and ps_isHelp=0 then
+    dpoke(DLIST_ADDR+25,SCREEN_WORK)
+  else
+    dpoke(DLIST_ADDR+25,HELPSCR_ADDR);
+  keyb:=255;
+end;
+
+procedure playerControl; Keep;
 begin
   if (keyb=k_Z) or (keyb=k_B) then // previous & next song
   begin
@@ -85,7 +101,7 @@ begin
   if keyb=k_V then statusStopped;
 end;
 
-procedure tempoControl;
+procedure tempoControl; Keep;
 begin
   if keyb=k_CLEAR then inc(tempoShift,20000);
   if keyb=k_INSERT then dec(tempoShift,20000);
@@ -93,7 +109,7 @@ begin
   setTempo;
 end;
 
-procedure fileAction;
+procedure fileAction; Keep;
 begin
   if choiceListFile then
   begin

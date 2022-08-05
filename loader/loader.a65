@@ -8,6 +8,7 @@ ICCHID  = $0340
 ICCMD   = $0342
 ICBUFA  = $0344
 ICBUFL  = $0348
+PORTB   = $D301
 CIOV    = $E456
 
 START:
@@ -61,6 +62,10 @@ step4:
     jsr detect_xms
     lda #$fe
     sta $0100
+
+    lda PORTB
+    ora #2
+    sta PORTB
 
     rts
 exit2DOS:

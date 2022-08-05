@@ -7,14 +7,10 @@ procedure init;
 
 begin
   DMACTL:=0;
-  asm
-    lda $14
-    cmp $14
-    beq *-2
-  end;
-  setMCBaseAddress;
-  // initialize MIDICar (MC6850)
+  waitFrame;
 
+  // initialize MIDICar (MC6850)
+  setMCBaseAddress;
   MC6850_Init(MasterReset);
   MC6850_Init(CD_64+WS_OddParity+WS_8bits+WS_2BitStop{+IRQ_Receive});
 
@@ -28,6 +24,7 @@ begin
 
   clearWorkArea;
   clearStatus;
+  clearUVMeters;
   scradr:=SCREEN_TIME-40; HLine;
   scradr:=SCREEN_TIME-39; putINTText(#$4e+'Status'~*+#$ce);
   scradr:=SCREEN_TIME-10; putINTText(#$4e+'Counter'~*+#$ce);
@@ -42,9 +39,15 @@ begin
 
   resetMemoryPtr;
   otm:=_tm;
-  setColors; DMACTL:=34; SOUNDR:=0; playDir:=1;
+  setColors; DMACTL:=34;
   playerStatus:=(playerStatus and %1111) or ps_isStopped;
-  thi:=255; hlpflg:=0;
-  stateInputLine:=0;
-  resultInputLine:=false;
+  // thi:=255;
+  // playDir:=1;
+  // timeShowMode:=1;
+  SOUNDR:=0;
+  // hlpflg:=0;
+  // shFile:=0; YFile:=0; curFile:=0;
+  // stateInputLine:=0;
+  // resultInputLine:=false;
+
 end;

@@ -1,11 +1,17 @@
 {$LIBRARYPATH midfile/}
+{$LIBRARYPATH units/}
+{$LIBRARYPATH includes/}
 {$DEFINE ROMOFF}
 Uses
   MC6850,
   MIDI_FIFO,
   MIDFiles,
   Misc,
-  CIO;
+  CIO,
+  keys,
+  filestr,
+  screen,
+  list;
 {$I-}
 
 {$i type.inc}
@@ -26,14 +32,13 @@ var
   _v:byte absolute $D7;
   memAvailable:longint;
 
-  fileList:Pointer absolute $DA;
-  YFile:Byte;// absolute $400;
-  shFile:Byte;// absolute $401;
-  curFile:Byte;// absolute $402;
+  YFile:Byte = 0;// absolute $400;
+  shFile:Byte = 0 ;// absolute $401;
+  curFile:Byte = 0;// absolute $402;
   totalFiles:Byte;// absolute $403;
 
   curPlay:Byte;// absolute $404;
-  playDir:Byte;// absolute $405;
+  playDir:Byte = 1;// absolute $405;
 
   last_bank:Byte;// absolute $406;
   last_adr:Word;// absolute $407;
@@ -45,47 +50,36 @@ var
   outstr:TFilename absolute $580;
 
   ilch:Byte absolute $D6;
-  ilpos:Byte;// absolute $450;
-  ilscradr:Word;// absolute $451;
-  ilvcrs:Boolean;// absolute $453;
-  resultInputLine:boolean;
-  stateInputLine:Byte;
+  ilpos:Byte absolute $54;
+  ilscradr:Word absolute $55;
+
+  resultInputLine:boolean = false;
+  stateInputLine:Byte = 0;
+
+  timeShowMode:Byte = 1;
+
   counter:Longint absolute $88;
   cntBCD:Longint absolute $8c;
 
-{$i screen.inc}
 procedure statusLoop; Forward;
-{$i filestr.inc}
 {$i myNMI.inc}
 {$i helpers.inc}
 {$i status.inc}
 {$i load.inc}
-{$i list_asm.inc}
 {$i fileselect.inc}
 {$i inputline.inc}
 {$i list.inc}
 {$i keyboard.inc}
 {$i autostop_songchange.inc}
 {$i init.inc}
-// {$i playlist.inc}
 
 begin
   init;
-  clearUVMeters;
 
-  // if paramCount>0 then
-  // begin
-  //   fn:=paramStr(1);
-  //   preparePlaylist;
-  // end
-  // else
-  begin
-    joinStrings(curDev,'*.*');
-    gotoNEntry(0);
-    _adr:=$ffff; _bank:=$fe; addToList(outStr);
-    shFile:=0; YFile:=0; curFile:=0;
-    choiceListFile; stateInputLine:=2; resultInputLine:=true; keyb:=k_RETURN;
-  end;
+  joinStrings(curDev,'*.*');
+  gotoNEntry(0);
+  _adr:=$ffff; _bank:=$fe; addToList(outStr);
+  choiceListFile; stateInputLine:=2; resultInputLine:=true; keyb:=k_RETURN;
 
   setNMI;
 
@@ -103,47 +97,33 @@ begin
         showList;
         drawListSelection;
       end;
+
       counter:=_totalTicks;
-      _v:=(counter div _songTicks)-1;
-      if v<>255 then
+      if _songTicks>0 then
       begin
-      asm
-        txa
-        sta oldx
-
-        lda v
-        and #%11
-        tax
-        lda v
-        lsr @
-        lsr @
-        tay
-
-        lda progressData,x
-        sta screen_timeline,y
-
-        lda oldx:#00
-        bpl skipData ; always jump
-      progressData:
-        .byte %01000000
-        .byte %01010000
-        .byte %01010100
-        .byte %01010101
-      skipData:
-      end;
+        _v:=(counter div _songTicks)-1;
+        if _v<>255 then
+        asm
+          icl 'asms/song_progress.a65'
+        end;
       end;
 
-      asm
-        icl 'asms/24bin_6bcd.a65'
+      scradr:=screen_time+14;
+      if timeShowMode=1 then
+        putHex(counter,6)
+      else if timeShowMode=2 then
+      begin
+        asm
+          icl 'asms/24bin_6bcd.a65'
+        end;
+        putHex(cntBCD,6);
       end;
-      scradr:=screen_time+14; putHex(cntBCD,6);
 
       asm  icl 'asms/uvmeters.a65' end;
       if stateInputLine=1 then
         if _tm-ctm>10 then
         begin
           ctm:=_tm;
-          ilvcrs:=not ilvcrs;
           show_inputLine;
         end;
 
@@ -156,15 +136,26 @@ begin
         do_inputLine
       else
       begin
-        if (keyb=k_H) or (hlpflg=k_HELP) then toggleHelpScreen
-        else if keyb=k_ESC then break
-        else if keyb=k_SPACE then toggleFile
-        else if (keyb=k_UP) or (keyb=k_DOWN) then moveFileSelection
-        else if keyb=k_L then toggleLoopMode
-        else if keyb=k_M then toggleMeters
-        else if keyb=k_INVERS then toggleScreenColors;
-        playerControl;
-        if (keyb=k_CLEAR) or (keyb=k_INSERT) or (keyb=k_DELETE) then tempoControl;
+        if keyb=k_ESC then break;
+
+        asm
+          lda MAIN.KEYS.hlpflg
+          seq:sta MAIN.KEYS.keyb
+
+          lda MAIN.KEYS.keyb
+          and #%00111111
+          asl @
+          tay
+
+          lda KEY_TABLE,y
+          sta jump_addr
+          lda KEY_TABLE+1,y
+          sta jump_addr+1
+          beq key_not_defined
+
+          jsr jump_addr:$ffff
+        key_not_defined:
+        end;
       end;
 
       if keyb=k_RETURN then fileAction;
@@ -179,4 +170,11 @@ begin
   unsetNMI;
 
   exit2DOS;
+  asm
+    jmp endProg
+
+    icl 'key_table.a65'
+
+  endProg:
+  end;
 end.

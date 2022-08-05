@@ -1,4 +1,5 @@
 const
+  // KEY_TABLE_ADDR  = $500;
   CHARS_ADDR      = $3000;
   SCREEN_ADDR     = $3400;
 
@@ -21,7 +22,7 @@ const
   START_INFO_ADDR = $2C00;
   TRACK_DATA_ADDR = $2E00;
   MIDI_DATA_ADDR  = $4000;
-  FREE_MEM        = ($8000-$4000)+($d000-$aa00)+($ff00-$d800);
+  FREE_MEM        = ($8000-$4000)+($d000-$ab00)+($ff00-$d800);
 
   f_clear = %00100000;
 
@@ -44,3 +45,8 @@ const
   // fe_PLS = $504c5300;
   fe_DIR = $a4a9b200;
   fe_MID = $4d494400;
+
+  colors:Array[0..1,0..4] of byte = (
+    ($A8,$00,$0A,$08,$0A),
+    ($A8,$0A,$00,$02,$00)
+  );

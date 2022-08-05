@@ -1,6 +1,6 @@
 procedure statusLoop;
 const
-  sloop:Array[0..3] of string[2] = (
+  sloop:Array[0..3] of string[2] = ( {?}
     #$00+#$00,  // sloop_playone
     #$7e+#$7f,  // sloop_repeatone
     #$5c+#$5d,  // sloop_repeatall

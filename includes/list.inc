@@ -1,6 +1,6 @@
 var
-  p_bank:byte;// absolute $409;  //  \
-  p_adr:word;// absolute $40a;   //  / It is important that this order remains intact
+  p_bank:byte;  //  \
+  p_adr:word;   //  / It is important that this order remains intact
 
 procedure drawListSelection;
 begin
@@ -25,10 +25,10 @@ begin
       v:=$5a; // file loaded into memory
 
   poke(scradr,v); inc(scradr,2);
-
-  if byte(outstr[0])>LIST_VISIBLE_CHARS then outstr[0]:=char(LIST_VISIBLE_CHARS);
+  v:=byte(outstr[0]);
+  if v>LIST_VISIBLE_CHARS then outstr[0]:=char(LIST_VISIBLE_CHARS);
   putASCText(outstr);
-  putSpaces(30-byte(outstr[0]));
+  putSpaces(30-v);
 end;
 
 procedure showList;
@@ -37,10 +37,8 @@ begin
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
     scradr:=listScrAdr[chn];
-    if getEntry(outstr) then
-      showEntry
-    else
-      break;
+    if not getEntry(outstr) then break;
+    showEntry;
     inc(chn);
     nextEntry;
   end;
@@ -48,7 +46,7 @@ end;
 
 function choiceListFile:boolean;
 var
-  dev:TDevString;// absolute $4f4;
+  dev:TDevString;
 
 begin
   if stateInputline<>0 then exit(false);

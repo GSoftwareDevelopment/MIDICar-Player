@@ -48,7 +48,7 @@ var
   chnVolume:Array[0..15] of byte;
   oldTimerVec:Pointer     ;
 
-  loadProcess:TLoadingProcess ;
+  loadProcess:TLoadingProcess;
   tempoShift:Longint      ;
 
 //
@@ -125,6 +125,7 @@ initialization
   ms_per_qnote:=500000;
   totalTracks:=0;
   cTrk:=0;
+  _songTicks:=0;
   _timerStatus:=f_counter;
 {$IFDEF USE_SUPPORT_VARS}
   tactNum:=4;

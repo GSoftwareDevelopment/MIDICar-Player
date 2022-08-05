@@ -4,3 +4,4 @@ DLIST_ADDR rcasm 'resources/dlist.asm';
 SCREEN_HEAD rcdata 'resources/graph.obj';
 UVMETER_ADDR rcdata 'resources/uvmeter.obj';
 HELPSCR_ADDR rcdata 'resources/help.obj';
+# KEY_TABLE_ADDR rcasm 'key_table.a65';

@@ -1,0 +1,23 @@
+  txa
+  sta oldx
+
+  lda v
+  and #%11
+  tax
+  lda v
+  lsr @
+  lsr @
+  tay
+
+  lda progressData,x
+  sta screen_timeline,y
+
+  lda oldx:#00
+  bpl skipData ; jump, becouse this is not procedure call!
+
+progressData:
+  .byte %01000000
+  .byte %01010000
+  .byte %01010100
+  .byte %01010101
+skipData:

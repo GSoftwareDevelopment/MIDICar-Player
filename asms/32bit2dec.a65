@@ -1,0 +1,51 @@
+regptr = $88
+
+        txa:pha
+
+; converts 10 digits (32 bit values have max. 10 decimal digits)
+hex2dec
+        ldx #0
+l3      jsr div10
+        sta result,x
+        inx
+        cpx #10
+        bne l3
+
+;print
+        lda <result
+        sta regptr
+        lda >result
+        sta regptr
+
+        ldy #9
+putText:
+        lda (regptr),y   // get string character
+        sta (scradr),y   // put on screen
+        dey
+        bpl putText
+
+        pla:tax
+
+        jmp exit
+
+        ; divides a 32 bit value by 10
+        ; remainder is returned in akku
+div10
+        ldy #32         ; 32 bits
+        lda #0
+        clc
+l4      rol
+        cmp #10
+        bcc skip
+        sbc #10
+skip    rol counter
+        rol counter+1
+        rol counter+2
+        rol counter+3
+        dey
+        bpl l4
+        rts
+
+result  .byte 0,0,0,0,0,0,0,0,0,0
+
+exit:

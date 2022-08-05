@@ -4,16 +4,27 @@ begin
   outstr[0]:=char(ilpos);
   scradr:=ilscradr;
   putASCText(outstr);
-  if ilvcrs then ilch:=$80 else ilch:=$00;
-  poke(scradr,ilch);
-  inc(scradr); putSpaces(31-ilpos);
+  if stateInputLine=1 then
+  begin
+    asm
+      ldy #0
+      lda (scradr),y
+      bmi nospace
+      lda #0
+    noSpace:
+      eor #$80
+      sta (scradr),y
+    end;
+    inc(scradr);
+  end;
+  putSpaces(31-ilpos);
 end;
 
 procedure init_inputLine;
 begin
   ilpos:=length(outstr);
   fillchar(outstr[ilpos+1],127-ilpos,$9b);
-  keyb:=255; ilvcrs:=true;
+  keyb:=255;
   ilscradr:=listScrAdr[YFile]+2;
   show_inputLine; ctm:=_tm;
   stateInputLine:=1;
@@ -30,8 +41,8 @@ begin
       begin
         ilpos:=byte(fn[0]); outstr:=fn;
       end;
-      ilvcrs:=false; show_inputLine;
       stateInputLine:=2;
+      show_inputLine;
       resultInputLine:=(keyb=K_RETURN);
       keyb:=k_RETURN; exit;
     end;

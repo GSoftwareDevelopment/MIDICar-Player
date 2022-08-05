@@ -1,14 +1,5 @@
-// const
-//   GM_RESET: array[0..5] of byte = ($f0, $7e, $7f, $09, $01, $f7);
-
-{$i keys.inc}
-
 var
-  keyb:byte absolute $2fc;
-  hlpflg:byte absolute $2dc;
-
   SOUNDR:Byte absolute $41;
-
 
 procedure reset_MIDI; assembler;
 asm
@@ -48,8 +39,8 @@ end;
 
 procedure updateMem;
 var
-  oscradr:word;
-  memAKB:Word;
+  oscradr:word; {?}
+  memAKB:Word;  {?}
 
 begin
   memAKB:=memAvailable div 1024;
@@ -84,14 +75,19 @@ asm
   icl 'asms/uvmeters_clear.a65'
 end;
 
-procedure toggleHelpScreen;
+procedure clearList;
 begin
-  playerStatus:=playerStatus xor ps_isHelp;
-  if playerStatus and ps_isHelp=0 then
-    dpoke(DLIST_ADDR+25,SCREEN_WORK)
-  else
-    dpoke(DLIST_ADDR+25,HELPSCR_ADDR);
-  keyb:=255;
+  resetMemoryPtr;
+  fileList:=pointer(PLAYLIST_ADDR);
+  totalFiles:=0; curfile:=0; YFile:=0; shFile:=0;
+  chn:=0;
+  while (chn<LIST_VISIBLE_ITEMS) do
+  begin
+    scradr:=listScrAdr[chn];
+    putSpaces(32);
+    inc(chn);
+  end;
+  fillchar(fileList,$C00,$9B);
 end;
 
 procedure exit2DOS;

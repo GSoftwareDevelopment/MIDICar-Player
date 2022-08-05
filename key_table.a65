@@ -1,0 +1,67 @@
+none = $0000
+
+key_table:
+  dta a(MAIN.toggleLoopMode)     ; k_L     = 0
+  dta a(none)                    ; k_J     = 1
+  dta a(none)                    ; k_SEMICO= 2
+  dta a(none)                    ; k_F1    = 3
+  dta a(none)                    ; k_F2    = 4
+  dta a(none)                    ; k_K     = 5
+  dta a(none)                    ; k_LEFT  = 6
+  dta a(none)                    ; k_RIGHT = 7
+  dta a(none)                    ; k_O     = 8
+  dta a(none)                    ; 9 - NOT USED
+  dta a(none)                    ; k_P     = 10
+  dta a(none)                    ; k_U     = 11
+  dta a(none)                    ; k_RETURN= 12
+  dta a(none)                    ; k_I     = 13
+  dta a(MAIN.moveFileSelection)  ; k_UP    = 14
+  dta a(MAIN.moveFileSelection)  ; k_DOWN  = 15
+  dta a(MAIN.playerControl)      ; k_V     = 16
+  dta a(toggleHelpScreen)        ; k_HELP  = 17
+  dta a(MAIN.playerControl)      ; k_C     = 18
+  dta a(none)                    ; k_F3    = 19
+  dta a(none)                    ; k_F4    = 20
+  dta a(MAIN.playerControl)      ; k_B     = 21
+  dta a(MAIN.playerControl)      ; k_X     = 22
+  dta a(MAIN.playerControl)      ; k_Z     = 23
+  dta a(none)                    ; k_4     = 24
+  dta a(none)                    ; 25 - NOT USED
+  dta a(none)                    ; k_3     = 26
+  dta a(none)                    ; k_6     = 27
+  dta a(none)                    ; k_ESC   = 28
+  dta a(none)                    ; k_5     = 29
+  dta a(none)                    ; k_2     = 30
+  dta a(none)                    ; k_1     = 31
+  dta a(none)                    ; k_COMMA = 32
+  dta a(MAIN.toggleFile)         ; k_SPACE = 33
+  dta a(none)                    ; k_DOT   = 34
+  dta a(none)                    ; k_N     = 35
+  dta a(none)                    ; 36 - NOT USED
+  dta a(MAIN.toggleMeters)       ; k_M     = 37
+  dta a(none)                    ; k_BACKSL= 38
+  dta a(MAIN.toggleScreenColors) ; k_INVERS= 39
+  dta a(none)                    ; k_R     = 40
+  dta a(none)                    ; 41 - NOT USED
+  dta a(none)                    ; k_E     = 42
+  dta a(none)                    ; k_Y     = 43
+  dta a(none)                    ; k_TAB   = 44
+  dta a(MAIN.toggleTimeShowMode) ; k_T     = 45
+  dta a(none)                    ; k_W     = 46
+  dta a(none)                    ; k_Q     = 47
+  dta a(none)                    ; k_9     = 48
+  dta a(none)                    ; 49 - NOT USED
+  dta a(none)                    ; k_0     = 50
+  dta a(none)                    ; k_7     = 51
+  dta a(MAIN.tempoControl)       ; k_DELETE= 52
+  dta a(none)                    ; k_8     = 53
+  dta a(MAIN.tempoControl)       ; k_CLEAR = 54
+  dta a(MAIN.tempoControl)       ; k_INSERT= 55
+  dta a(none)                    ; k_F     = 56
+  dta a(MAIN.toggleHelpScreen)   ; k_H     = 57
+  dta a(none)                    ; k_D     = 58
+  dta a(none)                    ; 59 - NOT USED
+  dta a(none)                    ; k_CAPS  = 60
+  dta a(none)                    ; k_G     = 61
+  dta a(none)                    ; k_S     = 62
+  dta a(none)                    ; k_A     = 63

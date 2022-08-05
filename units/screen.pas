@@ -1,17 +1,34 @@
-const
-  colors:Array[0..1,0..4] of byte = (
-    ($A8,$00,$0A,$08,$0A),
-    ($A8,$0A,$00,$02,$00)
-  );
+unit screen;
+
+interface
 
 var
-  puttextinvert:byte;
-  SDMACTL:Byte;
+  puttextinvert:Byte absolute $30;
   DMACTL:Byte absolute $d400;
   SDLST:Word absolute $230;
   CHBASE:Byte absolute $2f4;
 
-procedure setColors; assembler;
+procedure waitFrame; Inline; Assembler;
+procedure setColors; Assembler;
+procedure invers(chars:byte); Register; Assembler;
+procedure putSpaces(spaces:byte); Register; Assembler;
+procedure putINTText(s:PString); Register; Assembler;
+procedure PutASCText(s:PString); Register; Assembler;
+procedure PutHex(var v; n:byte); Assembler;
+procedure putInt(value:smallint); assembler;
+procedure hline; assembler;
+procedure clearWorkArea; assembler;
+
+implementation
+
+procedure waitFrame; Inline; Assembler;
+asm
+  lda $14
+  cmp $14
+  beq *-2
+end;
+
+procedure setColors; Assembler;
 asm
   icl 'asms/setColors.a65'
 end;
@@ -55,3 +72,5 @@ procedure clearWorkArea; assembler;
 asm
   icl 'asms/clear_workarea.a65'
 end;
+
+end.

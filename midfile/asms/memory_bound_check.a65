@@ -14,7 +14,7 @@ check1Bound:
   cmp #$ff
   bne check2Bound
 
-  lda #$aa
+  lda #$ab
   sta _adr+1
   rts
 
