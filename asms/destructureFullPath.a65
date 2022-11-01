@@ -1,0 +1,122 @@
+DestructureFullPath:
+
+    txa:pha
+
+    lda #0
+    sta result
+
+    ldy #0
+    lda (inStr),y
+    beq endInStr            ; this means, that input string is empty
+
+    tay
+    pha ; store inStr length
+
+; now, its need to find last delimiter (':' device separator; '>' or '/' path separator)
+
+l1:
+    lda (inStr),y
+    cmp #':'
+    beq foundNameBegin
+    cmp #'>'
+    beq foundNameBegin
+    cmp #'\'
+    beq foundNameBegin
+    cmp #'/'
+    beq foundNameBegin
+
+    dey
+    bne l1
+
+foundNameBegin:
+; copy name to nameS
+    pla
+    sta copyEnd
+    lda #name_size
+    sta maxLen
+
+    tya:pha ; store start postion of name
+
+    iny     ; name starts right after the Path or DevSpec
+
+    lda nameS
+    ldx nameS+1
+    jsr copyInStr2Ptr
+    beq skip_dp_name
+
+    lda result              ; set dp_name in result
+    ora #filestr.dp_name
+    sta result
+
+skip_dp_name:
+; now, try to extract device specification
+    jsr FILESTR.getDeviceSpec   ; in A register - 0 if, device is not specified; or 1 it is
+    lda FILESTR.getDeviceSpec.result
+    beq skip_dp_dev
+
+    lda result              ; set dp_dev in result
+    ora #filestr.dp_dev
+    sta result
+
+skip_dp_dev:
+; If device specification is found, then, its value is stored in devS pointer
+; At index 0 is stored length of string
+
+; betwen DevSpec and File name is Path specificatin
+; now, lets extract this chunk to pathS pointer
+
+    pla ; get temporart stored value - inStr length
+    sta copyEnd
+    lda #path_size
+    sta maxLen
+
+    ldy #0
+    lda (devS),Y
+    tay
+    iny
+
+    lda pathS
+    ldx pathS+1
+    jsr copyInStr2Ptr
+    beq skip_dp_path
+
+    lda result              ; set dp_path in result
+    ora #filestr.dp_path
+    sta result
+
+skip_dp_path:
+endInStr:
+
+    pla:tax
+
+    rts
+
+; copy input string (inStr) from position Y reg to
+; new string (ptr) and store new string length (X reg)
+copyInStr2Ptr:
+    sta Ptr1
+    sta Ptr2
+    stx Ptr1+1
+    stx Ptr2+1
+
+    inc copyEnd
+    ldx #1
+
+    lda maxLen
+    beq copyStop
+
+loop_copy:
+    cpy copyEnd:#00
+    beq copyStop
+    lda (inStr),y
+    sta Ptr1:$ffff,x
+    inx
+    cpx maxLen:#00
+    beq copyStop
+    iny
+    bne loop_copy
+
+copyStop:
+    dex
+    stx Ptr2:$ffff
+    rts

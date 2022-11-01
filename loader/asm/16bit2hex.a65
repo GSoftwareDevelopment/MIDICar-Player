@@ -1,0 +1,37 @@
+MCBASEPORT:
+    .local
+
+    ldy #1
+
+    lda #<MIDICAR_BASE
+    sta msgptr
+    lda #>MIDICAR_BASE
+    sta msgptr+1
+
+nextByte:
+    lda mcbase,y
+    pha
+    :4 lsr
+    jsr putHexCharToMsg
+    pla
+    and #$0f
+    jsr putHexCharToMsg
+
+    dey
+    bpl nextByte
+
+    rts
+
+putHexCharToMsg:
+    tax
+    lda hex,x
+    sta msgptr:$ffff
+
+    inc msgptr
+    bcc endPut
+    inc msgptr+1
+
+endPut:
+    rts
+
+    .endl

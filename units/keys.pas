@@ -72,6 +72,7 @@ const
 
 var
   keyb:byte absolute $2fc;
+  keymod:byte absolute $2fd;
   hlpflg:byte absolute $2dc;
 
 function keyscan2asc(keyscan:Byte):Byte; Assembler;

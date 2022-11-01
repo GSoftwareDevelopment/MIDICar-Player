@@ -1,9 +1,10 @@
-function LoadMID(fn:PString):shortint;
+function LoadMID:shortint;
 const
   LOADBUF_SIZE=16*1024;
   CIO_CHN = 1;
 
 var
+  fn:String[80] absolute $55a;
   trackCount:byte absolute $de;
   chunkTag:TTag;
   loadSize:Word absolute $d6;

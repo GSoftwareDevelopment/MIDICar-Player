@@ -14,16 +14,16 @@ Uses
   list;
 {$I-}
 
-{$i type.inc}
 {$i const.inc}
+{$i type.inc}
 
 {$r player.rc}
 
 var
   playerStatus:Byte absolute $4A;
-  totalXMS:Byte absolute $4B;
+  totalXMS:Byte absolute $4B; // this value is initialized by loader
   scradr:Word absolute $D4;
-  MCBaseAddr:Word absolute $D8;
+  MCBaseAddr:Word absolute $D8; // this valu is initialized by loader
   _tm:Byte absolute $14;
   otm:Byte absolute $13;
   ctm:Byte absolute $12;
@@ -32,22 +32,24 @@ var
   _v:byte absolute $D7;
   memAvailable:longint;
 
-  YFile:Byte = 0;// absolute $400;
-  shFile:Byte = 0 ;// absolute $401;
-  curFile:Byte = 0;// absolute $402;
-  totalFiles:Byte;// absolute $403;
+  YFile:Byte = 0;
+  shFile:Byte = 0;
+  curFile:Byte = 0;
+  totalFiles:Byte;
 
-  curPlay:Byte;// absolute $404;
-  playDir:Byte = 1;// absolute $405;
+  curPlay:Byte;
+  playDir:Byte = 1;
 
-  last_bank:Byte;// absolute $406;
-  last_adr:Word;// absolute $407;
+  last_bank:Byte;
+  last_adr:Word;
 
   listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
 
-  curdev:TDevString;// absolute $4fc;
-  fn:TFilename absolute $500;
-  outstr:TFilename absolute $580;
+  curdev:TDevString absolute CURDEV_ADDR;   // 6 (+1) // absolute $4f0;
+  curPath:TPath absolute CURPATH_ADDR;      // 64 (+1)
+  fn:TFilename absolute FN_PATH_ADDR;       // 32 (+1)
+  outstr:String[80] absolute OUTSTR_ADDR;   // 80 (+1)
+  Snull:String[80] absolute SNULL_ADDR;     // 80 (+1)
 
   ilch:Byte absolute $D6;
   ilpos:Byte absolute $54;
@@ -66,19 +68,20 @@ procedure statusLoop; Forward;
 {$i helpers.inc}
 {$i status.inc}
 {$i load.inc}
-{$i fileselect.inc}
 {$i inputline.inc}
 {$i list.inc}
+{$i getdirectory.inc}
 {$i keyboard.inc}
 {$i autostop_songchange.inc}
 {$i init.inc}
 
 begin
+  asm lda PORTB \ pha end;
   init;
 
-  joinStrings(curDev,'*.*');
-  gotoNEntry(0);
-  _adr:=$ffff; _bank:=$fe; addToList(outStr);
+  outStr:='D:';
+
+  gotoNEntry(0); _adr:=$ffff; _bank:=fl_device; addToList(outStr);
   choiceListFile; stateInputLine:=2; resultInputLine:=true; keyb:=k_RETURN;
 
   setNMI;
@@ -88,7 +91,7 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    if _tm<>otm then
+    if _tm-otm>1 then
     begin
       otm:=_tm;
       if playerStatus and ps_isRefresh<>0 then
@@ -120,6 +123,7 @@ begin
       end;
 
       asm  icl 'asms/uvmeters.a65' end;
+
       if stateInputLine=1 then
         if _tm-ctm>10 then
         begin
@@ -143,15 +147,21 @@ begin
           seq:sta MAIN.KEYS.keyb
 
           lda MAIN.KEYS.keyb
+          tay
+          and #%11000000
+          sta MAIN.KEYS.keymod
+          tya
           and #%00111111
+          sta MAIN.KEYS.keyb
+
           asl @
           tay
 
-          lda KEY_TABLE,y
-          sta jump_addr
-          lda KEY_TABLE+1,y
-          sta jump_addr+1
+          lda KEY_TABLE_ADDR+1,y
           beq key_not_defined
+          sta jump_addr+1
+          lda KEY_TABLE_ADDR,y
+          sta jump_addr
 
           jsr jump_addr:$ffff
         key_not_defined:
@@ -170,11 +180,5 @@ begin
   unsetNMI;
 
   exit2DOS;
-  asm
-    jmp endProg
-
-    icl 'key_table.a65'
-
-  endProg:
-  end;
+  asm pla \ sta PORTB end;
 end.

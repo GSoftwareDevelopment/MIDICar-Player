@@ -1,5 +1,5 @@
 hlpptr = $88
-result = $4f8
+result = $4ec
 
   lda #0
   sta result

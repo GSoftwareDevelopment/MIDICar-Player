@@ -1,0 +1,36 @@
+getParams:
+
+    .local
+
+    lda dosvec
+    clc
+    adc #$03
+    sta zcr
+    lda dosvec+1
+    adc #$00
+    sta zcr+1
+
+NextParam:
+    jsr ZCR:$FFFF
+    beq No_more_parameters
+
+    ldy #33
+_cp:
+    lda (dosvec),y
+    sta parbuf-33,y
+    iny
+    cmp #$9b
+    bne _cp
+
+; tu robimy z parametrem pobranym do bufora "parbuf" to, co potrzebujemy
+    lda #<parbuf
+    ldy #>parbuf
+    jsr PRINT
+
+    jmp NextParam
+
+No_more_parameters:
+
+    rts
+
+    .endl

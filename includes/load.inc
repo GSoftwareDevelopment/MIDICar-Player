@@ -1,4 +1,4 @@
-function loadSong(filename:PString):Byte;
+function loadSong:Byte;
 var
   curLoad:Word absolute $D6;
 
@@ -20,10 +20,11 @@ var
 begin
   resetMemoryPtr;
   _bank:=last_bank; _adr:=last_adr;
+
   clearStatus;
   statusLoading;
   loadProcess:=@loadPrc; thi:=0;
-  result:=LoadMid(filename);
+  result:=LoadMid;
   thi:=255;
   clearStatus;
   if (result and %11111100)<>0 then

@@ -1,6 +1,11 @@
 var
   SOUNDR:Byte absolute $41;
 
+procedure getCurrentPath(chn:byte; dev:PString; path:PString); register; assembler;
+asm
+  icl '../asms/getCurrentDirectory.a65'
+end;
+
 procedure reset_MIDI; assembler;
 asm
   txa:pha
@@ -93,5 +98,5 @@ end;
 procedure exit2DOS;
 begin
   stopMIDI;
-  Cls(0); Opn(0,12,0,'E:'); SOUNDR:=1;
+  Cls(0); Opn(0,12,0,'E:'); // SOUNDR:=1;
 end;

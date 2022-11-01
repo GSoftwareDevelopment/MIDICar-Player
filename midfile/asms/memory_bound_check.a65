@@ -14,11 +14,11 @@ check1Bound:
   cmp #$ff
   bne check2Bound
 
-  lda #$ab
+  lda #$c0
   sta _adr+1
   rts
 
-// 2st, $aa00..$d000
+// 2st, $c000..$d000
 check2bound:
   cmp #$d0
   bne check3Bound

@@ -50,13 +50,13 @@ begin
     else
       event:=_event;
 
-    if _event<=$bf then
+    if _event<$C0 then
       eventMidi3
-    else if _event<=$df then
+    else if _event<$E0 then
       eventMidi2
-    else if _event<=$ef then
+    else if _event<$F0 then
       eventMidi3
-    else if _event<=$f7 then
+    else if _event<$f8 then
       eventSysEx
     else if _event=$ff then
       eventMeta;

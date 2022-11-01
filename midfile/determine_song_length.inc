@@ -28,43 +28,32 @@ begin
       else
         event:=_event;
 
-      if _event<=$bf then
-      begin
-        readB;
-        readB;
-      end
-      else if _event<=$df then
-        readB
-      else if event<=$ef then
-      begin
-        readB;
-        readB;
-      end
-      else if _event<=$f7 then
-      begin
-        readVarL;
-        while _tmp>0 do
-        begin
-          readB;
-          dec(_tmp);
-        end;
-      end
+
+      if _event<$C0 then
+        _tmp:=2 // read 2 bytes
+      else if _event<$E0 then
+        _tmp:=1 // read 1 byte
+      else if event<$F0 then
+        _tmp:=2 // read 2 bytes
+      else if _event<$F8 then
+        readVarL
       else if _event=$ff then
       begin
         readB; // fetch Meta event numer
         readVarL; // fetch data size
-
-        if event=$2f then // end of track
-          break
-        else
-        // any orther meta event are skipped
-          while _tmp>0 do
-          begin
-            dec(_tmp);
-            inc(_adr);
-            memBoundCheck;
-          end;
+        if event=$2f then break; // end of track
       end;
+      while _tmp>0 do
+      begin
+        dec(_tmp);
+        inc(_adr);
+        memBoundCheck;
+      end;
+        // while _tmp>0 do
+        // begin
+        //   readB;
+        //   dec(_tmp);
+        // end;
     until false;
     if _trackTime>_songTicks then _songTicks:=_trackTime;
     inc(curTrackPtr,sizeOf(TMIDTrack));

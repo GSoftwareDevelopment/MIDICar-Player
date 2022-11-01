@@ -8,6 +8,7 @@
 | `13`       |              | byte    | otm             |                                                              | main      |
 | `4A`       |              | byte    | playerStatus    |                                                              | loader    |
 | `4B`       |              | byte    | totalXMS        |                                                              | loader    |
+| `4F`       |              | byte    | puttextinvert   |                                                              | screen (lib) |
 | `$D4, $D5` |              | pointer | `scradr`        | position on screen                                           | main      |
 | `$D6, $D7` |              | pointer | *n/n*           | help pointer                                                 | main      |
 | `$D8, $D9` |              | pointer | MCBase          | MC6850 base address                                          | loader    |

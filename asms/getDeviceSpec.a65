@@ -1,34 +1,38 @@
+  .local
+
 fnreg   = $88
 specreg = $8c
 
 getDeviceSpec:
   ldy #1
+  sty result
+
 colonLoop:
   lda (fnreg),y
+  sta (specreg),y
   cmp #':'
-  beq foundSpec
+  beq storeLen
   iny
-  cpy #4
+  cpy #dev_size+1
   bne colonLoop
 
 specNotFound:
   lda #0
-  ; tay
-  ; sta (specreg),y
+  tay
+  sta (specreg),Y
   sta result
-  rts
 
-foundSpec:
+storeLen:
   tya
   ldy #0
   sta (specreg),y
   tay
 
-copySpec:
-  lda (fnreg),y
-  sta (specreg),y
-  dey
-  bne copySpec
+  lda #$9b
+clr:
+  iny
+  sta (specreg),Y
+  cpy #dev_size
+  bne clr
 
-  lda #1
-  sta result
+  .endl

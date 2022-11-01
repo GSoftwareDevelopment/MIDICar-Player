@@ -1,4 +1,5 @@
-hlpptr = $D6
+// hlpptr = $D6
+
   lda playerStatus
   and #ps_view
   bne updateUVMeter
@@ -12,12 +13,9 @@ uvmeterLoop:
   lda MIDFILES.adr.CHNVOLUME,x
   beq dontUpdate
 
-  cmp #4
-  bpl decVol
-  lda #0
-  beq storeVol
-decVol:
   sub #4
+  bpl storeVol
+  lda #0
 storeVol:
   sta MIDFILES.adr.CHNVOLUME,x
 
@@ -26,8 +24,8 @@ storeVol:
 
   add #<UVMETER_ADDR
   sta hlpptr
-  lda #>UVMETER_ADDR
-  sta hlpptr+1
+  // lda #>UVMETER_ADDR
+  // sta hlpptr+1
 
   txa                       //2
   asl @                     //2
@@ -39,8 +37,10 @@ storeVol:
 
   ldy #3          // 2
 loop:
-  lda (hlpptr),y  // 5*
-  sta (scradr),y  // 6
+  lda hlpptr:$3500,y      // 4*
+  sta scradr:$2000,y      // 4*
+  // lda (hlpptr),y  // 5*
+  // sta (scradr),y  // 6
   dey             // 2
   bpl loop        // 2**
 

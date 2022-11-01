@@ -14,7 +14,7 @@ getEntry:
   ldx #3
   ldy #1
 loop:
-  lda entryptr:2000,x
+  lda entryptr:$b000,x
   cmp #$9B
   beq endEntry
   sta (hlpptr),y

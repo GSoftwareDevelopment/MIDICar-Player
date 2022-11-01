@@ -1,0 +1,35 @@
+path_delimiter:
+
+    .local
+    ldy #0
+    lda (inStr),y
+    beq stroreDelimiter
+
+checkEndDelimiter:
+    tay
+    lda (inStr),y
+    cmp #'>'
+    beq @exit
+    cmp #'\'
+    beq @exit
+    cmp #'/'
+    beq @exit
+
+stroreDelimiter:
+    iny
+;     cpy #path_size
+;     bmi store
+;     beq store
+
+; ; TODO: path to long
+;     rts
+
+store:
+    lda delimiterCh         ; get path delimiter char
+    sta (inStr),y            ; and store it at end of path
+
+    tya
+    ldy #0
+    sta (inStr),y
+
+    .endl

@@ -4,6 +4,8 @@ interface
 
 var
   fileList:Pointer absolute $DA;
+  p_bank:byte;  //  \
+  p_adr:word;   //  / It is important that this order remains intact
 
 function getEntry(fn:PString):Boolean; register; assembler;
 procedure getEntrySets(var ptr); register; assembler;

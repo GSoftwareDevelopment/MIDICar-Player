@@ -52,7 +52,7 @@ var
   tempoShift:Longint      ;
 
 //
-function LoadMID(fn:PString):shortint;
+function LoadMID:shortint;
 procedure initTimer;
 procedure setTempo;
 procedure ProcessTrack; // Keep;
@@ -121,11 +121,12 @@ end;
 initialization
   oldTimerVec:=nil;
   loadProcess:=@nullLoadPrcs;
-  tickDiv:=384;
-  ms_per_qnote:=500000;
   totalTracks:=0;
   cTrk:=0;
   _songTicks:=0;
+  _totalTicks:=0;
+  tickDiv:=384;
+  ms_per_qnote:=500000;
   _timerStatus:=f_counter;
 {$IFDEF USE_SUPPORT_VARS}
   tactNum:=4;

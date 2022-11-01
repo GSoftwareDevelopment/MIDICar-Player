@@ -3,7 +3,7 @@ begin
   gotoNEntry(curFile);
   getEntry(outStr);
   getEntrySets(p_bank);
-  if (p_bank<>$fe) and (p_bank and $7f<>0) then
+  if (p_bank<>fl_device) and (p_bank and $7f<>0) then
   begin
     drawListSelection;
     p_bank:=p_bank xor $80;
@@ -34,8 +34,7 @@ begin
   if v<>0 then
   begin
     inc(shFile,v);
-    playerStatus:=playerStatus or ps_isRefresh;
-    // showList;
+    playerStatus:=playerStatus or ps_isRefresh; // showList;
   end;
   curFile:=shFile+YFile;
   if curFile>=totalFiles then curFile:=totalFiles-1;
@@ -81,16 +80,32 @@ procedure playerControl; Keep;
 begin
   if (keyb=k_Z) or (keyb=k_B) then // previous & next song
   begin
-    if keyb=k_Z then playDir:=255;
-    if keyb=k_B then playDir:=1;
-    StatusPause;
-    playingTracks:=0;
+    if keyb=k_B then playDir:=1 else playDir:=255;
+    v:=playerStatus and ps_loop;
+    statusStopped;
+    repeat
+      if (v=ps_shuffle) then
+        curPlay:=random(totalFiles)
+      else
+      begin
+        inc(curPlay,playDir);
+        if (curPlay=1) then curPlay:=totalFiles;
+        if (curPlay=totalFiles) then begin curPlay:=1; break; end;
+      end;
+      curFile:=curPlay;
+      IOResult:=1; choiceListFile; stateInputLine:=0;
+    until (p_bank=fl_midifile) and (IOResult and %11111100=0);
+    clearStatus;
+    if IOResult and %11111100<>0 then statusError(IOResult);
+    if totalTracks<>0 then statusPlaying;
   end;
+
   if keyb=k_X then // Play
-    begin
-      statusStopped;
-      statusPlaying;
-    end;
+  begin
+    statusStopped;
+    statusPlaying;
+  end;
+
   if (keyb=k_C) and (playerStatus and ps_isStopped=0) then // Pause
   begin
     if _timerStatus and f_counter<>0 then
@@ -98,6 +113,7 @@ begin
     else
       StatusPause;
   end;
+
   if keyb=k_V then statusStopped;
 end;
 
@@ -111,36 +127,21 @@ end;
 
 procedure fileAction; Keep;
 begin
-  if choiceListFile then
+  choiceListFile;
+  if stateInputLine<>2 then exit;
+
+  stateInputLine:=0;
+  if (p_bank=fl_device) or
+      (p_bank=fl_directory) or
+      (p_bank=fl_parentDir) then
   begin
-  //   if p_bank=$fd then IOResult:=loadPlaylist(outStr);
-    if p_bank=$fe then
+    drawListSelection;
+    if resultInputLine then
     begin
-      drawListSelection;
-      init_inputLine;
-    end;
-    if p_bank=$ff then
-    begin
-      statusStopped;
-      IOResult:=loadSong(outStr);
-      stateInputLine:=2;
+      IOResult:=getDirectory;
+      playerStatus:=playerStatus or ps_isRefresh;
     end;
   end;
-  if stateInputLine=2 then
-  begin
-    if (p_bank=$fe) then
-    begin
-      drawListSelection;
-      if resultInputLine then
-      begin
-        fn:=outStr;
-        if not getDeviceSpec(outstr,curDev) then joinStrings(curDev,fn);
-        IOResult:=fileSelect(outStr);
-        playerStatus:=playerStatus or ps_isRefresh;
-      end;
-    end;
-    if IOResult and %11111100<>0 then statusError(IOResult);
-    if p_bank=$ff then statusPlaying;
-    stateInputLine:=0;
-  end;
+  if IOResult and %11111100<>0 then statusError(IOResult);
+  if p_bank=fl_midifile then statusPlaying;
 end;

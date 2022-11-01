@@ -1,0 +1,76 @@
+getCurrentDirectory:
+
+    .local
+
+    tax:pha
+
+// call CIO command - get current directory
+
+    lda chn
+    :4 asl @
+    tax
+
+    lda #48     // SDX - GET CURRENT DIRECTORY
+    sta iccmd,x
+
+; set DevSpec ptr (+1, at 0 index is length)
+    lda dev
+    add #1
+    sta icbufa,x
+    lda dev+1
+;    adc #0
+    sta icbufa+1,x
+
+; set Path ptr result (+1, at 0 index is length)
+    lda path
+    add #1
+    sta icbufl,x
+    lda path+1
+;    adc #0
+    sta icbufl+1,x
+
+    m@call ciov
+    ; inc PORTB
+    ; jsr CIOV
+    ; php
+    ; dec PORTB
+    ; plp
+
+
+; I/O result
+    sty MAIN.SYSTEM.IOResult
+    bpl preparePath
+; if error, just set zero length and exit
+    ldy #0
+    jmp storeLen
+
+preparePath:
+    ldy #0              ; reset index of path position
+
+loop_countLen:
+    iny                 ; increase index
+    lda (path),y        ; fetch character
+    beq loop_end
+    cmp #$9B
+    bne loop_countLen   ; check, if it is the end of path character
+loop_end:
+    dey
+
+storeLen:
+    tya
+    ldy #0
+    sta (path),y
+    tay
+
+    lda #$9b
+    clr:
+    iny
+    sta (path),Y
+    cpy #path_size
+    bne clr
+
+    pla:tax
+
+    rts
+
+    .endl

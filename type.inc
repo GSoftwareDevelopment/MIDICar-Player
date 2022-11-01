@@ -1,3 +1,4 @@
 type
-  TDevString = String[3];
-  TFilename = String[127];
+  TDevString = String[dev_size];
+  TPath      = String[path_size];
+  TFilename  = String[name_size];

@@ -1,0 +1,39 @@
+    org $600
+
+icchid = $0340
+icdno  = $0341
+iccmd  = $0342
+icstat = $0343
+icbufa = $0344
+icputb = $0346
+icbufl = $0348
+icax1  = $034a
+icax2  = $034b
+icax3  = $034c
+icax4  = $034d
+icax5  = $034e
+icax6  = $034f
+jciomain = $E456
+
+iocb = 1
+
+    ldx #iocb*16
+    lda #48
+    sta iccmd,x
+    lda #<fname
+    sta icbufa,x
+    lda #>fname
+    sta icbufa+1,x
+    lda #<buf
+    sta icbufl,x
+    lda #>buf
+    sta icbufl+1,x
+    jsr jciomain
+    bmi ioerror
+    rts
+ioerror
+    
+    rts
+
+fname dta c'D:',$9B
+buf   equ *

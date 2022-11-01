@@ -4,8 +4,11 @@
 ; $Id: sparta_detect.asm,v 1.2 2006/09/27 22:59:27 mikey Exp $
 ;
 
-p0      = $f0
+comtab  = $0A
 fsymbol = $07EB
+
+T_      = $F0   ; pointer to SDX T_ symbol
+_nbanks = $1D   ; COMTAB offset to free banks of extended memory
 
 detect_sdx
 
@@ -22,42 +25,30 @@ detect_sdx
 
 ; we're running 4.4 - the old method is INVALID as of 4.42
 
-;    lda #<sym_comtab2
-;    ldx #>sym_comtab2
-;    jsr fsymbol
-;    sta p0
-;    sec
-;    sbc #2
-;    sta p0
-;    stx p0+1
-
-;    ldy #0
-;    lda (p0),y
-;    sta $72
-
     lda #<sym_t
     ldx #>sym_t
     jsr fsymbol
-    sta p0
-    stx p0+1
+    sta T_
+    stx T_+1
     ldy #$06
     bne _fv
 
 ; we're running SDX, find (DOSVEC)-$150
 
-_oldsdx         lda $a
+_oldsdx
+    lda comtab
     sec
     sbc #<$150
-    sta p0
-    lda $b
+    sta T_
+    lda comtab+1
     sbc #>$150
-    sta p0+1
+    sta T_+1
 
 ; ok, hopefully we have established the address.
 ; now peek at it. return the value.
 
     ldy #0
-_fv lda (p0),y
+_fv lda (T_),y
     rts
 
 no_sparta

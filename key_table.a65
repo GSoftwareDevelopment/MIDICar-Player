@@ -18,7 +18,7 @@ key_table:
   dta a(MAIN.moveFileSelection)  ; k_UP    = 14
   dta a(MAIN.moveFileSelection)  ; k_DOWN  = 15
   dta a(MAIN.playerControl)      ; k_V     = 16
-  dta a(toggleHelpScreen)        ; k_HELP  = 17
+  dta a(MAIN.toggleHelpScreen)   ; k_HELP  = 17
   dta a(MAIN.playerControl)      ; k_C     = 18
   dta a(none)                    ; k_F3    = 19
   dta a(none)                    ; k_F4    = 20

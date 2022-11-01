@@ -19,8 +19,6 @@ begin
 {$IFDEF USE_FIFO}
   FIFO_Reset;
 {$ENDIF}
-  curDev:='D:';
-  fn:='';
 
   clearWorkArea;
   clearStatus;
@@ -34,17 +32,18 @@ begin
   // for chn:=0 to 15 do
   // begin
   //   // channelScrAdr[chn]:=SCREEN_WORK+42+chn*40;
-  //   listScrAdr[chn]:=SCREEN_WORK+48+chn*40;
+    // listScrAdr[chn]:=SCREEN_WORK+48+chn*40;
   // end;
 
   resetMemoryPtr;
+  setColors;
+  DMACTL:=34; waitFrame;
   otm:=_tm;
-  setColors; DMACTL:=34;
   playerStatus:=(playerStatus and %1111) or ps_isStopped;
   // thi:=255;
   // playDir:=1;
   // timeShowMode:=1;
-  SOUNDR:=0;
+  // SOUNDR:=0;
   // hlpflg:=0;
   // shFile:=0; YFile:=0; curFile:=0;
   // stateInputLine:=0;

@@ -1,6 +1,8 @@
 inreg  = $88
 outReg = $8c
 
+  .local
+
   txa:pha
 
   lda inreg
@@ -42,11 +44,24 @@ storeDot:
   dey
   tya:tax   // move Y to X - string length
   pla:tay   // pop stored dot position
+
+  stx len      // ex: X=$0a
+  cmp len:#00   //     A=$09
+                //   X-A=$0a-$09=-1($ff)
+  bmi putDot
+
+  dex
+  jmp storeLen;
+
+putDot:
   lda #'.'
   sta (outreg),y
 
+storeLen:
   txa       // move string length to Accu
   ldy #0
   sta (outreg),y
 
   pla:tax
+
+  .endl

@@ -8,7 +8,7 @@ begin
 
   gotoNEntry(0); getEntry(fn);
   clearPlaylist;
-  _adr:=$ffff; _bank:=$fe; addToPlaylist(fn);
+  _adr:=$ffff; _bank:=fl_device; addToPlaylist(fn);
   fn:=PLSFilename; clearStatus;
   statusReadPlaylist;
 

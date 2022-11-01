@@ -1,17 +1,20 @@
     org $8000
 
-; BOOT?   = $09
+BOOT?  = $09
 DOSVEC  = $0A
+AEXTMEM = $4B
 MCBASE  = $D8
-
-ICCHID  = $0340
-ICCMD   = $0342
-ICBUFA  = $0344
-ICBUFL  = $0348
 PORTB   = $D301
-CIOV    = $E456
 
 START:
+; Detect Command Line
+;     jsr detect_CMD
+;     bne NoCMD
+
+;     jsr getParams
+
+; NoCMD:
+
 ; Detect MIDICar
 step1:
     jsr detect_MC
@@ -21,9 +24,12 @@ MCFound:
     sty MCBASE
     stx MCBASE+1
 
+    jsr MCBASEPORT
+
     lda #<MIDICAR_EXIST
     ldy #>MIDICAR_EXIST
     jsr PRINT
+
     jmp step2
 
 MCNotFound:
@@ -42,10 +48,18 @@ step2:
     jsr detect_sdx
     cmp #$ff
     beq step3
+
+; SDX user
+
     lda #<SDX_FOUND
     ldy #>SDX_FOUND
     jsr PRINT
-    jmp exit2DOS
+
+    jsr detect_xms_by_sdx
+
+    jmp run_mcplay
+
+; extended RAM detection for non-SDX user
 
 ; AXLON Memory extention detect
 step3:
@@ -60,51 +74,54 @@ step3:
 ; Determine extended memory size (PORTB based)
 step4:
     jsr detect_xms
+
+run_mcplay:
+	sty AEXTMEM
+
     lda #$fe
     sta $0100
+
+; Turn off BASIC
 
     lda PORTB
     ora #2
     sta PORTB
 
     rts
+
 exit2DOS:
     jmp (DOSVEC)
 
 ;
 
+    ; icl 'asm/detect_CMD.a65'
     icl 'asm/detect_mc.a65'
     icl 'asm/detect_axlon.a65'
     icl 'asm/detect_sdx.a65'
     icl 'asm/detect_xms.a65'
-
-PRINT:
-    ldx #$00
-    sta ICBUFA,X
-    tya
-    sta ICBUFA+1,X
-    lda #$ff
-    sta ICBUFL,X
-    lda #$09
-    sta ICCMD,X
-    lda ICCHID,x
-    bmi ExitPRINT
-    jmp CIOV
-ExitPRINT:
-    rts
+    icl 'asm/detect_xms_by_sdx.a65'
+    icl 'asm/print.a65'
+    icl 'asm/16bit2hex.a65'
+    ; icl 'asm/get_params.a65'
 
 //
 //
 
 ; Strings
-
+MSG_NO_DOS:
+    dta c'Need DOS',$9B
 MIDICAR_EXIST:
-    dta 'Yoppie! MIDICar found :)',$9B
+    dta 'Yoppie! MIDICar found at $'
+MIDICAR_BASE:
+    dta 'xxxx',$9b
 MIDICAR_NOT_FOUND:
     dta 'Ouch! MIDICar not found :(',$9B
 AXLON_FOUND:
     dta 'Oh, AXLON extention is not supported :(',$9B
 SDX_FOUND:
-    dta 'SDX user must wait :P',$9B
+    dta 'SDX user. Oh yeah!',$9B
+HEX:
+    dta '0123456789abcdef'
+parbuf  equ *
 
     ini START

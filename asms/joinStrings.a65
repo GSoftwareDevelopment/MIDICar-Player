@@ -2,34 +2,60 @@ JoinStrings:
 
     txa:pha
 
+    ldx #0
+
     ldy #0
     lda (s1),y
-    sta devlen
-    ldx #1
+    beq nextCopy
+
+    sta s1Len
+
+; if s1 pointer is equal outstr pointer then...
+
+    lda s1
+    cmp #<adr.outstr
+    bne copyS1
+    lda s1+1
+    cmp #>adr.outstr
+    bne copyS1
+
+; ...skip copy s1 string
+    lda (s1),y
+    tax
+    jmp nextCopy
 
 copyS1:
+    inx
     iny
     lda (s1),y
     sta adr.outstr,x
-    inx
-    cpy devlen:#00
+    cpy s1Len:#00
     bne copyS1
 
 nextCopy:
     ldy #0
     lda (s2),y
-    sta fnlen
+    beq storeOutLen
+
+    sta s2Len
 
 copyS2:
+    inx
     iny
     lda (s2),y
     sta adr.outstr,x
-    inx
-    cpy fnlen:#00
+    cpy s2Len:#00
     bne copyS2
 
-    dex
+storeOutLen:
     stx adr.outstr
+
+    lda #$9b
+clr:
+    inx
+    sta adr.outstr,x
+    cpx #80
+    bne clr
 
     pla:tax
     rts

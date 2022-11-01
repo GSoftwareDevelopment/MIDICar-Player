@@ -4,7 +4,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Compile source",
+			"label": "Compile MCPLAY source",
 			"type": "shell",
 			"command": "mp",
 			"args": [
@@ -44,7 +44,7 @@
 			}
 		},
 		{
-			"label": "Compile ASM",
+			"label": "Compile MCPLAY ASM",
 			"type": "shell",
 			"command": "mads",
 			"args": [
@@ -89,7 +89,7 @@
 				"reevaluateOnRerun": false
 			},
 			"dependsOrder": "sequence",
-			"dependsOn": ["Compile source", "Compile ASM"]
+			"dependsOn": ["Compile MCPLAY source", "Compile MCPLAY ASM"]
 		},
 		{
 			"label": "Run",

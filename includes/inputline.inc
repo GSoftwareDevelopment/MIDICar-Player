@@ -23,9 +23,8 @@ end;
 procedure init_inputLine;
 begin
   ilpos:=length(outstr);
-  fillchar(outstr[ilpos+1],127-ilpos,$9b);
+  fillchar(outstr[ilpos+1],80-ilpos,$9b);
   keyb:=255;
-  ilscradr:=listScrAdr[YFile]+2;
   show_inputLine; ctm:=_tm;
   stateInputLine:=1;
   resultInputLine:=false;
@@ -37,10 +36,8 @@ begin
   begin
     if (keyb=k_ESC) or (keyb=k_RETURN) then
     begin
-      if keyb=k_ESC then
-      begin
-        ilpos:=byte(fn[0]); outstr:=fn;
-      end;
+      if keyb=k_ESC then outStr:=Snull;
+      ilpos:=byte(outstr[0]);
       stateInputLine:=2;
       show_inputLine;
       resultInputLine:=(keyb=K_RETURN);

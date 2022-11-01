@@ -7,7 +7,6 @@ banks   = $0101
 ext_b	= $4000		;cokolwiek z zakresu $4000-$7FFF
 vcount  = $D40B
 portb   = $D301
-result  = $4B
 
     txa:pha
 
@@ -81,8 +80,6 @@ _p3	jsr setpb
 
 	pla
 	sta portb
-
-	sty Result
 
 stop	pla:tax
 

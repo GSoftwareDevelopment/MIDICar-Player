@@ -1,0 +1,36 @@
+detect_CMD:
+
+    .local
+
+detect_DOS:
+    lda boot?           ; sprawdzamy, czy DOS w ogóle jest w pamięci
+    lsr
+    bcs FoundDOS
+
+NoDOS:
+    lda #<MSG_NO_DOS
+    ldy #>MSG_NO_DOS
+    jsr PRINT
+
+    jmp Halt
+
+FoundDOS:
+    lda dosvec+1        ; a jeśli tak, czy DOSVEC nie wskazuje ROM-u
+    cmp #$c0
+    bcc DOSbeforeROM
+
+    jmp NoDOS
+
+DOSbeforeROM:
+    ldy #$03
+    lda (dosvec),y
+    cmp #$4c
+    ; bne _no_command_line
+    rts
+
+Halt:
+    pla
+    pla
+    rts
+
+    .endl

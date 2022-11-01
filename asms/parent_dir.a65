@@ -1,0 +1,22 @@
+    .local
+
+    ldy #0
+    lda (inStr),y
+
+    tay
+prevChar:
+    lda #0
+    sta (inStr),y
+    dey
+    beq @exit
+    lda (inStr),y
+    cmp #'>'
+    beq stop
+    cmp #'\'
+    bne prevChar
+stop:
+    tya
+    ldy #0
+    sta (inStr),y
+
+    .endl
