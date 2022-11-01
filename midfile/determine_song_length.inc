@@ -58,5 +58,4 @@ begin
     if _trackTime>_songTicks then _songTicks:=_trackTime;
     inc(curTrackPtr,sizeOf(TMIDTrack));
   end;
-  _songTicks:=_songTicks div 160;
 end;

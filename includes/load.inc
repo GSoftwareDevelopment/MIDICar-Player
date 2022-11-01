@@ -35,6 +35,7 @@ begin
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
     statusCalcLength;
     determineSongLength;
+    _songTicks:=_songTicks div 160;
     clearStatus;
   end;
 end;
