@@ -5,4 +5,4 @@ UVMETER_ADDR rcdata 'resources/uvmeter.obj';
 CHARS_ADDR rcdata 'resources/font_blk.fnt';
 SCREEN_HEAD rcdata 'resources/graph.obj';
 HELPSCR_ADDR rcdata 'resources/help.obj';
-KEY_TABLE_ADDR rcasm 'key_table.a65';
+KEY_TABLE_ADDR rcasm 'resources/key_table.a65';
