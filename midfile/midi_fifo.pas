@@ -33,10 +33,13 @@ end;
 
 procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
 asm
+// check if FIFO buffer is empty?
   ldy FIFO_Tail
   cpy FIFO_Head
   beq exitPush
 
+//
+// check MC buffer is clear
   lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
   and #MC6850.TDRE
   beq exitPush
@@ -45,35 +48,39 @@ asm
   sta MCBaseBuf:$d500  //MC6850.MC6850_BUFFER
   inc FIFO_Tail
 
+  sec
+  rts
 exitPush:
+  clc
 end;
 
 procedure FIFO_WriteByte; Assembler; // Inline;
 asm
-  lda FIFO_Head
-  clc
-  adc #1
-  cmp FIFO_Tail
+// Check if the FIFO buffer is full?
+  ldy FIFO_Head   // 3
+  iny             // 2
+  cpy FIFO_Tail   // 3
   bne storeInFIFO
 
+// If it is full, flush it.
   jsr FIFO_Flush
 
 storeInFIFO:
-  ldy FIFO_Head
+// Put a byte in the FIFO buffer
+  ldy FIFO_Head // 3
   lda FIFO_Byte
   sta FIFO_ADDR,y
   inc FIFO_Head
 
+// try sending immediately
   jsr FIFO_PushDirect2MC6850
+
 exitWrite:
 end;
 
 procedure FIFO_Flush; Assembler; Keep;
 asm
   sei
-  // lda _timerStatus
-  // eor #$80
-  // sta _timerStatus
 
   ldy FIFO_Tail
 flushLoop:
@@ -95,9 +102,6 @@ endFlush:
   sty FIFO_Tail
 
   cli
-  // lda _timerStatus
-  // eor #$80
-  // sta _timerStatus
 end;
 
 {

@@ -45,7 +45,15 @@ begin
 
     if _ptr^ and $80<>0 then
     begin
-      ReadB; _event:=event;
+      asm
+        sta event
+        sta _event
+        inc _ADR
+        sne
+        inc _ADR+1
+        jsr memBoundCheck
+      end;
+      // ReadB; _event:=event;
     end
     else
       event:=_event;
