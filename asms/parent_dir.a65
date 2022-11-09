@@ -5,10 +5,10 @@
 
     tay
 prevChar:
-    lda #0
+    lda #$9B
     sta (inStr),y
     dey
-    beq @exit
+    beq stop
     lda (inStr),y
     cmp #'>'
     beq stop

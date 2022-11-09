@@ -35,9 +35,9 @@ Source: loader.a65
     33 8013 4C 2A 80		    jmp step2
     34
     35 8016			MCNotFound:
-    36 8016 A9 FE		    lda #$FE
+    36 8016 A9 FF		    lda #$FF
     37 8018 85 D8		    sta MCBASE
-    38 801A A9 04		    lda #$04
+    38 801A A9 00		    lda #$00
     39 801C 85 D9		    sta MCBASE+1
     40 801E A9 02		    lda #$02
     41 8020 8D FF 04		    sta $4ff

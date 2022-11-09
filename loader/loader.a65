@@ -33,9 +33,9 @@ MCFound:
     jmp step2
 
 MCNotFound:
-    lda #$FE
+    lda #$FF
     sta MCBASE
-    lda #$04
+    lda #$00
     sta MCBASE+1
     lda #$02
     sta $4ff
