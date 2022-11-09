@@ -22,6 +22,7 @@ Uses
 var
   playerStatus:Byte absolute $4A;
   totalXMS:Byte absolute $4B; // this value is initialized by loader
+  screenStatus:Byte absolute $4C;
   scradr:Word absolute $D4;
   MCBaseAddr:Word absolute $D8; // this valu is initialized by loader
   _tm:Byte absolute $14;
@@ -79,10 +80,10 @@ begin
   asm lda PORTB \ pha end;
   init;
 
-  outStr:='D:';
+  outStr:='D:'; validPath;
 
   gotoNEntry(0); _adr:=$ffff; _bank:=fl_device; addToList(outStr);
-  choiceListFile; stateInputLine:=2; resultInputLine:=true; keyb:=k_RETURN;
+  choiceListFile; stateInputLine:=ils_done; resultInputLine:=true; keyb:=k_RETURN;
 
   setNMI;
 
@@ -94,9 +95,9 @@ begin
     if _tm-otm>1 then
     begin
       otm:=_tm;
-      if playerStatus and ps_isRefresh<>0 then
+      if screenStatus and ss_isRefresh<>0 then
       begin
-        playerStatus:=playerStatus xor ps_isRefresh;
+        screenStatus:=screenStatus xor ss_isRefresh;
         showList;
         drawListSelection;
       end;
@@ -124,7 +125,7 @@ begin
 
       asm  icl 'asms/uvmeters.a65' end;
 
-      if stateInputLine=1 then
+      if stateInputLine=ils_inprogress then
         if _tm-ctm>10 then
         begin
           ctm:=_tm;
@@ -135,8 +136,8 @@ begin
 
     if (keyb<>255) or (hlpflg<>0) then
     begin
-      if playerStatus and ps_isHelp<>0 then toggleHelpScreen;
-      if stateInputLine=1 then
+      if screenStatus and ss_isHelp<>0 then toggleHelpScreen;
+      if stateInputLine=ils_inprogress then
         do_inputLine
       else
       begin

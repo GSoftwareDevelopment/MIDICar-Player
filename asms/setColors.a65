@@ -5,8 +5,8 @@ colptr = $88
   lda colors+1
   sta colptr+1
 
-  lda playerStatus
-  and #ps_colorSet
+  lda screenStatus
+  and #ss_colorSet
   beq skip
   lda colptr
   add #5

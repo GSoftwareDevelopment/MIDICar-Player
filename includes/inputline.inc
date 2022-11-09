@@ -4,7 +4,7 @@ begin
   outstr[0]:=char(ilpos);
   scradr:=ilscradr;
   putASCText(outstr);
-  if stateInputLine=1 then
+  if stateInputLine=ils_inprogress then
   begin
     asm
       ldy #0
@@ -26,7 +26,7 @@ begin
   fillchar(outstr[ilpos+1],80-ilpos,$9b);
   keyb:=255;
   show_inputLine; ctm:=_tm;
-  stateInputLine:=1;
+  stateInputLine:=ils_inprogress;
   resultInputLine:=false;
 end;
 
@@ -38,10 +38,11 @@ begin
     begin
       if keyb=k_ESC then outStr:=Snull;
       ilpos:=byte(outstr[0]);
-      stateInputLine:=2;
+      stateInputLine:=ils_done;
       show_inputLine;
       resultInputLine:=(keyb=K_RETURN);
-      keyb:=k_RETURN; exit;
+      // keyb:=k_RETURN;
+      exit;
     end;
     if (keyb=k_delete) then
     begin
@@ -59,5 +60,5 @@ begin
     end;
   end;
   show_inputLine;
-  keyb:=255;
+  // keyb:=255;
 end;

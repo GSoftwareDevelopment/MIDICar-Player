@@ -15,7 +15,7 @@ end;
 
 procedure moveFileSelection; Keep;
 begin
-  if playerStatus and ps_isRefresh=0 then drawListSelection;
+  if screenStatus and ss_isRefresh=0 then drawListSelection;
   v:=0;
   if (keyb=k_UP) then
   begin
@@ -34,11 +34,11 @@ begin
   if v<>0 then
   begin
     inc(shFile,v);
-    playerStatus:=playerStatus or ps_isRefresh; // showList;
+    screenStatus:=screenStatus or ss_isRefresh; // showList;
   end;
   curFile:=shFile+YFile;
   if curFile>=totalFiles then curFile:=totalFiles-1;
-  if playerStatus and ps_isRefresh=0 then drawListSelection;
+  if screenStatus and ss_isRefresh=0 then drawListSelection;
 end;
 
 procedure toggleLoopMode; Keep;
@@ -51,7 +51,7 @@ end;
 procedure toggleMeters; Keep;
 begin
   clearUVMeters;
-  playerStatus:=playerStatus xor ps_view;
+  screenStatus:=screenStatus xor ss_view;
 end;
 
 procedure toggleTimeShowMode; Keep;
@@ -62,14 +62,14 @@ end;
 
 procedure toggleScreenColors; Keep;
 begin
-  playerStatus:=playerStatus xor ps_colorSet;
+  screenStatus:=screenStatus xor ss_colorSet;
   setColors;
 end;
 
 procedure toggleHelpScreen;
 begin
-  playerStatus:=playerStatus xor ps_isHelp;
-  if playerStatus and ps_isHelp=0 then
+  screenStatus:=screenStatus xor ss_isHelp;
+  if screenStatus and ss_isHelp=0 then
     dpoke(DLIST_ADDR+25,SCREEN_WORK)
   else
     dpoke(DLIST_ADDR+25,HELPSCR_ADDR);
@@ -128,9 +128,9 @@ end;
 procedure fileAction; Keep;
 begin
   choiceListFile;
-  if stateInputLine<>2 then exit;
+  if stateInputLine<>ils_done then exit;
 
-  stateInputLine:=0;
+  stateInputLine:=ils_pending;
   if (p_bank=fl_device) or
       (p_bank=fl_directory) or
       (p_bank=fl_parentDir) then
@@ -138,8 +138,9 @@ begin
     drawListSelection;
     if resultInputLine then
     begin
+      validPath;
       IOResult:=getDirectory;
-      playerStatus:=playerStatus or ps_isRefresh;
+      screenStatus:=screenStatus or ss_isRefresh;
     end;
   end;
   if IOResult and %11111100<>0 then statusError(IOResult);

@@ -4,8 +4,15 @@ const
 
   f_clear = %00100000;
 
-  ps_colorSet = %0001;
-  ps_view     = %0010;
+  ils_pending     = 0;
+  ils_inprogress  = 1;
+  ils_done        = 2;
+
+  ss_colorSet  = %00000001;
+  ss_view      = %00000010;
+  ss_isRefresh = %10000000;
+  ss_isHelp    = %00100000;
+
   ps_loop     = %1100;
 
   ps_playonce = %0000;
@@ -13,9 +20,7 @@ const
   ps_repeatall= %1000;
   ps_shuffle  = %1100;
 
-  ps_isRefresh = %10000000;
   ps_isStopped = %01000000;
-  ps_isHelp    = %00100000;
 
   LIST_VISIBLE_CHARS = 30;
   LIST_VISIBLE_ITEMS = 16;

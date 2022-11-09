@@ -1,8 +1,8 @@
 ; hlpptr = $D6
   .local
 
-  lda playerStatus
-  and #ps_view
+  lda screenStatus
+  and #ss_view
   bne dontUpdateUVMeter
 
 updateUVMeter:

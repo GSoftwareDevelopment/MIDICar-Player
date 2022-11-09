@@ -1,7 +1,7 @@
 // hlpptr = $D6
 
-  lda playerStatus
-  and #ps_view
+  lda screenStatus
+  and #ss_view
   bne updateUVMeter
   rts
 
