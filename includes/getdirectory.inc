@@ -11,7 +11,7 @@ begin
 
   statusStopped;
   statusReadDirectory;
-  validPath;
+
   clearList; _adr:=$ffff; _bank:=fl_device; addToList(outStr);
   if byte(curPath[0])>1 then
   begin

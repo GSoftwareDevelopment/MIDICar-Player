@@ -45,53 +45,43 @@ end;
 procedure validPath;
 begin
   _v:=destructureFullPath(outstr,curDev,curPath,fn);
-//  if (_v and (dp_dev+dp_path)<>(dp_dev+dp_path)) then
-  if (_v and dp_dev=0) then
-  begin
-    gotoNEntry(0); getEntry(outStr);
-    _v:=destructureFullPath(outstr,curDev,curPath,Snull);
-    if (_v and dp_dev=0) then curDev:='D:';
-    if (_v and dp_path=0) then getCurrentPath(2,curDev,curPath);
-  end;
-  if byte(curPath[0])>0 then
-    PathDelimiter(curPath,'>');
-
-  joinStrings(curDev,curPath);
-  joinStrings(outStr,fn);
+  if (_v and dp_dev=0) then curDev:='D:';
+  if (_v and dp_path=0) then getCurrentPath(2,curDev,curPath);
+  PathDelimiter(curPath,'>');
 end;
 
 procedure choiceListFile;
 begin
-  if stateInputline<>0 then exit;
+  if stateInputline<>ils_pending then exit;
 
   gotoNEntry(curFile);
-  if getEntry(outStr) then
+  if getEntry(Snull) then
   begin
     getEntrySets(p_bank);
-    validPath;
     if (p_bank=fl_parentdir) then
     begin
       parentDir(curPath);
-      joinStrings(curDev,curPath);
       resultInputLine:=True;
-      stateInputLine:=2;
     end;
     if (p_bank=fl_directory) then
     begin
+      joinStrings(curPath,Snull);
       PathDelimiter(outStr,'>');
+      curPath:=outStr;
       resultInputLine:=True;
-      stateInputLine:=2;
     end;
+    joinStrings(curDev,curPath);
     if p_bank=fl_midifile then
     begin
       statusStopped;
+      joinStrings(outStr,Snull);
+      validPath;
       IOResult:=loadSong;
-      stateInputLine:=2;
     end;
+    stateInputLine:=ils_done;
     if p_bank=fl_device then
     begin
       drawListSelection;
-      Snull:=outStr;
       ilscradr:=listScrAdr[YFile]+2;
       init_inputLine;
     end;
