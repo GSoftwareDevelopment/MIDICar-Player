@@ -1,23 +1,19 @@
-  txa
-  sta oldx
+  .local
+  stx regX
 
+; calculate pixel-fill inside byte
   lda v
   and #%11
   tax
+
+; calculate position offset on screen
   lda v
-  lsr @
-  lsr @
+  :2 lsr @
   tay
 
-  lda progressData,x
+  lda progress_data,x
   sta screen_timeline,y
 
-  lda oldx:#00
-  bpl skipData ; jump, becouse this is not procedure call!
+  ldx regX:#00
 
-progressData:
-  .byte %01000000
-  .byte %01010000
-  .byte %01010100
-  .byte %01010101
-skipData:
+  .endl
