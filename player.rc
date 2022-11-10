@@ -1,8 +1,12 @@
+SCREEN_HEAD rcdata 'resources/graph.obj';
 DLIST_ADDR rcasm 'resources/dlist.asm';
-SCREEN_ADRSES rcdata 'resources/screen_addresses.obj'
-UVMETER_ADDR rcdata 'resources/uvmeter.obj';
 
 CHARS_ADDR rcdata 'resources/font_blk.fnt';
-SCREEN_HEAD rcdata 'resources/graph.obj';
-HELPSCR_ADDR rcdata 'resources/help.obj';
+
 KEY_TABLE_ADDR rcasm 'resources/key_table.a65';
+
+PROGRESS_DATA rcasm 'asms/song_progress_data.a65'
+UVMETER_ADDR rcdata 'resources/uvmeter.obj';
+SCREEN_ADRSES rcdata 'resources/screen_addresses.obj'
+
+HELPSCR_ADDR rcdata 'resources/help.obj';
