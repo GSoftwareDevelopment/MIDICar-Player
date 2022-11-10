@@ -15,33 +15,33 @@ START:
 
 ; NoCMD:
 
-; Detect MIDICar
-step1:
-    jsr detect_MC
-    bcs MCNotFound
+; ; Detect MIDICar
+; step1:
+;     jsr detect_MC
+;     bcs MCNotFound
 
-MCFound:
-    sty MCBASE
-    stx MCBASE+1
+; MCFound:
+;     sty MCBASE
+;     stx MCBASE+1
 
-    jsr MCBASEPORT
+;     jsr MCBASEPORT
 
-    lda #<MIDICAR_EXIST
-    ldy #>MIDICAR_EXIST
-    jsr PRINT
+;     lda #<MIDICAR_EXIST
+;     ldy #>MIDICAR_EXIST
+;     jsr PRINT
 
-    jmp step2
+;     jmp step2
 
-MCNotFound:
-    lda #$FF
-    sta MCBASE
-    lda #$00
-    sta MCBASE+1
-    lda #$02
-    sta $4ff
-    lda #<MIDICAR_NOT_FOUND
-    ldy #>MIDICAR_NOT_FOUND
-    jsr PRINT
+; MCNotFound:
+;     lda #$FF
+;     sta MCBASE
+;     lda #$00
+;     sta MCBASE+1
+;     lda #$02
+;     sta $4ff
+;     lda #<MIDICAR_NOT_FOUND
+;     ldy #>MIDICAR_NOT_FOUND
+;     jsr PRINT
 
 ; SpartaDOS X detect
 step2:
@@ -95,13 +95,13 @@ exit2DOS:
 ;
 
     ; icl 'asm/detect_CMD.a65'
-    icl 'asm/detect_mc.a65'
+    ; icl 'asm/detect_mc.a65'
     icl 'asm/detect_axlon.a65'
     icl 'asm/detect_sdx.a65'
     icl 'asm/detect_xms.a65'
     icl 'asm/detect_xms_by_sdx.a65'
     icl 'asm/print.a65'
-    icl 'asm/16bit2hex.a65'
+    ; icl 'asm/16bit2hex.a65'
     ; icl 'asm/get_params.a65'
 
 //
@@ -110,18 +110,18 @@ exit2DOS:
 ; Strings
 MSG_NO_DOS:
     dta c'Need DOS',$9B
-MIDICAR_EXIST:
-    dta 'Yoppie! MIDICar found at $'
-MIDICAR_BASE:
-    dta 'xxxx',$9b
-MIDICAR_NOT_FOUND:
-    dta 'Ouch! MIDICar not found :(',$9B
+; MIDICAR_EXIST:
+;     dta 'Yoppie! MIDICar found at $'
+; MIDICAR_BASE:
+;     dta 'xxxx',$9b
+; MIDICAR_NOT_FOUND:
+;     dta 'Ouch! MIDICar not found :(',$9B
 AXLON_FOUND:
     dta 'Oh, AXLON extention is not supported :(',$9B
 SDX_FOUND:
     dta 'SDX user. Oh yeah!',$9B
-HEX:
-    dta '0123456789abcdef'
+; HEX:
+;     dta '0123456789abcdef'
 parbuf  equ *
 
     ini START
