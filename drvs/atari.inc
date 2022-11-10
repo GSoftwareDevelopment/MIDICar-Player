@@ -1,0 +1,23 @@
+POKMSK		= $10
+
+// STATUS		= $30
+CHKSUM      = $31
+XMTDON		= $3A
+CHKSNT		= $3B
+
+CRITIC		= $42
+
+VSEROUT		= $020C
+
+SSKCTL		= $0232
+
+AUDF3		= $D204
+AUDC3       = $D205
+AUDF4		= $D206
+AUDC4       = $D207
+SKCTL		= $D20F
+AUDCTL		= $D208
+SEROUT		= $D20D
+IRQEN		= $D20E
+
+PACTL       = $d302

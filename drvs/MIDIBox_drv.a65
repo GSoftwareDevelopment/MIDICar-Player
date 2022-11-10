@@ -1,0 +1,215 @@
+    org $2000
+
+drvjtab:
+    jmp serial_drv.init
+	jmp serial_drv.start
+	jmp serial_drv.send
+	jmp serial_drv.stop
+
+
+    .local serial_drv
+
+	icl './atari.inc'
+	icl './fifo.inc'
+
+;--------------------------------------------------
+; Initialize
+
+init:
+    lda #<DESC
+    ldy #>DESC
+    jsr PRINT
+	rts
+
+;--------------------------------------------------
+; Start serial port service
+
+start:
+	lda OVSEROUT
+	ora OVSEROUT+1
+	bne exitInit
+
+; store old vector
+    lda VSEROUT
+    sta OVSEROUT
+    lda VSEROUT+1
+    sta OVSEROUT+1
+
+; set new vector
+	lda #<IOutMIDISer
+	sta VSEROUT
+	lda #>IOutMIDISer
+	sta VSEROUT+1
+
+; set serial transmission speed - ~31669 baud=1773447/(2*(0x15+7))
+; altirra says (under debbug) it is 31960.2 baud = ?how?
+	LDA #$15
+	STA AUDF3
+	LDA #$00
+	STA AUDF4
+
+; set serial
+	LDA #%00000111	; $07
+		; -------x - keep keyboard debounce as is
+		; ------x- - keep keyboard scanning as is
+		; -----x-- - keep fast POT scan as is
+		; ----0--- - clear POKEY two-tone mode
+		; 0------- - clear force break; serial output to zero
+	AND SSKCTL
+	ORA #%00100000	; $20
+		; -010---- - Trans. & Receive rates set by Channel 4
+		;		   - Channel 4 output on Bi-Directional clock line
+	STA SSKCTL
+	STA SKCTL
+
+; set interrupts
+	LDA #%11000111	; $C7
+		; x-------  - keep Break IRQ
+		; -x------  - keep Other key IRQ
+		; -----xxx  - keep timer 4,2 & 1 IRQs
+	AND POKMSK
+	ORA #%00010000	; $10
+		; --0-----  - disable serial input data ready
+		; ---1----  - enabled serial output data ready
+		; ----0---  - disable serial output transmission done
+	STA POKMSK
+	STA IRQEN
+
+;set POKEY
+	LDA #%00101000 ; $28
+		; --1----- - clock channel three with 1.79 MHz
+		; ----1--- - join channels 4 & 3 (16 bit)
+	STA AUDCTL
+
+	LDA #%10100000 ; $A0
+		; 101----- - no poly counters (pure tone)
+		; ---00000 - silence (0 volume)
+	STA AUDC3
+	STA AUDC4
+
+; checksum sent flag ($ff equals sent)
+	LDA #$FF
+	STA CHKSNT
+
+; Transmission done flag - pending
+	LDY #$01
+	STY XMTDON
+
+exitInit:
+    RTS
+
+;--------------------------------------------------
+;
+
+Send:
+; skip if trasmission not end
+	LDA XMTDON
+	BEQ exitSend
+
+; skip if fifo is empty
+    ldy fifo_tail
+	cpy fifo_head
+	beq exitSend
+
+;
+	LDA #$01
+	STA CRITIC
+
+; reset transmission done flag
+	LDA #$00
+	STA XMTDON
+
+; start transmission by send byte to serial out
+	LDA FIFO_BUF,Y
+	STA SEROUT
+
+exitSend:
+    rts
+
+;--------------------------------------------------
+; Stop serial port service
+
+Stop:
+    lda OVSEROUT
+	ora OVSEROUT
+	beq exitUnInit
+
+	lda OVSEROUT
+    sta VSEROUT
+    lda OVSEROUT+1
+    sta VSEROUT+1
+
+	lda #0
+	sta OVSEROUT
+	sta OVSEROUT+1
+
+; Clear interrupts
+; (5) serial input data ready
+; (4) serial output data required
+; (3) serial out transmission finished
+	LDA #%11000111 ; $C7
+	AND POKMSK
+	STA POKMSK
+	STA IRQEN
+
+; clear critic NMI time
+	LDA #$00
+	STA CRITIC
+
+; set POKEY AUDC's registers
+set_AUDC:
+	STA AUDC3
+	STA AUDC4
+
+exitUnInit:
+	RTS
+
+;--------------------------------------------------
+;Output MIDI Data by Serial Bus - Interrupt
+
+IOutMIDISer:
+
+	tya:pha
+
+    ldy fifo_tail
+	iny
+	cpy fifo_head
+	bne send_next
+
+dont_send_checksum:
+    sty fifo_tail
+
+	lda POKMSK
+	ora #%00001000	; $08
+	sta POKMSK
+	sta IRQEN
+
+	LDA #$00
+	STA CRITIC
+
+serial_rti:
+	pla:tay:pla
+	rti
+
+send_next:
+    sty fifo_tail
+	lda FIFO_BUF,y
+	sta SEROUT
+
+	jmp serial_rti
+
+;--------------------------------------------------
+;
+
+	icl './print.a65'
+
+;--------------------------------------------------
+; driver variables
+
+; old serial out vector
+OVSEROUT    dta a(0)
+DESC	dta c'MIDIBox Driver by GSD',$9B
+
+    .endl
+
+	ini serial_drv.init

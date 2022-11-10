@@ -1,0 +1,25 @@
+PRINT:
+
+    .local
+
+ICCHID  = $0340
+ICCMD   = $0342
+ICBUFA  = $0344
+ICBUFL  = $0348
+CIOV    = $E456
+
+    ldx #$00
+    sta ICBUFA,X
+    tya
+    sta ICBUFA+1,X
+    lda #$ff
+    sta ICBUFL,X
+    lda #$09
+    sta ICCMD,X
+    lda ICCHID,x
+    bmi ExitPRINT
+    jmp CIOV
+ExitPRINT:
+    rts
+
+    .endl

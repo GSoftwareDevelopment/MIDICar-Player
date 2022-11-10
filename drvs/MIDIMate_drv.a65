@@ -1,0 +1,188 @@
+    org $2000
+
+drvjtab:
+
+	jmp serial_drv.init
+	jmp serial_drv.Start
+	jmp serial_drv.Send
+	jmp serial_drv.Stop
+
+
+    .local serial_drv
+
+	icl './atari.inc'
+	icl './fifo.inc'
+
+;--------------------------------------------------
+; Initialize
+
+init:
+    lda #<DESC
+    ldy #>DESC
+    jsr PRINT
+
+	rts
+;--------------------------------------------------
+; Start serial port service
+
+Start:
+    lda VSEROUT
+    sta OVSEROUT
+    lda VSEROUT+1
+    sta OVSEROUT+1
+
+	lda #<IOutMIDISer
+	sta VSEROUT
+	lda #>IOutMIDISer
+	sta VSEROUT+1
+
+; turn on MOTOR - power up MIDIMate
+	lda pactl
+	and #$f7
+	sta pactl
+
+; set serial
+	LDA #%00000111	; $07
+		; -------x - keep keyboard debounce as is
+		; ------x- - keep keyboard scanning as is
+		; -----x-- - keep fast POT scan as is
+		; ----0--- - clear POKEY two-tone mode
+		; 0------- - clear force break; serial output to zero
+	AND SSKCTL
+	STA SSKCTL
+	STA SKCTL
+
+; set interrupts
+	LDA #%11000111	; $C7
+		; x-------  - keep Break IRQ
+		; -x------  - keep Other key IRQ
+		; -----xxx  - keep timer 1,2 & 4 IRQs
+	AND POKMSK
+	ORA #%00010000	; $10
+		; --0-----  - disable serial input data ready
+		; ---1----  - enabled serial output data ready
+		; ----0---  - disable serial output transmission done
+	STA POKMSK
+	STA IRQEN
+
+; checksum sent flag ($ff equals sent)
+	LDA #$FF
+	STA CHKSNT
+
+; Transmission done flag - pending
+	LDY #$01
+	STY XMTDON
+
+    RTS
+
+;--------------------------------------------------
+;
+
+Send:
+; skip if trasmission not end
+	LDA XMTDON
+	BEQ exitSend
+
+    ldy fifo_tail
+	cpy fifo_head
+	beq exitSend
+
+;
+	LDA #$01
+	; STA STATUS
+	STA CRITIC
+
+; reset transmission done flag
+	LDA #$00
+	STA XMTDON
+
+; start transmission by send byte to serial out
+	LDA FIFO_BUF,Y
+	STA SEROUT
+
+exitSend:
+    rts
+
+;--------------------------------------------------
+; Stop serial port service
+
+Stop:
+    lda OVSEROUT
+	ora OVSEROUT
+	beq exitUnInit
+
+; turn off MOTOR - power down MIDIMate
+	lda pactl
+	ora #$08
+	sta pactl
+
+    lda OVSEROUT
+    sta VSEROUT
+    lda OVSEROUT+1
+    sta VSEROUT+1
+
+; Clear interrupts
+; (5) serial input data ready
+; (4) serial output data required
+; (3) serial out transmission finished
+	LDA #%11000111 ; $C7
+	AND POKMSK
+	STA POKMSK
+	STA IRQEN
+
+; clear critic NMI time
+	LDA #$00
+	STA CRITIC
+
+exitUnInit:
+	RTS
+
+;--------------------------------------------------
+;Output MIDI Data by Serial Bus - Interrupt
+
+IOutMIDISer:
+
+	tya:pha
+
+    ldy fifo_tail
+	iny
+	cpy fifo_head
+	bne send_next
+
+dont_send_checksum:
+    sty fifo_tail
+
+	lda POKMSK
+	ora #%00001000	; $08
+	sta POKMSK
+	sta IRQEN
+
+	LDA #$00
+	STA CRITIC
+
+serial_rti:
+	pla:tay:pla
+	rti
+
+send_next:
+    sty fifo_tail
+	lda FIFO_BUF,y
+	sta SEROUT
+
+	jmp serial_rti
+
+;--------------------------------------------------
+;
+
+	icl './print.a65'
+
+;--------------------------------------------------
+; driver variables
+
+; old serial out vector
+OVSEROUT    dta a(0)
+DESC	dta c'MIDIMate Driver by GSD',$9B
+
+    .endl
+
+	ini serial_drv.init

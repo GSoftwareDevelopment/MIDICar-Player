@@ -1,0 +1,11 @@
+    .local midi_data
+    org $0600
+tail:
+; GM_RESET:
+;     .byte $f0, $7e, $7f, $09, $01, $f7
+note:
+    .byte $91, $3c, 127
+    .byte $40, 127
+    .byte $43, 127
+head equ *
+    .endl
