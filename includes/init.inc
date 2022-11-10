@@ -1,18 +1,18 @@
 procedure init;
 
-  procedure setMCBaseAddress; assembler;
-  asm
-    icl 'asms/setMCBaseAddr.a65'
-  end;
+  // procedure setMCBaseAddress; assembler;
+  // asm
+  //   icl 'asms/setMCBaseAddr.a65'
+  // end;
 
 begin
   DMACTL:=0;
   waitFrame;
 
   // initialize MIDICar (MC6850)
-  setMCBaseAddress;
-  MC6850_Init(MasterReset);
-  MC6850_Init(CD_64+WS_OddParity+WS_8bits+WS_2BitStop{+IRQ_Receive});
+  // setMCBaseAddress;
+  // MC6850_Init(MasterReset);
+  // MC6850_Init(CD_64+WS_OddParity+WS_8bits+WS_2BitStop{+IRQ_Receive});
 
   CHBASE:=$32;
   SDLST:=DLIST_ADDR;

@@ -13,7 +13,7 @@ begin
   The value read will represent the strength with which the sound will play.
 }
   if (event>0) and (_event and $f0=$90) then
-    chnVolume[_event and $0f]:=MC_Byte;
+    chnVolume[_event and $0f]:=peek($ff); // MC_Byte;
 end;
 
 procedure eventMidi2;

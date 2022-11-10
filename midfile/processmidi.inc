@@ -26,7 +26,10 @@ end;
 procedure ProcessMIDI;
 begin
 {$IFDEF USE_FIFO}
-  FIFO_PushDirect2MC6850;
+  // FIFO_PushDirect2MC6850;
+  asm
+    jsr $2006
+  end;
 {$ENDIF}
   if _timerStatus and f_counter<>0 then exit;
   if cTrk=totalTracks then

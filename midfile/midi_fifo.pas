@@ -6,24 +6,23 @@ var
   FIFO_Head:Byte absolute $fd;
   FIFO_Tail:Byte absolute $fe;
   FIFO_Byte:Byte absolute $ff;
-  FIFO2Null:Boolean = False;
 
 procedure FIFO_Reset;
-procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
+// procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
 procedure FIFO_WriteByte; Assembler; // Inline;
 procedure FIFO_Flush;  Assembler; Keep;
 // procedure FIFO_ReadByte; // Inline;
 // procedure FIFO_Send(var data; len:byte);
 
 implementation
-uses mc6850;
+// uses mc6850;
 
 const
   FIFO_ADDR = $0600;
 
 var
   FIFO_Buf:Array[0..255] of byte absolute FIFO_ADDR;
-  _timerStatus:Byte absolute $f5;
+  // _timerStatus:Byte absolute $f5;
 
 procedure FIFO_Reset;
 begin
@@ -31,28 +30,28 @@ begin
   FIFO_Tail:=0;
 end;
 
-procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
-asm
-// check if FIFO buffer is empty?
-  ldy FIFO_Tail
-  cpy FIFO_Head
-  beq exitPush
+// procedure FIFO_PushDirect2MC6850; Assembler; // Inline;
+// asm
+// // check if FIFO buffer is empty?
+//   ldy FIFO_Tail
+//   cpy FIFO_Head
+//   beq exitPush
 
-//
-// check MC buffer is clear
-  lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
-  and #MC6850.TDRE
-  beq exitPush
+// //
+// // check MC buffer is clear
+//   lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
+//   and #MC6850.TDRE
+//   beq exitPush
 
-  lda FIFO_ADDR,y
-  sta MCBaseBuf:$d500  //MC6850.MC6850_BUFFER
-  inc FIFO_Tail
+//   lda FIFO_ADDR,y
+//   sta MCBaseBuf:$d500  //MC6850.MC6850_BUFFER
+//   inc FIFO_Tail
 
-  sec
-  rts
-exitPush:
-  clc
-end;
+//   sec
+//   rts
+// exitPush:
+//   clc
+// end;
 
 procedure FIFO_WriteByte; Assembler; // Inline;
 asm
@@ -72,36 +71,46 @@ storeInFIFO:
   sta FIFO_ADDR,y
   inc FIFO_Head
 
-// try sending immediately
-  jsr FIFO_PushDirect2MC6850
+// driver call `send` - try sending immediately
+  jsr $2006
 
 exitWrite:
 end;
 
 procedure FIFO_Flush; Assembler; Keep;
 asm
-  sei
+XMTDON  = $3a
 
-  ldy FIFO_Tail
-flushLoop:
-  cpy FIFO_Head
-  beq endFlush
+// driver call `send`
+  jsr $2006
 
-waitOnMC:
-  lda MCBaseState:$d500 // MC6850.MC6850_CNTRReg
-  and #MC6850.TDRE
-  beq waitOnMc
+// wait until fifo not flush
+loop:
+	LDA XMTDON
+	BEQ loop
 
-  lda FIFO_ADDR,y
-  sta MCBaseBuf:$d500   // MC6850.MC6850_BUFFER
+//   sei
 
-  iny
-  jmp flushLoop
+//   ldy FIFO_Tail
+// flushLoop:
+//   cpy FIFO_Head
+//   beq endFlush
 
-endFlush:
-  sty FIFO_Tail
+// waitOnMC:
+//   lda MCBaseState:$d500 // MC6850.MC6850_CNTRReg
+//   and #MC6850.TDRE
+//   beq waitOnMc
 
-  cli
+//   lda FIFO_ADDR,y
+//   sta MCBaseBuf:$d500   // MC6850.MC6850_BUFFER
+
+//   iny
+//   jmp flushLoop
+
+// endFlush:
+//   sty FIFO_Tail
+
+//   cli
 end;
 
 {

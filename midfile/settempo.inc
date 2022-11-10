@@ -42,12 +42,12 @@ This yields apparently lower frequencies for the main counter.
     sei  // disable IRQ
   // reset POKEY
     lda #$00
-    ldy #$03
-    sta AUDCTL
+    // ldy #$03
+    // sta AUDCTL
     sta AUDC1
-    sty SKCTL
+    // sty SKCTL
   // setup TIMER1
-    sta AUDCTL
+    // sta AUDCTL
     mva FDIV AUDF1
   // initialize IRQ for TIMER1
     // lda irqens

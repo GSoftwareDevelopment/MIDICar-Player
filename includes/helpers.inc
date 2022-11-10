@@ -6,32 +6,6 @@ asm
   icl '../asms/getCurrentDirectory.a65'
 end;
 
-procedure reset_MIDI; assembler;
-asm
-  txa:pha
-  ldx #0
-sendData:
-  lda GM_RESET,x
-  sta MAIN.MIDI_FIFO.FIFO_Byte
-  jsr MAIN.MIDI_FIFO.FIFO_WriteByte
-  inx
-  cpx #6
-  bne sendData
-  jsr MAIN.MIDI_FIFO.FIFO_Flush
-  pla:tax
-  rts
-GM_RESET:
-  .byte $f0, $7e, $7f, $09, $01, $f7
-end;
-
-procedure stopMIDI;
-begin
-  _timerStatus:=_timerStatus or f_counter;
-  _totalTicks:=0; _subCnt:=1;
-  setIntVec(iTim1,oldTimerVec);
-  Reset_MIDI;
-end;
-
 procedure resetMemoryPtr;
 begin
   memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
@@ -97,6 +71,6 @@ end;
 
 procedure exit2DOS;
 begin
-  stopMIDI;
+  doneMIDI;
   Cls(0); Opn(0,12,0,'E:'); // SOUNDR:=1;
 end;

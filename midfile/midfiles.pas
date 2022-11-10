@@ -53,7 +53,9 @@ var
 
 //
 function LoadMID:shortint;
-procedure initTimer;
+procedure initMIDI;
+procedure resetMIDI; assembler;
+procedure doneMIDI;
 procedure setTempo;
 procedure ProcessTrack; // Keep;
 procedure ProcessMIDI;
@@ -62,8 +64,9 @@ procedure determineSongLength;
 implementation
 Uses
   CIO,
-  {$IFDEF USE_FIFO}MIDI_FIFO,{$ENDIF}
-  MC6850;
+  {$IFDEF USE_FIFO}MIDI_FIFO{$ENDIF}
+  // MC6850
+  ;
 
 procedure int_timer; Interrupt; Assembler;
 asm
@@ -81,7 +84,7 @@ end;
 {$i processmidi.inc}
 {$i determine_song_length.inc}
 
-procedure initTimer;
+procedure initMIDI;
 begin
   _totalTicks:=0;    // reset song ticks
   tempoShift:=0;
@@ -110,7 +113,42 @@ begin
   // start timer strobe
     sta stimer
 
+    jsr $2003
+
     cli  // enable IRQ
+  end;
+end;
+
+procedure resetMIDI; assembler;
+asm
+  txa:pha
+
+  jsr $2003
+
+  ldx #0
+sendData:
+  lda GM_RESET,x
+  sta MAIN.MIDI_FIFO.FIFO_Byte
+  jsr MAIN.MIDI_FIFO.FIFO_WriteByte
+  inx
+  cpx #6
+  bne sendData
+
+  jsr MAIN.MIDI_FIFO.FIFO_Flush
+  pla:tax
+  rts
+GM_RESET:
+  .byte $f0, $7e, $7f, $09, $01, $f7
+end;
+
+procedure doneMIDI;
+begin
+  _timerStatus:=_timerStatus or f_counter;
+  _totalTicks:=0; _subCnt:=1;
+  setIntVec(iTim1,oldTimerVec);
+  resetMIDI;
+  asm
+    jsr $2009
   end;
 end;
 
