@@ -3,9 +3,10 @@
     lda (_PTR),y
     sta :storeTo
     inc _ADR
-    sne
+    bne skipMemBoundCheck
     inc _ADR+1
     jsr MEMBOUNDCHECK
+  skipMemBoundCheck:
   .ENDM
 
   m@readByte _delta+2
