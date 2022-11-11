@@ -3,8 +3,6 @@
 {$LIBRARYPATH includes/}
 {$DEFINE ROMOFF}
 Uses
-  MC6850,
-  MIDI_FIFO,
   MIDFiles,
   Misc,
   CIO,
