@@ -2,14 +2,38 @@
 
 }
 
-procedure readB; Inline;
-var
-  event:byte absolute $ff; // yes, this is the same address as `FIFO_Byte` and `MC_Byte` :)
+procedure readB; Inline; Assembler;
+asm
+event = $ff;
 
-begin
-  event:=_ptr^;
-  inc(_adr);
-  memBoundCheck;
+  ldy #0
+  lda (_PTR),y
+  sta event
+
+  inc _adr
+  bne skipMemBoundCheck
+  inc _adr+1
+  jsr memBoundCheck+5
+// restore A reg
+  lda event
+skipMemBoundCheck:
+end;
+
+procedure readBpush; InLine; Assembler;
+asm
+event = $ff;
+
+  ldy #0
+  lda (_PTR),y
+  jsr $2006
+
+  inc _adr
+  bne skipMemBoundCheck
+  inc _adr+1
+  jsr memBoundCheck+5
+// restore A reg
+  lda event
+skipMemBoundCheck:
 end;
 
 procedure readVarL; Assembler;
@@ -19,7 +43,7 @@ end;
 
 procedure read24; Assembler;
 asm
-  icl 'midfile/asms/read24bigendian.pas'
+  icl 'midfile/asms/read24bigendian.a65'
 end;
 
 procedure ProcessTrack;
@@ -43,31 +67,68 @@ begin
     else
       _status:=_status and not f_skipDelta;
 
-    if _ptr^ and $80<>0 then
-    begin
-      asm
-        sta event
-        sta _event
-        inc _ADR
-        sne
-        inc _ADR+1
-        jsr memBoundCheck
-      end;
-      // ReadB; _event:=event;
-    end
-    else
-      event:=_event;
+    asm
+      ldy #0
+      lda (_ptr),y
+      bpl status_run
 
-    if _event<$C0 then
-      eventMidi3
-    else if _event<$E0 then
-      eventMidi2
-    else if _event<$F0 then
-      eventMidi3
-    else if _event<$f8 then
-      eventSysEx
-    else if _event=$ff then
-      eventMeta;
+    // zapisz pobrany bajt jako ostatnie zdarzenie (Status Run)
+      sta _event
+
+      inc _ADR
+      bne skipMemBoundCheck
+      inc _ADR+1
+      jsr memBoundCheck
+      lda _event
+    skipMemBoundCheck:
+
+      jmp eventCase
+
+    status_run:
+    // pobierz zdarzenie ze Status Run
+      lda _event
+
+    eventCase:
+    // zapisz zdarzenie jako aktualne
+      sta event
+
+// event cases
+      cmp #$C0
+      bcs case_ev2
+      case_ev3:
+    end;
+    eventMidi3;
+    asm
+      jmp case_endEvent
+
+    case_ev2:
+      cmp #$E0
+      bcs case_ev4
+    end;
+    eventMidi2;
+    asm
+      jmp case_endEvent
+
+    case_ev4:
+      cmp #$F0
+      bcc case_ev3
+
+    case_evSysEx:
+      cmp #$F8
+      bcs case_evMeta
+    end;
+    eventSysEx;
+    asm
+      jmp case_endEvent
+
+    case_evMeta:
+      cmp #$ff
+      bne case_endEvent
+    end;
+    eventMeta;
+    asm
+    case_endEvent:
+    end;
 
   until _status and f_stop<>0;
 

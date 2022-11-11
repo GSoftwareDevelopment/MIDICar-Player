@@ -28,7 +28,10 @@ begin
 {$IFDEF USE_FIFO}
   // FIFO_PushDirect2MC6850;
   asm
-    jsr $2006
+    // send data from buffer
+    // clear C to not wait for empty buffer
+    sec
+    jsr $2009
   end;
 {$ENDIF}
   if _timerStatus and f_counter<>0 then exit;

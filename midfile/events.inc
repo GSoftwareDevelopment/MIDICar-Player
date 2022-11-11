@@ -1,14 +1,14 @@
 procedure eventMidi3; // Inline;
 begin
-{$IFDEF USE_FIFO}
-  FIFO_WriteByte;
-  readB; FIFO_WriteByte;
-  readB; FIFO_WriteByte;
-{$ELSE}
-  MC6850_Send2;
-  readB; MC6850_Send2;
-  readB; MC6850_Send2;
-{$ENDIF}
+  asm
+    // lda event
+    jsr $2006
+  end;
+  readBPush;
+  readBPush;
+  // drv_WriteByte;
+  // readB; drv_WriteByte;
+  // readB; drv_WriteByte;
 {
   The value read will represent the strength with which the sound will play.
 }
@@ -18,39 +18,29 @@ end;
 
 procedure eventMidi2;
 begin
-{$IFDEF USE_FIFO}
-  FIFO_WriteByte;
-  readB; FIFO_WriteByte;
-{$ELSE}
-  MC6850_Send2;
-  readB; MC6850_Send2;
-{$ENDIF}
+  asm
+    // lda event
+    jsr $2006
+  end;
+  readBPush;
+  // drv_WriteByte;
+  // readB; drv_WriteByte;
 end;
 
 procedure eventSysEx; // Inline;
 begin
+  asm
+    // lda event
+    jsr $2006
+  end;
   readVarL;
-{$IFDEF USE_FIFO}
-  FIFO_WriteByte;
-{$ELSE}
-  MC6850_Send2;
-{$ENDIF}
   while _tmp>0 do
   begin
-    readB;
-{$IFDEF USE_FIFO}
-    FIFO_WriteByte;
-{$ELSE}
-    MC6850_Send2;
-{$ENDIF}
+    readBPush;
+    // readB;
+    // drv_WriteByte;
     dec(_tmp);
   end;
-// {$IFDEF USE_FIFO}
-//         if FIFO_Byte=$F7 then flagSysEx:=false else flagSysEx:=true;
-// {$ELSE}
-//         if MC_Byte=$F7 then flagSysEx:=false else flagSysEx:=true;
-// {$ENDIF}
-
 end;
 
 procedure eventMeta; // Inline;

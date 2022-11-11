@@ -63,10 +63,7 @@ procedure determineSongLength;
 
 implementation
 Uses
-  CIO,
-  {$IFDEF USE_FIFO}MIDI_FIFO{$ENDIF}
-  // MC6850
-  ;
+  CIO;
 
 procedure int_timer; Interrupt; Assembler;
 asm
@@ -113,6 +110,7 @@ begin
   // start timer strobe
     sta stimer
 
+// initialize driver
     jsr $2003
 
     cli  // enable IRQ
@@ -123,20 +121,26 @@ procedure resetMIDI; assembler;
 asm
   txa:pha
 
+// initialize driver
   jsr $2003
 
   ldx #0
 sendData:
   lda GM_RESET,x
-  sta MAIN.MIDI_FIFO.FIFO_Byte
-  jsr MAIN.MIDI_FIFO.FIFO_WriteByte
+  // sta MAIN.MIDI_DEVICE.FIFO_Byte
+  jsr $2006
   inx
   cpx #6
   bne sendData
 
-  jsr MAIN.MIDI_FIFO.FIFO_Flush
+// flush but wait on empty buffer
+  clc
+  jsr $2009
+
   pla:tax
+
   rts
+
 GM_RESET:
   .byte $f0, $7e, $7f, $09, $01, $f7
 end;
@@ -148,7 +152,7 @@ begin
   setIntVec(iTim1,oldTimerVec);
   resetMIDI;
   asm
-    jsr $2009
+    jsr $200c
   end;
 end;
 

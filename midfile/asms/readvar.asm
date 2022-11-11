@@ -8,10 +8,11 @@ D equ _delta+3;
     lda (_PTR),y
     sta A
     inc _ADR
-    sne
+    bne skipMemBoundCheck
     inc _ADR+1
     jsr MEMBOUNDCHECK
     lda A
+  skipMemBoundCheck:
   .ENDM
 
   ldy #0
