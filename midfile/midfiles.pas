@@ -25,7 +25,7 @@ var
   _ptr:^Byte              absolute _trkRegs+2;   {16-bits}
   _adr:Word               absolute _trkRegs+2;   // must be the same address as _ptr!!
   _trackTime:TDeltaVar    absolute _trkRegs+4;   {32-bits}
-  _event:Byte             absolute _trkRegs+8;
+  _eStatusRun:Byte        absolute _trkRegs+8;
 
 //
   MIDData:Pointer         ;
@@ -57,7 +57,7 @@ procedure initMIDI;
 procedure resetMIDI; assembler;
 procedure doneMIDI;
 procedure setTempo;
-procedure ProcessTrack; // Keep;
+procedure ProcessTrack; Assembler;
 procedure ProcessMIDI;
 procedure determineSongLength;
 

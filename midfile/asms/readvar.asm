@@ -11,8 +11,8 @@ D equ _delta+3;
     bne skipMemBoundCheck
     inc _ADR+1
     jsr MEMBOUNDCHECK
-    lda A
   skipMemBoundCheck:
+    lda A
   .ENDM
 
   ldy #0
@@ -25,6 +25,10 @@ D equ _delta+3;
 
 // read 1st byte to A
   m@read2A
+
+  clc
+  sne
+  rts
 
   bpl endRead
 
@@ -64,9 +68,11 @@ D equ _delta+3;
 // read 4th
   m@read2A
 
-// end read block
 endRead:
+// end read block
+// --------------
 
+// ------------
 // decode block
 // 'A' stays as it is
 
@@ -121,7 +127,7 @@ noOrC:
 decodeD:
 // 'D' if geather than zero, lets decode
   lda D
-  beq endDecode
+  beq setC
 
 // 76543210
 // 0ddddddd and %111
@@ -148,6 +154,9 @@ noOrD:
   lsr @       // 2
   sta D       // 3
               //=28*+**
+setC:
+  sec
+
 endDecode:
   rts
 

@@ -14,7 +14,7 @@ type
     bank:Byte;
     ptr:Pointer;
     trackTime:TDeltaVar;
-    _event:Byte;
+    _eStatusRun:Byte;
   end;
 
   TLoadingProcess = procedure(v:byte);
