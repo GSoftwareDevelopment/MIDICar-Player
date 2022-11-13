@@ -1,3 +1,5 @@
 FIFO_HEAD   = $FD
 FIFO_TAIL   = $FE
+FIFO_BYTE   = $FF
+
 FIFO_BUF    = $0600

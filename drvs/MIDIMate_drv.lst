@@ -4,15 +4,16 @@ Source: MIDIMate_drv.a65
      2
      3 				drvjtab:
      4
-     5 FFFF> 2000-20EF> 4C 0C + 	jmp serial_drv.init
-     6 2003 4C 14 20			jmp serial_drv.Start
-     7 2006 4C 51 20			jmp serial_drv.Send
-     8 2009 4C 6A 20			jmp serial_drv.Stop
-     9
+     5 FFFF> 2000-2124> 4C 26 + 	jmp serial_drv.init
+     6 2003 4C 2E 20			jmp serial_drv.start
+     7 2006 4C 79 20			jmp serial_drv.send
+     8 2009 4C A4 20		  jmp serial_drv.flush
+     9 200C 4C B0 20			jmp serial_drv.stop
     10
-    11 200C			    .local serial_drv
-    12
-    13 200C				icl './atari.inc'
+    11
+    12 200F			    .local serial_drv
+    13
+    14 200F				icl './atari.inc'
 Source: atari.inc
      1 = 0010			POKMSK		= $10
      2
@@ -37,178 +38,252 @@ Source: atari.inc
     21 = D20E			IRQEN		= $D20E
     22
     23 = D302			PACTL       = $d302
-    14 200C				icl './fifo.inc'
+    15 200F				icl './fifo.inc'
 Source: fifo.inc
      1 = 00FD			FIFO_HEAD   = $FD
      2 = 00FE			FIFO_TAIL   = $FE
-     3 = 0600			FIFO_BUF    = $0600
-    15
-    16 				;--------------------------------------------------
-    17 				; Initialize
-    18
-    19 200C			init:
-    20 200C A9 D9		    lda #<DESC
-    21 200E A0 20		    ldy #>DESC
-    22 2010 20 BB 20		    jsr PRINT
-    23
-    24 2013 60				rts
-    25 				;--------------------------------------------------
-    26 				; Start serial port service
-    27
-    28 2014			Start:
-    29 2014 AD 0C 02		    lda VSEROUT
-    30 2017 8D D7 20		    sta OVSEROUT
-    31 201A AD 0D 02		    lda VSEROUT+1
-    32 201D 8D D8 20		    sta OVSEROUT+1
-    33
-    34 2020 A9 94			lda #<IOutMIDISer
-    35 2022 8D 0C 02			sta VSEROUT
-    36 2025 A9 20			lda #>IOutMIDISer
-    37 2027 8D 0D 02			sta VSEROUT+1
-    38
-    39 				; turn on MOTOR - power up MIDIMate
-    40 202A AD 02 D3			lda pactl
-    41 202D 29 F7			and #$f7
-    42 202F 8D 02 D3			sta pactl
-    43
-    44 				; set serial
-    45 2032 A9 07			LDA #%00000111	; $07
-    46 						; -------x - keep keyboard debounce as is
-    47 						; ------x- - keep keyboard scanning as is
-    48 						; -----x-- - keep fast POT scan as is
-    49 						; ----0--- - clear POKEY two-tone mode
-    50 						; 0------- - clear force break; serial output to zero
-    51 2034 2D 32 02			AND SSKCTL
-    52 2037 8D 32 02			STA SSKCTL
-    53 203A 8D 0F D2			STA SKCTL
-    54
-    55 				; set interrupts
-    56 203D A9 C7			LDA #%11000111	; $C7
-    57 						; x-------  - keep Break IRQ
-    58 						; -x------  - keep Other key IRQ
-    59 						; -----xxx  - keep timer 1,2 & 4 IRQs
-    60 203F 25 10			AND POKMSK
-    61 2041 09 10			ORA #%00010000	; $10
-    62 						; --0-----  - disable serial input data ready
-    63 						; ---1----  - enabled serial output data ready
-    64 						; ----0---  - disable serial output transmission done
-    65 2043 85 10			STA POKMSK
-    66 2045 8D 0E D2			STA IRQEN
-    67
-    68 				; checksum sent flag ($ff equals sent)
-    69 2048 A9 FF			LDA #$FF
-    70 204A 85 3B			STA CHKSNT
-    71
-    72 				; Transmission done flag - pending
-    73 204C A0 01			LDY #$01
-    74 204E 84 3A			STY XMTDON
-    75
-    76 2050 60			    RTS
-    77
-    78 				;--------------------------------------------------
-    79 				;
+     3 = 00FF			FIFO_BYTE   = $FF
+     4
+     5 = 0600			FIFO_BUF    = $0600
+    16
+    17 				;--------------------------------------------------
+    18 				; Initialize
+    19
+    20 200F 4D 49 44 49 4D 61 + DESC	dta c'MIDIMate Driver by GSD',$9B
+    21
+    22 2026			init:
+    23 2026 A9 0F		    lda #<DESC
+    24 2028 A0 20		    ldy #>DESC
+    25 202A 20 07 21		    jsr PRINT
+    26
+    27 202D 60				rts
+    28 				;--------------------------------------------------
+    29 				; Start serial port service
+    30
+    31 202E			Start:
+    32 202E AD 23 21			lda OVSEROUT
+    33 2031 0D 24 21			ora OVSEROUT+1
+    34 2034 D0 42			bne exitStart
+    35
+    36 				;store old vector
+    37 2036 AD 0C 02		  lda VSEROUT
+    38 2039 8D 23 21		  sta OVSEROUT
+    39 203C AD 0D 02		  lda VSEROUT+1
+    40 203F 8D 24 21		  sta OVSEROUT+1
+    41
+    42 				;set new vector
+    43 2042 A9 E0			lda #<IOutMIDISer
+    44 2044 8D 0C 02			sta VSEROUT
+    45 2047 A9 20			lda #>IOutMIDISer
+    46 2049 8D 0D 02			sta VSEROUT+1
+    47
+    48 				; turn on MOTOR - power up MIDIMate
+    49 204C AD 02 D3			lda pactl
+    50 204F 29 F7			and #$f7
+    51 2051 8D 02 D3			sta pactl
+    52
+    53 				; set serial
+    54 2054 A9 07			LDA #%00000111	; $07
+    55 						; -------x - keep keyboard debounce as is
+    56 						; ------x- - keep keyboard scanning as is
+    57 						; -----x-- - keep fast POT scan as is
+    58 						; ----0--- - clear POKEY two-tone mode
+    59 						; 0------- - clear force break; serial output to zero
+    60 2056 2D 32 02			AND SSKCTL
+    61 2059 8D 32 02			STA SSKCTL
+    62 205C 8D 0F D2			STA SKCTL
+    63
+    64 				; set interrupts
+    65 205F A9 C7			LDA #%11000111	; $C7
+    66 						; x-------  - keep Break IRQ
+    67 						; -x------  - keep Other key IRQ
+    68 						; -----xxx  - keep timer 1,2 & 4 IRQs
+    69 2061 25 10			AND POKMSK
+    70 2063 09 10			ORA #%00010000	; $10
+    71 						; --0-----  - disable serial input data ready
+    72 						; ---1----  - enabled serial output data ready
+    73 						; ----0---  - disable serial output transmission done
+    74 2065 85 10			STA POKMSK
+    75 2067 8D 0E D2			STA IRQEN
+    76
+    77 				; checksum sent flag ($ff equals sent)
+    78 206A A9 FF			LDA #$FF
+    79 206C 85 3B			STA CHKSNT
     80
-    81 2051			Send:
-    82 				; skip if trasmission not end
-    83 2051 A5 3A			LDA XMTDON
-    84 2053 F0 14			BEQ exitSend
-    85
-    86 2055 A4 FE		    ldy fifo_tail
-    87 2057 C4 FD			cpy fifo_head
-    88 2059 F0 0E			beq exitSend
+    81 				; Transmission done flag - pending
+    82 206E A0 01			LDY #$01
+    83 2070 84 3A			STY XMTDON
+    84
+    85 				; Reset FIFO
+    86 2072 A9 00			lda #0
+    87 2074 85 FD			sta fifo_head
+    88 2076 85 FE			sta fifo_tail
     89
-    90 				;
-    91 205B A9 01			LDA #$01
-    92 					; STA STATUS
-    93 205D 85 42			STA CRITIC
-    94
-    95 				; reset transmission done flag
-    96 205F A9 00			LDA #$00
-    97 2061 85 3A			STA XMTDON
-    98
-    99 				; start transmission by send byte to serial out
-   100 2063 B9 00 06			LDA FIFO_BUF,Y
-   101 2066 8D 0D D2			STA SEROUT
-   102
-   103 2069			exitSend:
-   104 2069 60			    rts
-   105
-   106 				;--------------------------------------------------
-   107 				; Stop serial port service
-   108
-   109 206A			Stop:
-   110 206A AD D7 20		    lda OVSEROUT
-   111 206D 0D D7 20			ora OVSEROUT
-   112 2070 F0 21			beq exitUnInit
-   113
-   114 				; turn off MOTOR - power down MIDIMate
-   115 2072 AD 02 D3			lda pactl
-   116 2075 09 08			ora #$08
-   117 2077 8D 02 D3			sta pactl
-   118
-   119 207A AD D7 20		    lda OVSEROUT
-   120 207D 8D 0C 02		    sta VSEROUT
-   121 2080 AD D8 20		    lda OVSEROUT+1
-   122 2083 8D 0D 02		    sta VSEROUT+1
-   123
-   124 				; Clear interrupts
-   125 				; (5) serial input data ready
-   126 				; (4) serial output data required
-   127 				; (3) serial out transmission finished
-   128 2086 A9 C7			LDA #%11000111 ; $C7
-   129 2088 25 10			AND POKMSK
-   130 208A 85 10			STA POKMSK
-   131 208C 8D 0E D2			STA IRQEN
+    90 2078			exitStart:
+    91 2078 60			  RTS
+    92
+    93 				;--------------------------------------------------
+    94 				;
+    95
+    96 				m@putInFIFO	.macro
+    97 				// Check if the FIFO buffer is full?
+    98 				  ldy FIFO_Head   // 3
+    99 				  iny             // 2
+   100 				  cpy FIFO_Tail   // 3
+   101 				  bne storeInFIFO
+   102 				
+   103 				// If it is full, flush it and wait until buffer is not empty
+   104 				  clc
+   105 				  jsr flush
+   106 				
+   107 				storeInFIFO:
+   108 				// Put a byte in the FIFO buffer
+   109 				  ldy FIFO_Head // 3
+   110 				  ; lda FIFO_BYTE
+   111 				  sta FIFO_BUF,y
+   112 				  inc FIFO_Head
+   113 				
+   114 					.endm
+   115
+   116 2079			Send:
+   117
+   118 2079			  m@putInFIFO
+Macro: SERIAL_DRV.M@PUTINFIFO [Source: MIDIMate_drv.a65]
+     2 2079 A4 FD		  ldy FIFO_Head   // 3
+     3 207B C8			  iny             // 2
+     4 207C C4 FE		  cpy FIFO_Tail   // 3
+     5 207E D0 04		  bne storeInFIFO
+     8 2080 18			  clc
+     9 2081 20 A4 20		  jsr flush
+    11 2084			storeInFIFO:
+    13 2084 A4 FD		  ldy FIFO_Head // 3
+    15 2086 99 00 06		  sta FIFO_BUF,y
+    16 2089 E6 FD		  inc FIFO_Head
+Source: MIDIMate_drv.a65
+   119
+   120 208B			StartSend:
+   121 				; skip if trasmission not end
+   122 208B A5 3A			LDA XMTDON
+   123 208D F0 14			BEQ exitSend
+   124
+   125 208F A4 FE		  ldy fifo_tail
+   126 2091 C4 FD			cpy fifo_head
+   127 2093 F0 0E			beq exitSend
+   128
+   129 				;
+   130 2095 A9 01			LDA #$01
+   131 2097 85 42			STA CRITIC
    132
-   133 				; clear critic NMI time
-   134 208F A9 00			LDA #$00
-   135 2091 85 42			STA CRITIC
+   133 				; reset transmission done flag
+   134 2099 A9 00			LDA #$00
+   135 209B 85 3A			STA XMTDON
    136
-   137 2093			exitUnInit:
-   138 2093 60				RTS
-   139
-   140 				;--------------------------------------------------
-   141 				;Output MIDI Data by Serial Bus - Interrupt
-   142
-   143 2094			IOutMIDISer:
-   144
-   145 2094 98 48			tya:pha
-   146
-   147 2096 A4 FE		    ldy fifo_tail
-   148 2098 C8				iny
-   149 2099 C4 FD			cpy fifo_head
-   150 209B D0 13			bne send_next
+   137 				; start transmission by send byte to serial out
+   138 209D B9 00 06			LDA FIFO_BUF,Y
+   139 20A0 8D 0D D2			STA SEROUT
+   140
+   141 20A3			exitSend:
+   142 20A3 60			    rts
+   143
+   144 				;--------------------------------------------------
+   145 				; Flush buffer
+   146 				; C = 0 - start send if buffer is not empty and serial is free
+   147 				; C = 1 -
+   148 20A4			Flush:
+   149 20A4 90 03		  bcc FlushAll
+   150 20A6 4C 8B 20		  jmp startSend
    151
-   152 209D			dont_send_checksum:
-   153 209D 84 FE		    sty fifo_tail
+   152 20A9			FlushAll:
+   153 20A9 48			  pha
    154
-   155 209F A5 10			lda POKMSK
-   156 20A1 09 08			ora #%00001000	; $08
-   157 20A3 85 10			sta POKMSK
-   158 20A5 8D 0E D2			sta IRQEN
-   159
-   160 20A8 A9 00			LDA #$00
-   161 20AA 85 42			STA CRITIC
-   162
-   163 20AC			serial_rti:
-   164 20AC 68 A8 68			pla:tay:pla
-   165 20AF 40				rti
-   166
-   167 20B0			send_next:
-   168 20B0 84 FE		    sty fifo_tail
-   169 20B2 B9 00 06			lda FIFO_BUF,y
-   170 20B5 8D 0D D2			sta SEROUT
-   171
-   172 20B8 4C AC 20			jmp serial_rti
-   173
-   174 				;--------------------------------------------------
-   175 				;
-   176
-   177 20BB				icl './print.a65'
+   155 20AA			flush_loop:
+   156 20AA A5 3A			lda XMTDON
+   157 20AC F0 FC			beq flush_loop
+   158
+   159 20AE 68			  pla
+   160 20AF 60			  rts
+   161
+   162 				;--------------------------------------------------
+   163 				; Stop serial port service
+   164
+   165 20B0			Stop:
+   166 20B0 AD 23 21		  lda OVSEROUT
+   167 20B3 0D 23 21			ora OVSEROUT
+   168 20B6 F0 27			beq exitUnInit
+   169
+   170 				; restore old vector
+   171 20B8 AD 23 21		  lda OVSEROUT
+   172 20BB 8D 0C 02		  sta VSEROUT
+   173 20BE AD 24 21		  lda OVSEROUT+1
+   174 20C1 8D 0D 02		  sta VSEROUT+1
+   175
+   176 				; turn off MOTOR - power down MIDIMate
+   177 20C4 AD 02 D3			lda pactl
+   178 20C7 09 08			ora #$08
+   179 20C9 8D 02 D3			sta pactl
+   180
+   181 				; Clear interrupts
+   182 				; (5) serial input data ready
+   183 				; (4) serial output data required
+   184 				; (3) serial out transmission finished
+   185 20CC A9 C7			LDA #%11000111 ; $C7
+   186 20CE 25 10			AND POKMSK
+   187 20D0 85 10			STA POKMSK
+   188 20D2 8D 0E D2			STA IRQEN
+   189
+   190 				; clear critic NMI time
+   191 20D5 A9 00			LDA #$00
+   192 20D7 85 42			STA CRITIC
+   193
+   194 				; clear old vector
+   195 20D9 8D 23 21			sta OVSEROUT
+   196 20DC 8D 24 21			sta OVSEROUT+1
+   197
+   198 20DF			exitUnInit:
+   199 20DF 60				RTS
+   200
+   201 				;--------------------------------------------------
+   202 				;Output MIDI Data by Serial Bus - Interrupt
+   203
+   204 20E0			IOutMIDISer:
+   205
+   206 20E0 98 48			tya:pha
+   207
+   208 20E2 A4 FE		  ldy fifo_tail
+   209 20E4 C8				iny
+   210 20E5 C4 FD			cpy fifo_head
+   211 20E7 D0 13			bne send_next
+   212
+   213 20E9			dont_send_checksum:
+   214 20E9 84 FE		  sty fifo_tail
+   215
+   216 20EB A5 10			lda POKMSK
+   217 20ED 09 08			ora #%00001000	; $08
+   218 20EF 85 10			sta POKMSK
+   219 20F1 8D 0E D2			sta IRQEN
+   220
+   221 20F4 A9 00			LDA #$00
+   222 20F6 85 42			STA CRITIC
+   223
+   224 20F8			serial_rti:
+   225 20F8 68 A8 68			pla:tay:pla
+   226 20FB 40				rti
+   227
+   228 20FC			send_next:
+   229 20FC 84 FE		  sty fifo_tail
+   230 20FE B9 00 06			lda FIFO_BUF,y
+   231 2101 8D 0D D2			sta SEROUT
+   232
+   233 2104 4C F8 20			jmp serial_rti
+   234
+   235 				;--------------------------------------------------
+   236 				;
+   237
+   238 2107				icl './print.a65'
 Source: print.a65
-     1 20BB			PRINT:
+     1 2107			PRINT:
      2
-     3 20BB			    .local
+     3 2107			    .local
      4
      5 = 0340			ICCHID  = $0340
      6 = 0342			ICCMD   = $0342
@@ -216,29 +291,28 @@ Source: print.a65
      8 = 0348			ICBUFL  = $0348
      9 = E456			CIOV    = $E456
     10
-    11 20BB A2 00		    ldx #$00
-    12 20BD 9D 44 03		    sta ICBUFA,X
-    13 20C0 98			    tya
-    14 20C1 9D 45 03		    sta ICBUFA+1,X
-    15 20C4 A9 FF		    lda #$ff
-    16 20C6 9D 48 03		    sta ICBUFL,X
-    17 20C9 A9 09		    lda #$09
-    18 20CB 9D 42 03		    sta ICCMD,X
-    19 20CE BD 40 03		    lda ICCHID,x
-    20 20D1 30 03		    bmi ExitPRINT
-    21 20D3 4C 56 E4		    jmp CIOV
-    22 20D6			ExitPRINT:
-    23 20D6 60			    rts
+    11 2107 A2 00		    ldx #$00
+    12 2109 9D 44 03		    sta ICBUFA,X
+    13 210C 98			    tya
+    14 210D 9D 45 03		    sta ICBUFA+1,X
+    15 2110 A9 FF		    lda #$ff
+    16 2112 9D 48 03		    sta ICBUFL,X
+    17 2115 A9 09		    lda #$09
+    18 2117 9D 42 03		    sta ICCMD,X
+    19 211A BD 40 03		    lda ICCHID,x
+    20 211D 30 03		    bmi ExitPRINT
+    21 211F 4C 56 E4		    jmp CIOV
+    22 2122			ExitPRINT:
+    23 2122 60			    rts
     24
     25 				    .endl
-   178
-   179 				;--------------------------------------------------
-   180 				; driver variables
-   181
-   182 				; old serial out vector
-   183 20D7 00 00		OVSEROUT    dta a(0)
-   184 20D9 4D 49 44 49 4D 61 + DESC	dta c'MIDIMate Driver by GSD',$9B
-   185
-   186 				    .endl
-   187
-   188 02E2-02E3> 0C 20			ini serial_drv.init
+   239
+   240 				;--------------------------------------------------
+   241 				; driver variables
+   242
+   243 				; old serial out vector
+   244 2123 00 00		OVSEROUT    dta a(0)
+   245
+   246 				    .endl
+   247
+   248 02E2-02E3> 26 20			ini serial_drv.init

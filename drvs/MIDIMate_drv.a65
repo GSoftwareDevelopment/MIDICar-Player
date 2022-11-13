@@ -3,9 +3,10 @@
 drvjtab:
 
 	jmp serial_drv.init
-	jmp serial_drv.Start
-	jmp serial_drv.Send
-	jmp serial_drv.Stop
+	jmp serial_drv.start
+	jmp serial_drv.send
+  jmp serial_drv.flush
+	jmp serial_drv.stop
 
 
     .local serial_drv
@@ -15,6 +16,8 @@ drvjtab:
 
 ;--------------------------------------------------
 ; Initialize
+
+DESC	dta c'MIDIMate Driver by GSD',$9B
 
 init:
     lda #<DESC
@@ -26,11 +29,17 @@ init:
 ; Start serial port service
 
 Start:
-    lda VSEROUT
-    sta OVSEROUT
-    lda VSEROUT+1
-    sta OVSEROUT+1
+	lda OVSEROUT
+	ora OVSEROUT+1
+	bne exitStart
 
+;store old vector
+  lda VSEROUT
+  sta OVSEROUT
+  lda VSEROUT+1
+  sta OVSEROUT+1
+
+;set new vector
 	lda #<IOutMIDISer
 	sta VSEROUT
 	lda #>IOutMIDISer
@@ -73,23 +82,52 @@ Start:
 	LDY #$01
 	STY XMTDON
 
-    RTS
+; Reset FIFO
+	lda #0
+	sta fifo_head
+	sta fifo_tail
+
+exitStart:
+  RTS
 
 ;--------------------------------------------------
 ;
 
+m@putInFIFO	.macro
+// Check if the FIFO buffer is full?
+  ldy FIFO_Head   // 3
+  iny             // 2
+  cpy FIFO_Tail   // 3
+  bne storeInFIFO
+
+// If it is full, flush it and wait until buffer is not empty
+  clc
+  jsr flush
+
+storeInFIFO:
+// Put a byte in the FIFO buffer
+  ldy FIFO_Head // 3
+  ; lda FIFO_BYTE
+  sta FIFO_BUF,y
+  inc FIFO_Head
+
+	.endm
+
 Send:
+
+  m@putInFIFO
+
+StartSend:
 ; skip if trasmission not end
 	LDA XMTDON
 	BEQ exitSend
 
-    ldy fifo_tail
+  ldy fifo_tail
 	cpy fifo_head
 	beq exitSend
 
 ;
 	LDA #$01
-	; STA STATUS
 	STA CRITIC
 
 ; reset transmission done flag
@@ -104,22 +142,41 @@ exitSend:
     rts
 
 ;--------------------------------------------------
+; Flush buffer
+; C = 0 - start send if buffer is not empty and serial is free
+; C = 1 -
+Flush:
+  bcc FlushAll
+  jmp startSend
+
+FlushAll:
+  pha
+
+flush_loop:
+	lda XMTDON
+	beq flush_loop
+
+  pla
+  rts
+
+;--------------------------------------------------
 ; Stop serial port service
 
 Stop:
-    lda OVSEROUT
+  lda OVSEROUT
 	ora OVSEROUT
 	beq exitUnInit
+
+; restore old vector
+  lda OVSEROUT
+  sta VSEROUT
+  lda OVSEROUT+1
+  sta VSEROUT+1
 
 ; turn off MOTOR - power down MIDIMate
 	lda pactl
 	ora #$08
 	sta pactl
-
-    lda OVSEROUT
-    sta VSEROUT
-    lda OVSEROUT+1
-    sta VSEROUT+1
 
 ; Clear interrupts
 ; (5) serial input data ready
@@ -134,6 +191,10 @@ Stop:
 	LDA #$00
 	STA CRITIC
 
+; clear old vector
+	sta OVSEROUT
+	sta OVSEROUT+1
+
 exitUnInit:
 	RTS
 
@@ -144,13 +205,13 @@ IOutMIDISer:
 
 	tya:pha
 
-    ldy fifo_tail
+  ldy fifo_tail
 	iny
 	cpy fifo_head
 	bne send_next
 
 dont_send_checksum:
-    sty fifo_tail
+  sty fifo_tail
 
 	lda POKMSK
 	ora #%00001000	; $08
@@ -165,7 +226,7 @@ serial_rti:
 	rti
 
 send_next:
-    sty fifo_tail
+  sty fifo_tail
 	lda FIFO_BUF,y
 	sta SEROUT
 
@@ -181,7 +242,6 @@ send_next:
 
 ; old serial out vector
 OVSEROUT    dta a(0)
-DESC	dta c'MIDIMate Driver by GSD',$9B
 
     .endl
 
