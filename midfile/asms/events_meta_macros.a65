@@ -1,0 +1,43 @@
+  .macro meta@endOfTrack
+    dec PlayingTracks
+    lda _status
+    ora #f_stop
+    sta _status
+  .endm
+
+  .macro meta@setTempo
+    jsr MAIN.MIDFILES.READ24
+    lda _delta
+    sta ms_per_qnote
+    lda _delta+1
+    sta ms_per_qnote+1
+    lda _delta+2
+    sta ms_per_qnote+2
+    lda _delta+3
+    sta ms_per_qnote+3
+    jsr MAIN.MIDFILES.SetTempo
+  .endm
+
+  .macro meta@timeSignature
+    m@read "sta MAIN.MIDFILES.tactNum" ""
+    m@read "sta MAIN.MIDFILES.tactDenum" ""
+    m@read "sta MAIN.MIDFILES.ticks_per_qnote" ""
+    m@read "sta MAIN.MIDFILES.ticks_per_32nd" ""
+  .endm
+
+  .macro meta@skip
+    jmp checkSkipLoop
+skipLoop:
+    dec _tmp
+
+    inc _adr
+    bne skipMemBoundCheck
+    inc _adr+1
+    jsr memBoundCheck+5
+
+skipMemBoundCheck:
+    
+checkSkipLoop:
+    lda _tmp
+    bne skipLoop
+  .endm

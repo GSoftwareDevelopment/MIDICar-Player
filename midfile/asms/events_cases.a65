@@ -1,0 +1,65 @@
+; -----------------
+; begin event cases
+eventCase:
+; case for events $80..$BF
+    cmp #$C0
+    bcc _ev3            ; send 3 bytes
+
+; case for events $C0..$DF
+case_ev2:
+    cmp #$E0
+    bcs case_ev3
+
+; send 2 bytes for events $C0..$DF
+    event@send2bytes
+    jmp case_endEvent
+
+case_ev3:
+    cmp #$F0            ; for events $E0..$EF
+    bcs case_evSysEx
+
+; send 3 bytes for events $80..$BF & $E0..$EF
+_ev3:
+    event@send3bytes
+    jmp case_endEvent
+
+; case for SysEx event
+case_evSysEx:
+    cmp #$F8
+    bcs case_evMeta
+
+; send multiple bytes for events $F0..$F7
+    event@sendMulti
+    jmp case_endEvent
+
+
+case_evMeta:
+    cmp #$FF
+    beq evMeta
+    jmp case_endEvent
+
+evMeta:
+    icl 'midfile/asms/events_meta_cases.a65'
+
+
+case_endEvent:
+; end event cases
+; ---------------
+
+  .macro m@read doAfterFetchData doAfterBoundCheck
+  ldy #0
+  lda (_PTR),y
+
+  :doAfterFetchData
+
+  inc _adr
+  bne skipMemBoundCheck
+  inc _adr+1
+  jsr memBoundCheck+5
+
+  :doAfterBoundCheck
+
+skipMemBoundCheck:
+  .endm
+
+  icl 'midfile/asms/events_macros.a65'

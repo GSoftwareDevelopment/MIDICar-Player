@@ -1,0 +1,41 @@
+    m@read "sta event" ""
+    jsr MAIN.MIDFILES.READVARL
+
+; ----------------------
+; start meta event cases
+
+    lda event
+; check meta event - track end
+    cmp #$2F
+    bne eMeta2
+
+    meta@endOfTrack
+
+    jmp case_endEvent
+
+eMeta2:
+; check meta event - set tempo
+    cmp #$51
+    bne eMeta3
+
+    meta@setTempo
+
+    jmp case_endEvent
+
+eMeta3:
+.ifdef USE_SUPPORT_VARS
+    cmp #$58
+    bne eMeta4
+
+    meta@timeSignature
+
+    jmp case_endEvent
+.endif
+
+eMeta4:
+
+    meta@skip
+; end meta event cases
+; --------------------
+
+    icl 'midfile/asms/events_meta_macros.a65'

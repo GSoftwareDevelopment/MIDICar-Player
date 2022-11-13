@@ -1,0 +1,59 @@
+  .macro updateVolumeMeters
+
+    lda event
+    beq skipVolumeUpdate
+
+updateVolumeMeters:
+    lda _eStatusRun
+    and #$F0
+    cmp #$90      // %1001 xxxx NOTE ON
+    ; beq doUpdate
+    ; cmp #$A0      // %1010 xxxx AFTER TOUCH
+    ; beq doUpdate
+    ; cmp #$D0      // %1101 xxxx CHANNEL PRESSURE
+    bne skipVolumeUpdate
+
+doUpdate:
+    lda _eStatusRun
+    and #$0F
+    tay
+    lda event
+    sta MIDFILES.adr.CHNVOLUME,Y
+
+skipVolumeUpdate:
+
+  .endm
+
+  .macro event@send2bytes
+    ; jsr eventMidi2
+    jsr $2006
+    m@read "sta event \ jsr $2006" ""
+
+    updateVolumeMeters
+
+  .endm
+
+  .macro event@send3bytes
+    ; jsr eventMidi3
+    jsr $2006
+    m@read "jsr $2006" ""
+    m@read "sta event \ jsr $2006" ""
+
+    updateVolumeMeters
+
+  .endm
+
+  .macro event@sendMulti
+    ; jsr eventSysEx
+    jsr $2006
+    jsr MAIN.MIDFILES.READVARL
+
+    jmp checkSendLoop
+sendLoop:
+    m@read "jsr $2006" ""
+    dec _tmp
+
+checkSendLoop:
+    lda _tmp
+    bne sendLoop
+  .endm

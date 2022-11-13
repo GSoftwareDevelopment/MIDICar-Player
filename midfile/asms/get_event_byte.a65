@@ -1,0 +1,21 @@
+; get event byte
+    ldy #0
+    lda (_ptr),y
+; check Status run (7 bit clear)
+    bpl status_run
+
+; save readed byte in Status Run
+    sta _eStatusRun
+; move readed byte to Y-reg (it is current event register)
+
+    inc _ADR
+    bne eventCase     ; skip MemBoundCheck if page has not been crossed
+    inc _ADR+1
+    jsr memBoundCheck+5
+; restore event in A-reg
+    lda _eStatusRun
+    jmp eventCase
+
+status_run:
+; get last event from Status Run
+    lda _eStatusRun

@@ -19,118 +19,69 @@ event = $ff;
 skipMemBoundCheck:
 end;
 
-procedure readBpush; InLine; Assembler;
-asm
-event = $ff;
-
-  ldy #0
-  lda (_PTR),y
-  jsr $2006
-
-  inc _adr
-  bne skipMemBoundCheck
-  inc _adr+1
-  jsr memBoundCheck+5
-// restore A reg
-  lda event
-skipMemBoundCheck:
-end;
-
-procedure readVarL; Assembler;
+procedure readVarL; Keep; Assembler;
 asm
   icl 'midfile/asms/readvar.asm'
 end;
 
-procedure read24; Assembler;
+procedure read24; Keep; Assembler;
 asm
   icl 'midfile/asms/read24bigendian.a65'
 end;
 
-procedure ProcessTrack;
-var
-  event:byte absolute $ff; // yes, this is the same address as `FIFO_Byte` and `MC_Byte` :)
+procedure ProcessTrack; Assembler;
+asm
+event = $FF ; yes, this is the same address as `FIFO_Byte` and `MC_Byte` :)
 
-{$i events.inc}
+  ldy _bank \ lda $100,y \ sta PORTB
 
-begin
-  asm ldy _bank \ lda $100,y \ sta PORTB end;
-  repeat
-    if (_status and f_skipDelta)=0 then
-    begin
-      readVarL;
-      if _delta>0 then
-      begin
-        _trackTime:=_trackTime+_delta;
-        break;
-      end;
-    end
-    else
-      _status:=_status and not f_skipDelta;
+  jmp checkTrackProcess
 
-    asm
-      ldy #0
-      lda (_ptr),y
-      bpl status_run
+; ------------------------
+; begin track process loop
 
-    // zapisz pobrany bajt jako ostatnie zdarzenie (Status Run)
-      sta _event
+  loopTrackProcess:
 
-      inc _ADR
-      bne skipMemBoundCheck
-      inc _ADR+1
-      jsr memBoundCheck
-      lda _event
-    skipMemBoundCheck:
+  lda _status
+  bmi skipDeltaTime
 
-      jmp eventCase
+  jsr readVarL
+  bcc continueTrackProcess
 
-    status_run:
-    // pobierz zdarzenie ze Status Run
-      lda _event
+  lda _trackTime
+  add _delta
+  sta _trackTime
+  lda _trackTime+1
+  adc _delta+1
+  sta _trackTime+1
+  lda _trackTime+2
+  adc _delta+2
+  sta _trackTime+2
+  lda _trackTime+3
+  adc _delta+3
+  sta _trackTime+3
 
-    eventCase:
-    // zapisz zdarzenie jako aktualne
-      sta event
+  jmp endTrackProcess
 
-// event cases
-      cmp #$C0
-      bcs case_ev2
-      case_ev3:
-    end;
-    eventMidi3;
-    asm
-      jmp case_endEvent
+skipDeltaTime:
+  eor #f_skipDelta
+  sta _status
 
-    case_ev2:
-      cmp #$E0
-      bcs case_ev4
-    end;
-    eventMidi2;
-    asm
-      jmp case_endEvent
+continueTrackProcess:
+  icl 'midfile/asms/get_event_byte.a65'
+  icl 'midfile/asms/events_cases.a65'
 
-    case_ev4:
-      cmp #$F0
-      bcc case_ev3
+checkTrackProcess:
+  bit _status
+  bvs endTrackProcess
+  jmp loopTrackProcess
 
-    case_evSysEx:
-      cmp #$F8
-      bcs case_evMeta
-    end;
-    eventSysEx;
-    asm
-      jmp case_endEvent
+; end track process loop
+; ----------------------
 
-    case_evMeta:
-      cmp #$ff
-      bne case_endEvent
-    end;
-    eventMeta;
-    asm
-    case_endEvent:
-    end;
+endTrackProcess:
+  lda _status
+  ora #f_skipDelta
+  sta _status
 
-  until _status and f_stop<>0;
-
-  _status:=_status or f_skipDelta;
 end;
