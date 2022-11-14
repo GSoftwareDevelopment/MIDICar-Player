@@ -8,6 +8,7 @@ It uses the MIDICar interface plugged in as an external device, via the ECI/CARD
 The programming language used is MAD Pascal compiler and MADS Assembler compiler for computers with 6502 processor.
 
 # Requirements
+
 In order to run the program correctly, an ATARI platform with a minimum of **64KB RAM** is required. Such a configuration will allow loading a MIDI file with a very small size, as **29KB** of RAM will be available. To load larger files without hindrance, it is a good idea to equip your computer with a minimum of **256KB RAM**.
 
 # DOS
@@ -18,22 +19,12 @@ In addition, the use of **RAM-DISK** is not advisable, as the data contained the
 Users using **SpartaDOS/SDX** can also use the player without much hindrance. The only requirement is to configure the system to use extended memory (`USE BANKED` configuration).
 
 # Compilation
-The program consists of two parts: the loader and the actual program.
-Both are compiled separately.
-The loader should be compiled using MADS Assembler. A BASH script is available in the `loader` directory, with which, you can compile the source code of the loader.
 
-Use MAD Pascal and MADS Assembler to compile the actual program.
-```
-mp 'MIDICar Player.pas' -ipath:./ -define:USE_FIFO -code:8000 -data:0400 -o:'./asm/MIDICar Player.a65'
-mads './asm/MIDICar Player.a65' -x -l -t -i:$HOME/Atari/MadPascal/base -o:./bin/p.com
-```
+Type `make` in main directory.
 
-The two parts need to be combined into a single file, e.g. using command (linux):
-```
-cat loader.com p.com >> mcplay.exe
-```
-
-The resulting file created in this way, you can run.
+Use `make -DRIVER={file_name}` to connect the driver to the program.
+The names of the drivers are available in the `drvs` directory - all files with the `a65` extension.
+Do not specify the extension in the `DRIVER=` parameter.
 
 # Documentation
 
