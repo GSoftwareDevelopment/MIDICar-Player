@@ -1,0 +1,29 @@
+FIFO_HEAD   = $FD
+FIFO_TAIL   = $FE
+FIFO_BYTE   = $FF
+
+FIFO_BUF    = $0600
+
+fifo@check .macro what with
+  ldy :what
+  iny
+  cpy :with
+  .endm
+
+fifo@put .macro
+// Check if the FIFO buffer is full?
+  fifo@check FIFO_Head FIFO_Tail
+  bne storeInFIFO
+
+// If it is full, flush it and wait until buffer is not empty
+  pha
+  jsr FlushAll
+  pla
+
+storeInFIFO:
+// Put a byte in the FIFO buffer
+  ldy FIFO_Head
+  sta FIFO_BUF,y
+  inc FIFO_Head
+
+	.endm
