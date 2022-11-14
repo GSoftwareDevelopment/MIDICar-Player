@@ -26,10 +26,9 @@ end;
 procedure ProcessMIDI;
 begin
 {$IFDEF USE_FIFO}
-  // FIFO_PushDirect2MC6850;
   asm
-    // send data from buffer
-    // clear C to not wait for empty buffer
+    ; hook for polling
+    ; call driver - flush buffer (set C is hook for send data without empty buffer wait)
     sec
     jsr $2009
   end;

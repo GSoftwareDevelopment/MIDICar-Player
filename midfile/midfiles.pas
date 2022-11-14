@@ -110,7 +110,7 @@ begin
   // start timer strobe
     sta stimer
 
-// initialize driver
+// call driver - setup
     jsr $2003
 
     cli  // enable IRQ
@@ -121,21 +121,19 @@ procedure resetMIDI; assembler;
 asm
   txa:pha
 
-// initialize driver
+// call driver - setup
   jsr $2003
 
   ldx #0
 sendData:
   lda GM_RESET,x
-  // sta MAIN.MIDI_DEVICE.FIFO_Byte
+
+  ; call driver - Send
   jsr $2006
+
   inx
   cpx #6
   bne sendData
-
-// flush but wait on empty buffer
-  clc
-  jsr $2009
 
   pla:tax
 
@@ -152,6 +150,7 @@ begin
   setIntVec(iTim1,oldTimerVec);
   resetMIDI;
   asm
+    sec       ; flush buffer & uninitialize driver
     jsr $200c
   end;
 end;
