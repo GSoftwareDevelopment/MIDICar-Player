@@ -85,6 +85,7 @@ begin
     ERR_UNSUPPORTED_FORMAT: PutINTText(#$4e+'Unsupported format'~*+#$ce);
     ERR_NOT_ENOUGHT_MEMORY: PutINTText(#$4e+'Not enought memory'~*+#$ce);
     ERR_NOT_A_MIDI_FILE:    PutINTText(#$4e+'Not a MIDI file'~*+#$ce);
+    ERR_FULL_LIST:          PutINTText(#$4e+'List is full'~*+#$ce);
   else
     puttextinvert:=128;
     PutINTText(#$4e+'I/O Error #'*~); putInt(err); poke(scradr,$ce);

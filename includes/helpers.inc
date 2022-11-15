@@ -56,7 +56,7 @@ end;
 procedure clearList;
 begin
   resetMemoryPtr;
-  fileList:=pointer(PLAYLIST_ADDR);
+  fileList:=pointer(LIST_ADDR);
   totalFiles:=0; curfile:=0; YFile:=0; shFile:=0;
   chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
@@ -65,7 +65,7 @@ begin
     putSpaces(32);
     inc(chn);
   end;
-  fillchar(fileList,$C00,$9B);
+  fillchar(fileList,$2700,$9B);
 end;
 
 procedure exit2DOS;

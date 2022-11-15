@@ -1,11 +1,24 @@
 ptrreg = $88;
 
-  txa:pha
-
   ldy #0
   lda (ptrreg),y
   add #1
   sta fnlen
+
+  add #3
+  adc fileList
+  bcc continueAdd
+  lda fileList+1
+  adc #0
+  cmp #$FF        ; end of list page
+  bne continueAdd
+
+  lda #ERR_FULL_LIST
+  sta SYSTEM.IOResult
+
+  rts
+
+continueAdd:
 
   ldy #0
   lda MAIN.MIDFILES._bank
@@ -22,6 +35,8 @@ ptrreg = $88;
   sta eptr
   lda ptrreg+1
   sta eptr+1
+
+  txa:pha
 
   ldx #1
 loop:
