@@ -4,27 +4,45 @@ begin
 end;
 
 procedure showEntry;
+const
+  listchars : array[0..4] of byte = (
+    $5a,  // fl_midifile
+    $5b,  // fl_playlist
+    $1c,  // fl_parentdir
+    $1e,  // fl_directory
+    $1a   // fl_device
+  );
+
 var
   p_bank:byte;  //  \
   p_adr:word;   //  / It is important that this order remains intact
 
 begin
   getEntrySets(p_bank);
-  v:=0;
-//   if p_bank=$FD then v:=$5b; // playlist file
-  if p_bank=fl_device then v:=$1a; // current path
-  if p_bank=fl_parentdir then v:=$1c; // directory
-  if p_bank=fl_directory then v:=$1e; // directory
-  if p_bank=fl_midifile then v:=$5a; // song
-  if p_bank<$40 then
-    if p_adr=$00 then
-      v:=$4d  // song not loaded
-    else
-      v:=$5a; // file loaded into memory
+  asm
+    lda p_bank
+    sub #fl_midifile
+    bcc nullChar
+    tay
+    lda adr.listchars,y
+    jmp putChar
 
-  poke(scradr,v); inc(scradr,2);
+  nullChar:
+    lda #0
+
+  putChar:
+    ldy #0
+    sta (scradr),y
+  end;
+  inc(scradr,2);
   v:=byte(outstr[0]);
-  if v>LIST_VISIBLE_CHARS then outstr[0]:=char(LIST_VISIBLE_CHARS);
+  if v>LIST_VISIBLE_CHARS then
+  begin
+    outstr[0]:=char(LIST_VISIBLE_CHARS);
+    move(outstr[v-LIST_VISIBLE_CHARS+2],outstr[2],LIST_VISIBLE_CHARS);
+    outstr[1]:=#$60;
+    v:=LIST_VISIBLE_CHARS
+  end;
   putASCText(outstr);
   putSpaces(30-v);
 end;

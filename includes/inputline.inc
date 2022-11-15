@@ -1,23 +1,75 @@
 
-procedure show_inputLine;
-begin
-  outstr[0]:=char(ilpos);
-  scradr:=ilscradr;
-  putASCText(outstr);
-  if stateInputLine=ils_inprogress then
-  begin
-    asm
-      ldy #0
-      lda (scradr),y
-      bmi nospace
-      lda #0
-    noSpace:
-      eor #$80
-      sta (scradr),y
-    end;
-    inc(scradr);
-  end;
-  putSpaces(31-ilpos);
+procedure show_inputLine; assembler;
+asm
+illen = 30
+
+  txa:pha
+
+; set screen row offset
+  ldy #0
+
+; get cursor position
+  lda ilpos
+  sta OUTSTR_ADDR
+  beq cursor    ; if zero, draw cursor & clear inputline
+
+; set outStr offset
+
+  ldx #1
+
+  cmp #illen
+  bmi strLoop   ; if cursor position more than inputline length...
+
+; set starting point of input line content
+setOffset:
+  sub #illen-2
+  tax
+
+; show input line content (outStr) on screen
+strLoop:
+  lda OUTSTR_ADDR,x
+
+  asl
+  adc #$c0
+  spl:eor #$40
+  lsr
+  scc:eor #$80
+
+  sta (ilscradr),y
+  iny
+  inx
+  cpx ilpos
+  bmi strLoop
+  beq strLoop
+
+cursor:
+; check input line state
+  lda stateInputLine
+  cmp #ils_inprogress
+  bne skipCursor
+
+; draw cursor
+  lda (ilscradr),y
+  bmi nospace
+  lda #0
+noSpace:
+  eor #$80
+  sta (ilscradr),y
+  iny
+
+skipCursor:
+
+; clear rest of inputline
+  lda #0
+  jmp checkSpaceLoop
+spaceLoop:
+  sta (ilscradr),y
+  iny
+checkSpaceLoop:
+  cpy #illen
+  bmi spaceLoop
+
+  pla:tax
 end;
 
 procedure init_inputLine;
@@ -32,25 +84,22 @@ end;
 
 procedure do_inputLine;
 begin
-  if ilpos>0 then
+  if (keyb=k_ESC) or (keyb=k_RETURN) then
   begin
-    if (keyb=k_ESC) or (keyb=k_RETURN) then
-    begin
-      if keyb=k_ESC then outStr:=Snull;
-      ilpos:=byte(outstr[0]);
-      stateInputLine:=ils_done;
-      show_inputLine;
-      resultInputLine:=(keyb=K_RETURN);
-      // keyb:=k_RETURN;
-      exit;
-    end;
-    if (keyb=k_delete) then
-    begin
-      outstr[ilpos]:=#$9B;
-      dec(ilpos);
-    end;
+    if (keyb=k_ESC) or (ilpos=0) then outStr:=Snull;
+    ilpos:=byte(outstr[0]);
+    stateInputLine:=ils_done*byte(keyb=K_RETURN);
+    show_inputLine;
+    drawListSelection;
+    resultInputLine:=(keyb=K_RETURN) and (ilpos>0);
+    exit;
   end;
-  if ilpos<30 then
+  if (ilpos>0) and (keyb=k_delete) then
+  begin
+    outstr[ilpos]:=#$9B;
+    dec(ilpos);
+  end;
+  if ilpos<79 then
   begin
     ilch:=keyscan2asc(keyb);
     if ilch<>0 then
@@ -60,5 +109,4 @@ begin
     end;
   end;
   show_inputLine;
-  // keyb:=255;
 end;

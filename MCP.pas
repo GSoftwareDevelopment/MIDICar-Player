@@ -63,6 +63,7 @@ var
   cntBCD:Longint absolute $8c;
 
 procedure statusLoop; Forward;
+procedure drawListSelection; Forward;
 {$i myNMI.inc}
 {$i helpers.inc}
 {$i status.inc}

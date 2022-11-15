@@ -135,7 +135,7 @@ begin
       (p_bank=fl_directory) or
       (p_bank=fl_parentDir) then
   begin
-    drawListSelection;
+
     if resultInputLine then
     begin
       validPath;
