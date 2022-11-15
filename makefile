@@ -7,6 +7,10 @@ DRVPATH = ./drvs
 BINPATH = ./bin
 ASMPATH = ./asm
 
+DRIVER ?= MIDIBox
+
+EXEFILE = mcplay
+
 SUBDIRS = drvs loader res
 
 MAKE = make
@@ -30,14 +34,15 @@ compile_asm: ${ASMPATH}/MCP.a65
 	${CASM} ${ASMPATH}/MCP.a65 ${CFLAGS} -i:${MPBASE} -o:${BINPATH}/mcp.bin
 
 link: ${BINPATH}/loader.bin ${BINPATH}/mcp.bin
-	rm -vf ${BINPATH}/mcplay.com
+	rm -vf ${BINPATH}/mcplay.exe
 
 ifdef DRIVER
 	@echo "Linking with driver..."
 	cat ${BINPATH}/loader.bin ${BINPATH}/${DRIVER}.bin ${BINPATH}/mcp.bin >> ${BINPATH}/mcplay.exe
 else
 	@echo "Linking without driver..."
-	cat ${BINPATH}/loader.bin ${BINPATH}/mcp.bin >> ${BINPATH}/mcplay.exe
+	cat ${BINPATH}/loader.bin ${BINPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
 endif
 
+clean:
 	rm -vf $(BINPATH)/*.bin
