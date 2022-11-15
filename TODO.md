@@ -1,18 +1,20 @@
 In version 1.5
 
-[ ] version designations in the program, so that there are no problems with distinguishing between them
+1. [ ] version designations in the program, so that there are no problems with distinguishing between them
 
-[ ] possibility to determine the used driver from the command line
+2. [ ] error when moving to the next track - when the next in the list is a catalogue, it moves to it and recursion occurs. An invalid path is created
 
-[ ] possibility to specify the file to be played from the command line
+3. [ ] improved handling of track editing - currently, for lengths greater than 30 characters, it spoils the appearance of the screen :P
 
-[ ] possibility to set the refresh rate of the screen content - currently it is set to every 3rd frame, which translates into smoother decoding of the MID stream
+4. [ ] improvement of list handling - there was a bug, which, when the list is filled to the penultimate position, causes that, the list scrolls further :p
 
-[ ] improved handling of track editing - currently, for lengths greater than 30 characters, it spoils the appearance of the screen :P
+5. [ ] improvement of the progress bar - there are possible situations in which the bar is "broken", and its area is not cleared when it is launched
 
-[ ] improvement of list handling - there was a bug, which, when the list is filled to the penultimate position, causes that, the list scrolls further :p
+6. [ ] possibility to determine the used driver from the command line
 
-[ ] improvement of the progress bar - there are possible situations in which the bar is "broken", and its area is not cleared when it is launched
+7. [ ] possibility to specify the file to be played from the command line
+
+8. [ ] possibility to set the refresh rate of the screen content - currently it is set to every 3rd frame, which translates into smoother decoding of the MID stream
 
 [ ] configuration file
 
