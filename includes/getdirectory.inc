@@ -18,7 +18,7 @@ begin
     _adr:=$ffff; _bank:=fl_parentdir; addToList('..');
   end;
   joinStrings(outStr,dirMask);
-
+  thi:=0;
   opn(CIO_CHN,6,0,outStr);
   while IOResult=1 do
   begin
@@ -45,5 +45,6 @@ begin
   clearStatus;
   result:=IOResult;
   cls(CIO_CHN);
+  thi:=255;
 end;
 
