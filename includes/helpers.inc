@@ -22,15 +22,15 @@ var
   memAKB:Word;  {?}
 
 begin
+  scradr:=SCREEN_FOOT; HLine;
+  scradr:=SCREEN_FOOT; putINTText(VERSION);
   memAKB:=memAvailable div 1024;
-  scradr:=SCREEN_STATUS+32;
-  if memAKB<10000 then scradr:=SCREEN_STATUS+33;
-  if memAKB<1000 then scradr:=SCREEN_STATUS+34;
-  if memAKB<100 then scradr:=SCREEN_STATUS+35;
-  if memAKB<10 then scradr:=SCREEN_STATUS+36;
-  oscradr:=scradr;
+  scradr:=SCREEN_FOOT+33;
+  if memAKB<10000 then scradr:=SCREEN_FOOT+34;
+  if memAKB<1000 then scradr:=SCREEN_FOOT+35;
+  if memAKB<100 then scradr:=SCREEN_FOOT+36;
+  if memAKB<10 then scradr:=SCREEN_FOOT+37;
   {putINTText(#$4a);} putInt(memAKB); putINTText('KB'~);
-  scradr:=oscradr;
 end;
 
 procedure clearStatus;
@@ -38,15 +38,14 @@ var
   l:byte;
 
 begin
-  fillchar(pointer(SCREEN_TIME),60,0);
+  fillchar(pointer(SCREEN_TIME),100,0);
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
   statusLoop;
-  scradr:=SCREEN_STATUS; HLine;
   updateMem;
   l:=length(fn);
   if l=0 then exit;
   if l>16 then fn[0]:=#16;
-  scradr:=scradr-l-1; putASCText(fn);
+  scradr:=SCREEN_STATUS+40-l; putASCText(fn);
 end;
 
 procedure clearUVMeters; Assembler;

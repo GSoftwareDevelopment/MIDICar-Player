@@ -18,7 +18,6 @@ dl_start
         dta DL_MODE_40x24T2 + DL_LMS, A(SCREEN_TIME + 20)
 
         dta DL_BLANK1
-        dta DL_MODE_320x192G2 + DL_LMS, A(SCREEN_FOOT)
-    :5  dta DL_MODE_320x192G2
+        dta DL_MODE_40x24T2 + DL_LMS, A(SCREEN_FOOT)
 
         dta DL_JVB, A(dl_start)

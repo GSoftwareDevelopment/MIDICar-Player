@@ -19,7 +19,7 @@ begin
   if totalTracks>0 then
   begin
     putINTText(#$3b+#0+#$fc+#0+#$fd);
-    scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Playing'*~+#$ce);
+    scradr:=SCREEN_STATUS; PutINTText(#$4e+'Playing'*~+#$ce);
     if (playerStatus and ps_isStopped)<>0 then
     begin
       initMIDI;
@@ -31,7 +31,7 @@ begin
   else
   begin
     putINTText(#$fb+#0+#$fc+#0+#$fd);
-    scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'No song'*~+#$ce);
+    scradr:=SCREEN_STATUS; PutINTText(#$4e+'No song'*~+#$ce);
   end;
 end;
 
@@ -39,7 +39,7 @@ procedure statusPause;
 begin
   if (playerStatus and ps_isStopped)<>0 then exit;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$3c+#0+#$fd);
-  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+' Pause '*~+#$ce);
+  scradr:=SCREEN_STATUS; PutINTText(#$4e+' Pause '*~+#$ce);
   _timerStatus:=_timerStatus or f_counter;
 end;
 
@@ -50,7 +50,7 @@ begin
   if (playerStatus and ps_isStopped)<>0 then exit;
   playerStatus:=playerStatus or ps_isStopped;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$3d);
-  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Stopped'*~+#$ce);
+  scradr:=SCREEN_STATUS; PutINTText(#$4e+'Stopped'*~+#$ce);
   doneMIDI;
   move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
   chn:=0;
@@ -64,7 +64,7 @@ end;
 
 procedure statusCalcLength;
 begin
-  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Calculating length'*~+#$ce);
+  scradr:=SCREEN_STATUS; PutINTText(#$4e+'Calculating length'*~+#$ce);
 end;
 
 procedure statusReadDirectory;

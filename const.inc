@@ -1,6 +1,7 @@
 const
 {$i memory.inc}
 
+  VERSION= 'v1.5'~;
 // base memory (under 64KB) available
   FREE_MEM = ($8000-$4000)+($ff00-$d800);
 
