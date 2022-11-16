@@ -11,7 +11,7 @@ function getEntry(fn:PString):Boolean; register; assembler;
 procedure getEntrySets(var ptr); register; assembler;
 procedure setEntrySets(var ptr); register; assembler;
 function nextEntry:Boolean; assembler;
-procedure gotoNEntry(nEntry:byte); assembler;
+procedure gotoNEntry(nEntry:SmallInt); assembler;
 procedure addToList(entry:PString); Register; Assembler;
 
 implementation
@@ -36,7 +36,7 @@ asm
   icl 'asms/list_nextEntry.a65'
 end;
 
-procedure gotoNEntry(nEntry:byte); assembler;
+procedure gotoNEntry(nEntry:SmallInt); assembler;
 asm
   icl 'asms/list_gotoNEntry.a65'
 end;

@@ -32,11 +32,11 @@ var
   memAvailable:longint;
 
   YFile:Byte = 0;
-  shFile:Byte = 0;
-  curFile:Byte = 0;
-  totalFiles:Byte;
+  shFile:SmallInt = 0;
+  curFile:SmallInt = 0;
+  totalFiles:SmallInt;
 
-  curPlay:Byte;
+  curPlay:SmallInt;
   playDir:Byte = 1;
 
   last_bank:Byte;

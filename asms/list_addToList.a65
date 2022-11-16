@@ -5,12 +5,12 @@ ptrreg = $88;
   add #1
   sta fnlen
 
-  add #3
+  add #3          ; 3 is a size of entry sets
   adc fileList
   bcc continueAdd
   lda fileList+1
   adc #0
-  cmp #$FF        ; end of list page
+  cmp #$D0        ; memory page that end of list
   bne continueAdd
 
   lda #ERR_FULL_LIST
@@ -20,6 +20,7 @@ ptrreg = $88;
 
 continueAdd:
 
+; store sets of entry
   ldy #0
   lda MAIN.MIDFILES._bank
   sta (fileList),y
@@ -41,6 +42,7 @@ continueAdd:
   ldx #1
 loop:
   lda eptr:$2000,x
+  and #$7F
   sta (fileList),y
   iny
   inx
@@ -48,15 +50,22 @@ loop:
   bmi loop
 
 storeEOFN:
-  lda #$9B
+  dey
+  lda (fileList),y
+  ora #$80
+  ; lda #$9B
   sta (fileList),y
   iny
 
+; increment list pointer
   tya
   add fileList
   sta fileList
   scc:inc fileList+1
 
+; increment list counter
   inc totalFiles
+  sne
+  inc totalFiles+1
 
   pla:tax

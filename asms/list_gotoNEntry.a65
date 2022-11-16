@@ -6,13 +6,20 @@ gotoNEntry:
     lda #>LIST_ADDR
     sta fileList+1
 
-    ldx nEntry
-    beq exitGotoNEntry
+    jmp checkNEntry
 
 loop:
     jsr nextEntry
     beq exitGotoNEntry
-    dex
+
+    lda nEntry
+    sne
+    dec nEntry+1
+    dec nEntry
+
+checkNEntry:
+    lda nEntry
+    ora nEntry+1
     bne loop
 
 exitGotoNEntry:

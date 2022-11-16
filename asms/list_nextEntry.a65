@@ -2,8 +2,9 @@ nextEntry:
   ldy #3
 loop:
   lda (fileList),y
-  cmp #$9B
-  beq endEntry
+  ; cmp #$9B
+  ; beq endEntry
+  bmi endEntry
   iny
   bne loop
 

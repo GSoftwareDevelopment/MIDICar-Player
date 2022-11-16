@@ -22,22 +22,31 @@ begin
     if YFile>0 then
       dec(YFile)
     else
-      if shFile>0 then v:=-1;
+      v:=-1;
   end;
   if (keyb=k_DOWN) then
   begin
     if YFile<LIST_VISIBLE_ITEMS-1 then
       inc(YFile)
     else
-      if shFile<totalFiles-YFile-1 then v:=1;
+      v:=1;
   end;
+  curFile:=shFile+YFile+SmallInt(v);
+  if (curFile<0) or (curFile>totalFiles-1) then
+    if v=0 then
+    begin
+      if keyb=k_up then inc(YFile);
+      if keyb=k_down then dec(YFile);
+    end
+    else
+      v:=0;
   if v<>0 then
   begin
     inc(shFile,v);
     screenStatus:=screenStatus or ss_isRefresh; // showList;
   end;
   curFile:=shFile+YFile;
-  if curFile>=totalFiles then curFile:=totalFiles-1;
+  // if curFile>=totalFiles then curFile:=totalFiles-1;
   if screenStatus and ss_isRefresh=0 then drawListSelection;
 end;
 

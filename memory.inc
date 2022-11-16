@@ -19,6 +19,6 @@
   HELPSCR_ADDR    = SCREEN_ADRSES+$20;  // $2d0 ( 720)
   DLIST_ADDR      = $2FAC;              // $054 (  84)
 
-  LIST_ADDR       = $D800;              //$1000 (4096)
+  LIST_ADDR       = $c000;              //$1000 (4096)
   START_INFO_ADDR = $3C00;              // $200 ( 512)
   TRACK_DATA_ADDR = $3E00;              // $200 ( 512)

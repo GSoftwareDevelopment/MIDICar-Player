@@ -65,7 +65,7 @@ begin
     putSpaces(32);
     inc(chn);
   end;
-  fillchar(fileList,$2700,$9B);
+  fillchar(fileList,$1000{$2700},$9B);
 end;
 
 procedure exit2DOS;
