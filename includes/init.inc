@@ -31,7 +31,7 @@ begin
   // timeShowMode:=1;
   // SOUNDR:=0;
   // hlpflg:=0;
-  // shFile:=0; YFile:=0; curFile:=0;
+  // lstShift:=0; lstY:=0; lstCurrent:=0;
   // stateInputLine:=0;
   // resultInputLine:=false;
 

@@ -24,16 +24,22 @@ loop:
   bne loop
 
 endEntry:
+  cmp #$9B
+  beq noEntry
+
   and #$7f
   sta (hlpptr),y
   iny
   lda #$9B
   sta (hlpptr),y
-  dey
 
-  cpy #1
-  bne store
+  bmi store ; always jump
+  ; dey
 
+  ; cpy #1
+  ; bne store
+
+noEntry:
   pla:tax
   rts
 
@@ -44,6 +50,7 @@ store:
 
   ; sec
   ; sbc #3            // decease position by 3
+  dey
   tya
   ldy #0
   sta (hlpptr),y    // store as string length

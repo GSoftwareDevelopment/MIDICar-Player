@@ -57,7 +57,7 @@ procedure clearList;
 begin
   resetMemoryPtr;
   fileList:=pointer(LIST_ADDR);
-  totalFiles:=0; curfile:=0; YFile:=0; shFile:=0;
+  lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
   chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin

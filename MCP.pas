@@ -31,13 +31,12 @@ var
   _v:byte absolute $D7;
   memAvailable:longint;
 
-  YFile:Byte = 0;
-  shFile:SmallInt = 0;
-  curFile:SmallInt = 0;
-  totalFiles:SmallInt;
+  lstY:Byte = 0;
+  lstShift:SmallInt = 0;
+  lstCurrent:SmallInt = 0;
+  lstTotal:SmallInt;
 
   curPlay:SmallInt;
-  playDir:Byte = 1;
 
   last_bank:Byte;
   last_adr:Word;

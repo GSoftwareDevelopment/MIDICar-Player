@@ -1,6 +1,6 @@
 procedure drawListSelection;
 begin
-  scradr:=listScrAdr[YFile]; invers(32);
+  scradr:=listScrAdr[lstY]; invers(32);
 end;
 
 procedure showEntry;
@@ -49,7 +49,7 @@ end;
 
 procedure showList;
 begin
-  gotoNEntry(shFile); chn:=0;
+  gotoNEntry(lstShift); chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
     scradr:=listScrAdr[chn];
@@ -72,7 +72,7 @@ procedure choiceListFile;
 begin
   if stateInputline<>ils_pending then exit;
 
-  gotoNEntry(curFile);
+  gotoNEntry(lstCurrent);
   if getEntry(Snull) then
   begin
     getEntrySets(p_bank);
@@ -100,7 +100,7 @@ begin
     if p_bank=fl_device then
     begin
       drawListSelection;
-      ilscradr:=listScrAdr[YFile]+2;
+      ilscradr:=listScrAdr[lstY]+2;
       init_inputLine;
     end;
   end;

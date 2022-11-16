@@ -70,6 +70,9 @@ const
   k_S     = 62;
   k_A     = 63;
 
+  kmod_shift = 64;
+  kmod_control = 128;
+
 var
   keyb:byte absolute $2fc;
   keymod:byte absolute $2fd;

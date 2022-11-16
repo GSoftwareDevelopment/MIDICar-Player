@@ -64,8 +64,8 @@ storeEOFN:
   scc:inc fileList+1
 
 ; increment list counter
-  inc totalFiles
+  inc lstTotal
   sne
-  inc totalFiles+1
+  inc lstTotal+1
 
   pla:tax

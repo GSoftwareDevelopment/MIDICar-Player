@@ -9,7 +9,7 @@ loop:
   bne loop
 
 endEntry:
-  cpy #3
+  cmp #$9b
   bne moveEntryPtr
 
   lda #0

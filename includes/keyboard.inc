@@ -1,6 +1,6 @@
 procedure toggleFile; Keep;
 begin
-  gotoNEntry(curFile);
+  gotoNEntry(lstCurrent);
   getEntry(outStr);
   getEntrySets(p_bank);
   if (p_bank<>fl_device) and (p_bank and $7f<>0) then
@@ -14,39 +14,62 @@ begin
 end;
 
 procedure moveFileSelection; Keep;
+var
+  tmp:SmallInt absolute $88;
+
 begin
   if screenStatus and ss_isRefresh=0 then drawListSelection;
   v:=0;
   if (keyb=k_UP) then
   begin
-    if YFile>0 then
-      dec(YFile)
+    if keymod and kmod_shift<>0 then
+      if lstY>0 then
+        lstY:=0                     // move to top of screen
+      else
+        v:=-LIST_VISIBLE_ITEMS      // scrool one page up
     else
-      v:=-1;
+      if lstY>0 then
+        dec(lstY)                   // move one line up
+      else
+        v:=-1;                      // scroll one line up
   end;
   if (keyb=k_DOWN) then
   begin
-    if YFile<LIST_VISIBLE_ITEMS-1 then
-      inc(YFile)
+    if keymod and kmod_shift<>0 then
+      if lstY<LIST_VISIBLE_ITEMS-1 then
+        lstY:=LIST_VISIBLE_ITEMS-1  // move to bottom of screen
+      else
+        v:=LIST_VISIBLE_ITEMS       // scroll one page down
     else
-      v:=1;
+      if lstY<LIST_VISIBLE_ITEMS-1 then
+        inc(lstY)                   // move one line down
+      else
+        v:=1;                       // scroll one line down
   end;
-  curFile:=shFile+YFile+SmallInt(v);
-  if (curFile<0) or (curFile>totalFiles-1) then
-    if v=0 then
-    begin
-      if keyb=k_up then inc(YFile);
-      if keyb=k_down then dec(YFile);
-    end
-    else
-      v:=0;
-  if v<>0 then
+  lstCurrent:=lstShift+lstY+SmallInt(v);
+  if v=0 then
   begin
-    inc(shFile,v);
-    screenStatus:=screenStatus or ss_isRefresh; // showList;
+    tmp:=lstTotal-1;
+    if (lstCurrent<0) or (lstCurrent>tmp) then
+    begin
+      if keyb=k_up then
+        v:=1
+      else
+        v:=tmp-lstCurrent;
+      inc(lstY,v);
+      v:=0;
+    end;
+  end
+  else
+  begin
+    tmp:=lstShift;
+    inc(lstShift,v);
+    if (lstShift+LIST_VISIBLE_ITEMS)>lstTotal then lstShift:=lstTotal-LIST_VISIBLE_ITEMS;
+    if lstShift<0 then lstShift:=0;
+    tmp:=tmp-lstShift;
+    if tmp<>0 then screenStatus:=screenStatus or ss_isRefresh;
   end;
-  curFile:=shFile+YFile;
-  // if curFile>=totalFiles then curFile:=totalFiles-1;
+  lstCurrent:=lstShift+lstY;
   if screenStatus and ss_isRefresh=0 then drawListSelection;
 end;
 
@@ -86,22 +109,24 @@ begin
 end;
 
 procedure playerControl; Keep;
+var
+  playMode:Byte;
 begin
   if (keyb=k_Z) or (keyb=k_B) then // previous & next song
   begin
-    if keyb=k_B then playDir:=1 else playDir:=255;
-    v:=playerStatus and ps_loop;
+    if keyb=k_B then v:=1 else v:=-1;
+    playMode:=playerStatus and ps_loop;
     statusStopped;
     repeat
-      if (v=ps_shuffle) then
-        curPlay:=random(totalFiles)
+      if (playMode=ps_shuffle) then
+        curPlay:=random(lstTotal)
       else
       begin
-        inc(curPlay,playDir);
-        if (curPlay=1) then curPlay:=totalFiles;
-        if (curPlay=totalFiles) then begin curPlay:=1; break; end;
+        inc(curPlay,v);
+        if (curPlay=1) then curPlay:=lstTotal;
+        if (curPlay=lstTotal) then begin curPlay:=1; break; end;
       end;
-      curFile:=curPlay;
+      lstCurrent:=curPlay;
       IOResult:=1; choiceListFile; stateInputLine:=0;
     until (p_bank=fl_midifile) and (IOResult and %11111100=0);
     clearStatus;

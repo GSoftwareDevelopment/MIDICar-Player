@@ -31,7 +31,7 @@ begin
     totalTracks:=0
   else
   begin
-    curPlay:=curFile;
+    curPlay:=lstCurrent;
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
     statusCalcLength;
     determineSongLength;
