@@ -1,6 +1,4 @@
-detect_CMD:
-
-    .local
+    .local detect_CMD
 
 detect_DOS:
     lda boot?           ; sprawdzamy, czy DOS w ogóle jest w pamięci
@@ -10,8 +8,6 @@ detect_DOS:
 NoDOS:
     lda #<MSG_NO_DOS
     ldy #>MSG_NO_DOS
-    jsr PRINT
-
     jmp Halt
 
 FoundDOS:
@@ -31,6 +27,6 @@ DOSbeforeROM:
 Halt:
     pla
     pla
-    rts
+    jmp exit2DOS
 
     .endl

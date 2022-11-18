@@ -1,24 +1,46 @@
-PRINT:
+    .local mlprint
 
-    .local
+nextLine
+    jsr print
 
-ICCHID  = $0340
-ICCMD   = $0342
-ICBUFA  = $0344
-ICBUFL  = $0348
-CIOV    = $E456
+    lda CIO.icbufl
+    add CIO.icbufa
+    sta ptr
+    lda CIO.icbufl+1
+    adc CIO.icbufa+1
+    sta ptr+1
 
-    ldx #$00
-    sta ICBUFA,X
+    lda ptr:$ffff
+    cmp #$ff
+    beq endmlprint
+
+    lda ptr
+    ldy ptr+1
+
+    jmp nextLine
+
+endmlprint
+    rts
+
+    .endl
+
+    .local Print
+
+    ldx #$00        ; IOCB Channel #0 - normaly is a E:
+
+    sta CIO.ICBUFA,X
     tya
-    sta ICBUFA+1,X
-    lda #$ff
-    sta ICBUFL,X
-    lda #$09
-    sta ICCMD,X
-    lda ICCHID,x
+    sta CIO.ICBUFA+1,X
+
+    lda CIO.ICCHID,x
     bmi ExitPRINT
-    jmp CIOV
+
+    lda #$ff
+    sta CIO.ICBUFL,X
+
+
+    jmp CIO._putRecord
+
 ExitPRINT:
     rts
 

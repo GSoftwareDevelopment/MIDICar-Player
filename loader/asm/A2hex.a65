@@ -1,24 +1,11 @@
-MCBASEPORT:
-    .local
+    .local A2HEX
 
-    ldy #1
-
-    lda #<MIDICAR_BASE
-    sta msgptr
-    lda #>MIDICAR_BASE
-    sta msgptr+1
-
-nextByte:
-    lda mcbase,y
     pha
     :4 lsr
     jsr putHexCharToMsg
     pla
     and #$0f
     jsr putHexCharToMsg
-
-    dey
-    bpl nextByte
 
     rts
 
@@ -33,5 +20,8 @@ putHexCharToMsg:
 
 endPut:
     rts
+
+hex:
+    dta c'0123456789abcdef'
 
     .endl

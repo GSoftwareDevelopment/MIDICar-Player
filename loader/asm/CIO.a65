@@ -1,0 +1,100 @@
+    .local CIO
+ICCHID  = $0340
+ICCMD   = $0342
+ICBUFA  = $0344
+ICBUFL  = $0348
+ICAX1   = $034A
+ICAX2   = $034B
+
+CIOV    = $E456
+
+; ----------------------------
+; find first free IOCB channel
+; return:
+; Y - 1 if found; otherwise error code
+; X - IOCB# channel ($x0)
+
+_find_IOCB:
+    ldx #$00
+    ldy #$01
+
+loop
+    lda icchid,x
+    cmp #$ff
+    beq found
+    txa
+    clc
+    adc #$10
+    tax
+    bpl loop
+
+    ldy #-95       ;kod błędu "TOO MANY CHANNELS OPEN"
+found:
+    rts
+
+; -----------------
+; Open IOCB channel
+; X - IOCB# ($x0)
+; ICBUFA - device specification address
+
+_open_channel:
+    lda #$03
+    sta iccmd,X
+
+    lda #$04
+    sta icax1,X
+    lda #$00
+    sta icax2,X
+
+    jmp CIOV
+
+; ---------
+; Block Get
+; X - IOCB# ($x0)
+; ICBUFA - address
+; ICBUFL - length
+
+_bget:
+    lda #$07
+    sta iccmd,X
+
+    jmp CIOV
+
+; ----------
+; Get Record
+; X - IOCB# ($x0)
+; ICBUFA - address
+; ICBUFL - length
+
+_putRecord:
+    lda #$09
+    sta CIO.ICCMD,X
+
+    jmp CIO.CIOV
+
+; ---------
+; Block Put
+; X - IOCB# ($x0)
+; ICBUFA - address
+; ICBUFL - length
+
+_bput:
+    lda #$0b
+    sta iccmd,X
+
+    jmp CIOV
+
+; ------------------
+; Close IOCB channel
+; X - IOCB# ($x0)
+
+_close_IOCB:
+    cpx #$80
+    smi:rts
+
+    lda #$0c
+    sta iccmd,X
+
+    jmp CIOV
+
+    .endl

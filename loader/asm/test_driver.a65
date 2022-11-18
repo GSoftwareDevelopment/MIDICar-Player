@@ -1,0 +1,20 @@
+    .local test_driver
+
+    ldx #12
+driverTestLoop:
+    lda $2000,x
+    cmp #$4c
+    beq next
+    sec
+    rts
+
+next:
+    dex
+    dex
+    dex
+    bpl driverTestLoop
+
+    clc
+    rts
+
+    .endl

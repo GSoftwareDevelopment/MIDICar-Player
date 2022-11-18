@@ -1,0 +1,23 @@
+nextParameter:
+    jsr get_param
+    bcc endOfCMD
+
+    ldx #0
+    lda parbuf,x
+    cmp #'/'
+    bne noSwitch
+
+    inx
+    lda parbuf,x
+    cmp #'D'
+    bne noDriver
+
+; if no, try load Driver
+    jsr load_driver
+    jmp nextParameter
+
+noDriver:
+
+noSwitch:
+
+    jmp nextParameter

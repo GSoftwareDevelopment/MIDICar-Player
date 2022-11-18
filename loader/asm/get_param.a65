@@ -1,0 +1,69 @@
+    .local get_param
+
+    ldy #$0a            ; BUFOFF
+    lda (comtab),y
+    add #$3F            ; LBUF
+    tay
+    ; ldy lbufpos:#$3F    ; LBUF (COMTAB+$3F)
+
+    lda #' '
+    sta oldchar
+
+    ldx #0
+
+_param_loop:
+    lda (comtab),y
+    iny
+
+; check for space - its means enf of parameter
+    cmp #' '
+    beq _get_param
+; check EOL - its means end of command line
+    cmp #$9b
+    beq _end_command_line
+
+; store character in current parameter
+    sta oldchar
+    sta parbuf,x
+    inx
+
+    bne _param_loop
+
+_end_command_line:
+; decrase LBUF position
+    dey
+
+; check parameter length
+; if its zero, means no more parameters
+    cpx #0
+    beq _no_more_params
+; otherwise, we have parameter
+    bne _get_param
+
+_no_more_params
+; clear C flag to indicate there is no more parameters
+    clc
+
+    rts
+
+_get_param
+; trim spaces
+    cmp oldchar:#0
+    beq _param_loop
+
+; set EOL at end of param
+    lda #$9b
+    sta parbuf,x
+
+; store LBUF position
+    tya
+    sub #$3F        ; LBUF
+    ldy #$0a        ; BUFOFF
+    sta (comtab),y
+
+; set C flag to indicate that is parameter
+    sec
+
+    rts
+
+    .endl

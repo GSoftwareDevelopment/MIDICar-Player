@@ -1,5 +1,7 @@
     org $8000
 
+EOL = $9B
+
 BOOT?  = $09
 DOSVEC  = $0A
 AEXTMEM = $4B
@@ -7,53 +9,15 @@ MCBASE  = $D8
 PORTB   = $D301
 
 START:
-; Detect Command Line
-;     jsr detect_CMD
-;     bne NoCMD
-
-;     jsr getParams
-
-; NoCMD:
-
-; ; Detect MIDICar
-; step1:
-;     jsr detect_MC
-;     bcs MCNotFound
-
-; MCFound:
-;     sty MCBASE
-;     stx MCBASE+1
-
-;     jsr MCBASEPORT
-
-;     lda #<MIDICAR_EXIST
-;     ldy #>MIDICAR_EXIST
-;     jsr PRINT
-
-;     jmp step2
-
-; MCNotFound:
-;     lda #$FF
-;     sta MCBASE
-;     lda #$00
-;     sta MCBASE+1
-;     lda #$02
-;     sta $4ff
-;     lda #<MIDICAR_NOT_FOUND
-;     ldy #>MIDICAR_NOT_FOUND
-;     jsr PRINT
 
 ; SpartaDOS X detect
 step2:
     jsr detect_sdx
+    sta isSDX
     cmp #$ff
     beq step3
 
 ; SDX user
-
-    lda #<SDX_FOUND
-    ldy #>SDX_FOUND
-    jsr PRINT
 
     jsr detect_xms_by_sdx
 
@@ -68,7 +32,7 @@ step3:
     beq step4
     lda #<AXLON_FOUND
     ldy #>AXLON_FOUND
-    jsr PRINT
+    ; jsr PRINT
     jmp exit2DOS
 
 ; Determine extended memory size (PORTB based)
@@ -81,6 +45,29 @@ run_mcplay:
     lda #$fe
     sta $0100
 
+; Detect Command Line
+    jsr detect_CMD
+    bne endOfCMD
+
+getParameters:
+    icl 'asm/check_param.a65'
+
+endOfCMD:
+    lda load_driver.isLoaded
+    bne skipTestDriver
+
+    jsr test_driver
+    bcc skipTestDriver
+
+    lda #<MSG_DRIVERNEED
+    ldy #>MSG_DRIVERNEED
+
+    jsr mlprint
+
+    jmp exit2DOS+3      ; skip print
+
+skipTestDriver:
+
 ; Turn off BASIC
 
     lda PORTB
@@ -90,6 +77,22 @@ run_mcplay:
     rts
 
 exit2DOS:
+kbcodes = $02FC
+
+    jsr print
+
+    lda isSDX
+    cmp #$FF
+    bne exit
+
+wait4key:
+    lda kbcodes
+    cmp #$ff
+    beq wait4key
+    ldx #$ff
+    stx kbcodes
+
+exit:
     jmp (DOSVEC)
 
 ;
@@ -100,16 +103,18 @@ exit2DOS:
     icl 'asm/detect_sdx.a65'
     icl 'asm/detect_xms.a65'
     icl 'asm/detect_xms_by_sdx.a65'
+    icl 'asm/A2hex.a65'
+    icl 'asm/detect_CMD.a65'
+    icl 'asm/get_param.a65'
+    icl 'asm/load_driver.a65'
+    icl 'asm/test_driver.a65'
+    icl 'asm/CIO.a65'
     icl 'asm/print.a65'
-    ; icl 'asm/16bit2hex.a65'
-    ; icl 'asm/get_params.a65'
 
 //
 //
 
 ; Strings
-MSG_NO_DOS:
-    dta c'Need DOS',$9B
 ; MIDICAR_EXIST:
 ;     dta 'Yoppie! MIDICar found at $'
 ; MIDICAR_BASE:
@@ -117,11 +122,27 @@ MSG_NO_DOS:
 ; MIDICAR_NOT_FOUND:
 ;     dta 'Ouch! MIDICar not found :(',$9B
 AXLON_FOUND:
-    dta 'Oh, AXLON extention is not supported :(',$9B
-SDX_FOUND:
-    dta 'SDX user. Oh yeah!',$9B
-; HEX:
-;     dta '0123456789abcdef'
+    dta 'Oh, AXLON extention is not supported :(',EOL
+MSG_NO_DOS:
+    dta c'Need DOS',EOL
+MSG_IOERR:
+    dta c'I/O Error $'
+MSG_ERRNO:
+    dta c'00 - Driver not loaded.',EOL
+MSG_DRV_TWICE:
+    dta c'Unable to load more drivers.',EOL
+MSG_NODRIVER:
+    dta c'Specified file isnt correct driver.',EOL
+MSG_DRIVERNEED:
+    dta c'Specify driver using:',EOL
+    dta c'MCPLAY /Dx:filename.ext',EOL
+    dta EOL
+    dta c'or try load it, before run MCP!',EOL
+    dta $ff
+
+isSDX:
+    .byte 0
+
 parbuf  equ *
 
     ini START

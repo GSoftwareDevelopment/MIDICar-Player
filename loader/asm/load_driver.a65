@@ -1,0 +1,118 @@
+    .local load_Driver
+_head   = $2000
+_sadr   = $2002
+_eadr   = $2004
+
+; check that the Driver has not alredy been loaded
+    lda isLoaded
+    seq:jmp cantLoadDriverTwice
+
+    txa                 ; move X-reg (position in parbuf) to A-reg
+    sta tmp
+
+    jsr CIO._find_IOCB
+    bmi IOError
+    ; spl:jmp IOError
+
+; open IOCB channel
+    lda tmp
+    add #<parbuf        ; increment lo byte of parbuf address
+    sta CIO.icbufa,x        ; store
+    lda #>parbuf        ; load hi byte of parbuf address
+    adc #0              ; increment if C=1
+    sta CIO.icbufa+1,X      ; store
+
+    jsr CIO._open_channel
+    bmi IOError
+    ; spl:jmp IOError
+
+; load file header
+    lda #<$2000     ; set load address
+    sta CIO.icbufa,X
+    lda #>$2000
+    sta CIO.icbufa+1,X
+
+    lda #<$06       ; 6 bytes to load
+    sta CIO.icbufl,X
+    lda #>$00
+    sta CIO.icbufl+1,X
+
+    jsr CIO._bget
+    bmi IOError
+
+; check header
+    lda _head
+    and _head+1
+    cmp #$ff
+    bne wrongDriver
+
+; check start address - must be $2000
+    lda _sadr+1
+    cmp #$20
+    bne wrongDriver
+    lda _sadr
+    bne wrongDriver
+
+; set driver length in IOCB
+    lda _eadr
+    sub _sadr
+    sta CIO.icbufl,x
+    lda _eadr+1
+    sbc _sadr+1
+    sta CIO.icbufl+1,x
+
+    jsr CIO._bget
+    bmi IOError
+
+; close IOCB
+    jsr CIO._close_IOCB
+
+;
+testDRV:
+    jsr test_driver
+    bcs wrongDriver
+
+    jsr $2000
+
+    sty isLoaded
+
+    rts
+
+IOError:
+    tya:pha
+    jsr CIO._close_IOCB
+
+    lda #<MSG_ERRNO
+    sta A2HEX.msgptr
+    lda #>MSG_ERRNO
+    sta A2HEX.msgptr+1
+
+    pla
+    jsr A2HEX
+    lda #<MSG_IOERR
+    ldy #>MSG_IOERR
+    ; jsr print
+    jmp exit2DOS
+
+wrongDriver:
+    jsr CIO._close_IOCB
+
+    lda #<MSG_NODRIVER
+    ldy #>MSG_NODRIVER
+    ; jsr print
+    jmp exit2DOS
+
+cantLoadDriverTwice:
+    lda #<MSG_DRV_TWICE
+    ldy #>MSG_DRV_TWICE
+    ; jsr print
+    jmp exit2DOS
+
+; -------------------------
+
+isLoaded:
+    .byte 0
+tmp;
+    .byte 0
+
+    .endl
