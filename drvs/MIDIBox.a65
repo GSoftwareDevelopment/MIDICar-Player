@@ -241,4 +241,4 @@ OVSEROUT    dta a(0)
 
   .endl
 
-  ini serial_drv.init
+  ; ini serial_drv.init
