@@ -6,12 +6,10 @@
 | ---------- | ------------ | ------- | --------------- | ------------------------------------------------------------ | --------- |
 | `12`       |              | byte    | `tm`            |                                                              | main      |
 | `13`       |              | byte    | `otm`           |                                                              | main      |
-| `4A`       |              | byte    | `playerStatus`  |                                                              | loader    |
-| `4B`       |              | byte    | `totalXMS`      |                                                              | loader    |
-| `4F`       |              | byte    | `puttextinvert` |                                                              | screen (lib) |
+| `$D3`      |              | byte    | `totalXMS`      |                                                              | loader    |
 | `$D4, $D5` |              | pointer | `scradr`        | position on screen                                           | main      |
-| `$D6, $D7` |              | pointer | *n/n*           | help pointer                                                 | main      |
-| `$D8, $D9` |              | pointer | `MCBase`        | MC6850 base address                                          | loader    |
+| `$D8`      |              | byte    | `playerStatus`  |                                                              | main      |
+| `$D9`      |              | byte    | `screenStatus`  |                                                              | main      |
 | `$DA..$DB` |              | pointer | `pls`           | Playlist pointer                                             | main      |
 | `$DC..$DD` |              | pointer | `curTrackPtr`   | pointer to current proceeded track                           | midfiles  |
 | `$DE`      |              | byte    | `cTrk`          | id of current proceeded track                                | midfiles  |

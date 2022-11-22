@@ -32,7 +32,7 @@ In case the DOS in use does not have the ability to pass a parameter to the prog
 
 # Run
 
-**The program supports ONLY `Dx:` disk devices.**
+It is important to indicate on the command line which driver will be used. To do this, run the programme as follows:
 
 Type:
 
@@ -41,6 +41,10 @@ Type:
 - in place of `x` enter the device number, or skip it
 - `path>` - path can only be specified in DOS that supports directories like Sparta DOS, Sparta DOS X, MyDos.
 - `filename.ext` driver file name
+
+**The program supports ONLY `Dx:` disk devices.**
+
+If your DOS does not have the ability to pass parameters to the program, the driver MUST be loaded into memory before running. Load it as you would a normal EXE or COM binary file.
 
 # Drivers
 
