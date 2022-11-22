@@ -1,0 +1,12 @@
+    .local set_refreshRate
+
+    inx
+
+    lda parbuf,X
+    jsr HEX_Digit2A
+    scc:lda #1          ; bad value, set refresh to 1
+    sta refreshRate
+
+    rts
+
+    .endl

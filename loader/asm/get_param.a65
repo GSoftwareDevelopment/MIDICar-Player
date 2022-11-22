@@ -1,24 +1,33 @@
     .local get_param
 
     ldy #$0a            ; BUFOFF
-    lda (comtab),y
+    lda (sdx.comtab),y
     add #$3F            ; LBUF
     tay
-    ; ldy lbufpos:#$3F    ; LBUF (COMTAB+$3F)
+    ; ldy lbufpos:#$3F    ; LBUF (sdx.COMTAB+$3F)
 
     lda #' '
     sta oldchar
 
     ldx #0
 
+; -------------------
+; start of param loop
+
 _param_loop:
-    lda (comtab),y
+    lda (sdx.comtab),y
     iny
 
 ; check for space - its means enf of parameter
     cmp #' '
-    beq _get_param
+    bne _checkEOL
+; trim spaces
+    cmp oldchar:#0
+    beq _param_loop
+    bne _get_param
+
 ; check EOL - its means end of command line
+_checkEOL:
     cmp #$9b
     beq _end_command_line
 
@@ -28,6 +37,9 @@ _param_loop:
     inx
 
     bne _param_loop
+
+; end of param loop
+; -----------------
 
 _end_command_line:
 ; decrase LBUF position
@@ -47,10 +59,6 @@ _no_more_params
     rts
 
 _get_param
-; trim spaces
-    cmp oldchar:#0
-    beq _param_loop
-
 ; set EOL at end of param
     lda #$9b
     sta parbuf,x
@@ -59,7 +67,7 @@ _get_param
     tya
     sub #$3F        ; LBUF
     ldy #$0a        ; BUFOFF
-    sta (comtab),y
+    sta (sdx.comtab),y
 
 ; set C flag to indicate that is parameter
     sec

@@ -1,3 +1,6 @@
+    .local
+EOST = $ff
+
 nextParameter:
     jsr get_param
     bcc endOfCMD
@@ -7,17 +10,48 @@ nextParameter:
     cmp #'/'
     bne noSwitch
 
+; switches
+
     inx
     lda parbuf,x
-    cmp #'D'
-    bne noDriver
 
-; if no, try load Driver
-    jsr load_driver
+    ldy #0
+
+switch_loop:
+    cmp #EOST
+    beq switchNotFound
+
+    cmp switchTab,y
+    beq switchFound
+
+nextSwitch:
+    iny
+    iny
+    iny
+    jmp switch_loop
+
+switchFound:
+    lda switchTab+1,Y
+    sta callSwitch
+    lda switchTab+2,Y
+    sta callSwitch+1
+
+    jsr callSwitch:$ffff
     jmp nextParameter
 
-noDriver:
+switchNotFound:
 
 noSwitch:
 
     jmp nextParameter
+
+; -----------------------
+
+switchTab:
+    dta 'D',a(load_driver)
+    dta 'R',a(set_refreshRate)
+    dta 'C',a(set_colors)
+    dta 'S',a(set_sysexMsg)
+    dta EOST
+
+    .endl

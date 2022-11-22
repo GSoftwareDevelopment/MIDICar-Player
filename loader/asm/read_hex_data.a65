@@ -1,0 +1,36 @@
+    .local read_hex_data
+; Before calling the procedure, the amount of data
+; to be retrieved and the target address must be
+; written to the `dataLength` and `destAddr` cells
+; respectively
+
+    ldy #0
+
+getbyte_loop:
+    inx
+    lda parbuf,X
+    jsr HEX_Digit2A
+    bcs hexerror
+
+    :4 asl
+    sta hi_nibble
+
+    inx
+    lda parbuf,X
+    jsr HEX_Digit2A
+    bcs hexerror
+
+    ora hi_nibble:#00
+    sta destAddr:$ffff,Y
+
+    iny
+    cmp dataLength:#10
+    bne getbyte_loop
+
+; Y-reg returns the number of readed bytes
+    rts
+
+hexerror:
+
+    rts
+    .endl

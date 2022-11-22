@@ -1,0 +1,11 @@
+    .local set_colors
+
+    lda #10
+    sta read_hex_data.dataLength
+    lda #<colors_tab
+    sta read_hex_data.destAddr
+    lda #>colors_tab
+    sta read_hex_data.destAddr+1
+    jmp read_hex_data
+
+    .endl

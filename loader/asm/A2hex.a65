@@ -1,3 +1,24 @@
+    .local HEX_Digit2A
+
+    sec
+    cmp #'0'
+    smi:sbc #'0'
+    cmp #10
+    spl:rts
+    cmp #$11
+    bpl @+
+    sec
+    rts
+@:
+    smi:sbc #7
+    cmp #16
+
+exit:
+    rts
+; c=0 - Hex digit is correct; A=decimal digit
+; c=1 - error; A=dirt
+    .endl
+
     .local A2HEX
 
     pha

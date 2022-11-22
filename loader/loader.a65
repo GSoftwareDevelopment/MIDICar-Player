@@ -1,25 +1,39 @@
     org $8000
 
+; constants
 EOL = $9B
 
-BOOT?  = $09
+; OS
+BOOT?   = $09
 DOSVEC  = $0A
-AEXTMEM = $4B
-MCBASE  = $D8
 PORTB   = $D301
 
+; variables
+
+refreshRate     = $D2
+AEXTMEM         = $D3
+playerStatus    = $D8
+screenStatus    = $D9
+tmp             = $80
+isSDX           = $82   ; SDX detected
+colors_tab      = $4e0
+
+; MCBASE  = $D8
+
 START:
+    lda #0
+    sta load_Driver.isLoaded
 
 ; SpartaDOS X detect
-step2:
-    jsr detect_sdx
+step1:
+    jsr sdx.detect
     sta isSDX
     cmp #$ff
     beq step3
 
 ; SDX user
 
-    jsr detect_xms_by_sdx
+    jsr sdx.detect_xms
 
     jmp run_mcplay
 
@@ -27,25 +41,30 @@ step2:
 
 ; AXLON Memory extention detect
 step3:
-    jsr detect_axlon
+    jsr ext_RAM.detect_axlon
     cpy #$00
     beq step4
+
     lda #<AXLON_FOUND
     ldy #>AXLON_FOUND
-    ; jsr PRINT
     jmp exit2DOS
 
 ; Determine extended memory size (PORTB based)
 step4:
-    jsr detect_xms
+    jsr ext_RAM.detect_portb
 
+;
 run_mcplay:
 	sty AEXTMEM
 
     lda #$fe
     sta $0100
 
+    jsr set_defaults
+
+; -------------------
 ; Detect Command Line
+
     jsr detect_CMD
     bne endOfCMD
 
@@ -97,20 +116,21 @@ exit:
 
 ;
 
-    ; icl 'asm/detect_CMD.a65'
-    ; icl 'asm/detect_mc.a65'
-    icl 'asm/detect_axlon.a65'
-    icl 'asm/detect_sdx.a65'
-    icl 'asm/detect_xms.a65'
-    icl 'asm/detect_xms_by_sdx.a65'
-    icl 'asm/A2hex.a65'
+    icl 'asm/sdx.a65'
+    icl 'asm/ext_ram.a65'
     icl 'asm/detect_CMD.a65'
+
+    icl 'asm/A2hex.a65'
     icl 'asm/get_param.a65'
     icl 'asm/load_driver.a65'
     icl 'asm/test_driver.a65'
+    icl 'asm/set_refresh_rate.a65'
+    icl 'asm/set_colors.a65'
+    icl 'asm/set_sysexMsg.a65'
     icl 'asm/CIO.a65'
     icl 'asm/print.a65'
-
+    icl 'asm/read_hex_data.a65'
+    icl 'asm/set_defaults.a65'
 //
 //
 
@@ -139,9 +159,6 @@ MSG_DRIVERNEED:
     dta EOL
     dta c'or try load it, before run MCP!',EOL
     dta $ff
-
-isSDX:
-    .byte 0
 
 parbuf  equ *
 

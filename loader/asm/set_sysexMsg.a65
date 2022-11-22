@@ -1,0 +1,20 @@
+    .local set_sysexMsg
+
+    lda #16
+    sta read_hex_data.dataLength
+    lda #<$0601
+    sta read_hex_data.destAddr
+    lda #>$0601
+    sta read_hex_data.destAddr+1
+
+    jsr read_hex_data
+
+; Save length information, as the programme
+; will not know how long the message is.
+    sty $0600
+
+    rts
+
+hexerror:
+    rts
+    .endl

@@ -1,0 +1,38 @@
+    .local set_defaults
+
+; refresh rate
+    lda #1
+    sta refreshRate
+
+; color set
+    lda #%00000000
+    ;       ||
+    ;       |+--color set: primary
+    ;       +---volume meters: on
+    sta screenStatus
+
+; loop mode
+    lda #%01
+    ;    %00 play once
+    ;    %01 repeat one
+    ;    %10 repeat all
+    ;    %11 shuffle
+    sta playerStatus
+
+; colors
+    ldy #9
+@:
+    lda defaultColors,Y
+    sta colors_tab,Y
+    dey
+    bpl @-
+
+    rts
+
+defaultColors:
+; primary
+    dta $A8,$0A,$00,$02,$00
+; secondary
+    dta $A8,$00,$0A,$08,$0A
+
+    .endl
