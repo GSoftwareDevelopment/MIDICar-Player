@@ -3,7 +3,9 @@ path_delimiter:
     .local
     ldy #0
     lda (inStr),y
-    beq stroreDelimiter
+    ; beq stroreDelimiter
+    bne checkEndDelimiter
+    rts
 
 checkEndDelimiter:
     tay
