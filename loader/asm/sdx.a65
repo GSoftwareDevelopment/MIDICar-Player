@@ -4,14 +4,15 @@
 ; $Id: sparta_detect.asm,v 1.2 2006/09/27 22:59:27 mikey Exp $
 ;
 
+    .local sdx
+
 comtab  = $0A
 fsymbol = $07EB
 
 T_      = $F0   ; pointer to SDX T_ symbol
 _nbanks = $1D   ; COMTAB offset to free banks of extended memory
 
-detect_sdx
-
+detect:
 ; if peek($700) = 'S' and bit($701) sets V then we're SDX
 
     lda $0700
@@ -55,12 +56,63 @@ no_sparta
     lda #$ff
     rts
 
-sym_t
-    .byte 'T_      '
-;sym_comtab2
-;    .byte 'COMTAB2 '
-
 ; if A=$FF -> No SDX :(
 ; if A=$FE -> SDX is in OSROM mode
 ; if A=$00 -> SDX doesn't use any XMS banks
 ; if A=anything else -> BANKED mode, and A is the bank number
+
+; -------------------
+;
+
+detect_xms:
+
+; extended RAM detect by SDX
+
+; incrase T_ pointer to the beginig table of portb calulation
+
+    lda T_
+    add #$08-1
+    sta T_
+    lda T_+1
+    adc #$00
+    sta T_+1
+
+; get free banks
+    ldy #_nbanks
+    lda (comtab),y
+    add #4
+    sta AEXTMEM
+
+; get values of port_b for free banks
+
+    ldx #4
+
+l1  txa
+    pha
+    lsr
+    lsr
+    tay
+    pla
+    and #$03
+    asl
+    asl
+    ora (T_),y
+
+    and #$fe
+    sta.w $00fd,x
+
+    inx
+    cpx AEXTMEM
+    bmi l1
+
+    lda AEXTMEM
+    sub #4
+    tay
+
+    rts
+
+; -------------------
+sym_t
+    .byte 'T_      '
+
+    .endl
