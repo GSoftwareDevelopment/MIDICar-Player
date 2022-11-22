@@ -1,4 +1,6 @@
     .local load_Driver
+isLoaded= $81   ; driver is loaded
+
 _head   = $2000
 _sadr   = $2002
 _eadr   = $2004
@@ -7,12 +9,14 @@ _eadr   = $2004
     lda isLoaded
     seq:jmp cantLoadDriverTwice
 
-    txa                 ; move X-reg (position in parbuf) to A-reg
-    sta tmp
+    stx tmp             ; store position in parbuf in tmp variable
 
     jsr CIO._find_IOCB
     bmi IOError
     ; spl:jmp IOError
+
+; -------------------------
+; begin of driver file load
 
 ; open IOCB channel
     lda tmp
@@ -55,6 +59,7 @@ _eadr   = $2004
 
 ; set driver length in IOCB
     lda _eadr
+    add #1
     sub _sadr
     sta CIO.icbufl,x
     lda _eadr+1
@@ -67,16 +72,23 @@ _eadr   = $2004
 ; close IOCB
     jsr CIO._close_IOCB
 
-;
+; end of driver file load
+; -----------------------
+
+; verify that the loaded file is a valid driver file
 testDRV:
     jsr test_driver
     bcs wrongDriver
 
-    jsr $2000
-
     sty isLoaded
 
+; call driver - init
+    jsr $2000
+
     rts
+
+; --------------------------------------
+; Displays message if IO operation fails
 
 IOError:
     tya:pha
@@ -94,6 +106,10 @@ IOError:
     ; jsr print
     jmp exit2DOS
 
+; ------------------------------------------
+; Displays a message when the specified file
+; is not a valid driver file
+
 wrongDriver:
     jsr CIO._close_IOCB
 
@@ -102,17 +118,14 @@ wrongDriver:
     ; jsr print
     jmp exit2DOS
 
+; -----------------------------------------
+; Displays a message when there has been an
+; attempt to load two drivers into memory
+
 cantLoadDriverTwice:
     lda #<MSG_DRV_TWICE
     ldy #>MSG_DRV_TWICE
     ; jsr print
     jmp exit2DOS
-
-; -------------------------
-
-isLoaded:
-    .byte 0
-tmp;
-    .byte 0
 
     .endl
