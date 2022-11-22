@@ -17,11 +17,11 @@ const
   ss_colorSet  = %00010000;  // flag for color set mode
 
 // player status
-  ps_loop      = %1100;
-  ps_playonce  = %0000;
-  ps_repeatone = %0100;
-  ps_repeatall = %1000;
-  ps_shuffle   = %1100;
+  ps_loop      = %11;
+  ps_playonce  = %00;
+  ps_repeatone = %01;
+  ps_repeatall = %10;
+  ps_shuffle   = %11;
   ps_isStopped = %01000000;
 
 //
@@ -57,9 +57,10 @@ const
   dirMask = '*.*';
 
 // colors sets
-  colors:Array[0..1,0..4] of byte = (
-    ($A8,$00,$0A,$08,$0A),
-    ($A8,$0A,$00,$02,$00)
-  );
+  COLORS_ADDR = $4E0;
+  // colors:Array[0..1,0..4] of byte = (
+  //   ($A8,$00,$0A,$08,$0A),
+  //   ($A8,$0A,$00,$02,$00)
+  // );
 
   ERR_FULL_LIST = 99;

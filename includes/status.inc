@@ -9,7 +9,7 @@ const
 
 begin
   scradr:=SCREEN_TIME+6;
-  v:=(playerStatus and ps_loop) shr 2;
+  v:=playerStatus and ps_loop;
   putINTText(sloop[v]);
 end;
 

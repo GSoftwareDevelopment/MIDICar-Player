@@ -18,17 +18,17 @@ Uses
 {$r player.rc}
 
 var
-  playerStatus:Byte absolute $4A;
-  totalXMS:Byte absolute $4B; // this value is initialized by loader
-  screenStatus:Byte absolute $4C;
-  scradr:Word absolute $D4;
-  MCBaseAddr:Word absolute $D8; // this valu is initialized by loader
   _tm:Byte absolute $14;
   otm:Byte absolute $13;
   ctm:Byte absolute $12;
+  refreshRate:Byte absolute $D2;
+  totalXMS:Byte absolute $D3; // this value is initialized by loader
+  scradr:Word absolute $D4;
   chn:Byte absolute $D6;
   v:shortint absolute $D7;
   _v:byte absolute $D7;
+  playerStatus:Byte absolute $D8;
+  screenStatus:Byte absolute $D9;
   memAvailable:longint;
 
   lstY:Byte = 0;
@@ -90,7 +90,7 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    if _tm-otm>1 then
+    if _tm-otm>refreshRate then
     begin
       otm:=_tm;
       if screenStatus and ss_isRefresh<>0 then

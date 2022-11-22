@@ -1,8 +1,8 @@
 colptr = $88
 
-  lda colors
+  lda #<colors_addr
   sta colptr
-  lda colors+1
+  lda #>colors_addr
   sta colptr+1
 
   lda screenStatus

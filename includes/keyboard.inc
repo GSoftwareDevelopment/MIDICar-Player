@@ -75,7 +75,7 @@ end;
 
 procedure toggleLoopMode; Keep;
 begin
-  v:=(playerStatus+4) and ps_loop;
+  v:=(playerStatus+1) and ps_loop;
   playerStatus:=(playerStatus and (not ps_loop)) or v;
   statusLoop;
 end;
@@ -88,8 +88,11 @@ end;
 
 procedure toggleTimeShowMode; Keep;
 begin
-  scradr:=screen_time+14; putSpaces(6);
   inc(timeShowMode); if timeShowMode>2 then timeShowMode:=0;
+  if timeShowMode=0 then
+  begin
+    scradr:=screen_time+14; putSpaces(6);
+  end;
 end;
 
 procedure toggleScreenColors; Keep;
