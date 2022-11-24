@@ -27,6 +27,14 @@
     dey
     bpl @-
 
+; sysex message
+    ldy #7
+@:
+    lda defaultSysExMsg,y
+    sta SysEx_MSG-1,Y
+    dey
+    bpl @-
+
     rts
 
 defaultColors:
@@ -34,5 +42,8 @@ defaultColors:
     dta $A8,$0A,$00,$02,$00
 ; secondary
     dta $A8,$00,$0A,$08,$0A
+
+defaultSysExMsg:
+    dta 6, $f0, $7e, $7f, $09, $01, $f7
 
     .endl
