@@ -87,6 +87,12 @@ Start:
   sta fifo_head
   sta fifo_tail
 
+;   ldy #0
+; clearFIFO_Loop:
+;   sta $600,Y
+;   iny
+;   bne clearFIFO_Loop
+
 exitStart:
   RTS
 
@@ -126,17 +132,14 @@ exitSend:
 ; C = 0 - start send if buffer is not empty and serial is free
 ; C = 1 -
 Flush:
-  bcc FlushAll
-  jmp startSend
+  bcs startSend
 
 FlushAll:
-  pha
 
 flush_loop:
   lda XMTDON
   beq flush_loop
 
-  pla
   rts
 
 ;--------------------------------------------------
@@ -146,6 +149,11 @@ Stop:
   lda OVSEROUT
   ora OVSEROUT
   beq exitUnInit
+
+  bcc noFlush
+  jsr FlushAll
+
+noFlush:
 
 ; restore old vector
   lda OVSEROUT
@@ -174,6 +182,11 @@ Stop:
 ; clear old vector
   sta OVSEROUT
   sta OVSEROUT+1
+
+; Reset FIFO
+  lda #0
+  sta fifo_head
+  sta fifo_tail
 
 exitUnInit:
   RTS
