@@ -125,11 +125,12 @@ asm
   jsr $2003
 
   ldx #0
-  lda GM_RESET,x
+  lda GM_RESET_ADDR-1,x
+  beq skip_reset
   sta sysexlen
 
 sendData:
-  lda GM_RESET+1,x
+  lda GM_RESET_ADDR,x
 
   ; call driver - Send
   jsr $2006
@@ -138,12 +139,15 @@ sendData:
   cpx sysexlen:#6
   bne sendData
 
+skip_reset:
   pla:tax
 
   rts
 
-GM_RESET:
-  .byte 6, $f0, $7e, $7f, $09, $01, $f7
+// GM_RESET:
+  // .byte 6, $f0, $7e, $7f, $09, $01, $f7
+  // .byte 7, $f0, $05, $7e, $7f, $09, $01, $f7
+  // .byte 10, $f0, $08, $43, $10, $4c, $00, $00, $7e, $00, $f7
 end;
 
 procedure doneMIDI;

@@ -63,4 +63,7 @@ const
   //   ($A8,$0A,$00,$02,$00)
   // );
 
+// MIDI Reset SysEx Message Address
+  GM_RESET_ADDR = $2700;
+
   ERR_FULL_LIST = 99;

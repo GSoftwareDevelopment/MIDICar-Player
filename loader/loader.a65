@@ -17,6 +17,7 @@ screenStatus    = $D9
 tmp             = $80
 isSDX           = $82   ; SDX detected
 colors_tab      = $4e0
+SysEx_MSG       = $2700;
 
 ; MCBASE  = $D8
 
