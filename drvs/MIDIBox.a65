@@ -1,6 +1,7 @@
     org $2000
 
 drvjtab:
+
   jmp serial_drv.init
   jmp serial_drv.start
   jmp serial_drv.send
@@ -16,12 +17,13 @@ drvjtab:
 ;--------------------------------------------------
 ; Initialize
 
-DESC	dta c'MIDIBox Driver by GSD',$9B
+DESC	dta c'MIDIBox Driver 1.0 by GSD',$9B
 
 init:
   lda #<DESC
   ldy #>DESC
   jsr PRINT
+
   rts
 
 ;--------------------------------------------------
@@ -193,6 +195,8 @@ set_AUDC:
   STA AUDC3
   STA AUDC4
 
+  sta fifo_head
+  sta fifo_tail
 exitUnInit:
   RTS
 

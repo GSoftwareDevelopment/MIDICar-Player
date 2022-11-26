@@ -17,7 +17,7 @@ drvjtab:
 ;--------------------------------------------------
 ; Initialize
 
-DESC	dta c'MIDIMate Driver by GSD',$9B
+DESC	dta c'MIDIMate Driver 1.0 by GSD',$9B
 
 init:
   lda #<DESC
@@ -184,7 +184,6 @@ noFlush:
   sta OVSEROUT+1
 
 ; Reset FIFO
-  lda #0
   sta fifo_head
   sta fifo_tail
 
