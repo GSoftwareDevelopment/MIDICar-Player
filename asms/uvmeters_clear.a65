@@ -2,29 +2,29 @@ clearUVMeter:
   txa:pha
 
   lda #<SCREEN_CHANNELS
-  sta scradr
+  sta screen.scradr
   lda #>SCREEN_CHANNELS
-  sta scradr+1
+  sta screen.scradr+1
 
   ldx #0
 clearLoop:
   ldy #3
   lda #$41
 VClr:
-  sta (scradr),y
+  sta (screen.scradr),y
   dey
-  sta (scradr),y
+  sta (screen.scradr),y
   dey
-  sta (scradr),y
+  sta (screen.scradr),y
   dey
-  sta (scradr),y
+  sta (screen.scradr),y
   dey
 
 dontClear:
-  lda scradr
+  lda screen.scradr
   add #40
-  sta scradr
-  scc:inc scradr+1
+  sta screen.scradr
+  scc:inc screen.scradr+1
 
   inx
   cpx #16

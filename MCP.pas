@@ -4,9 +4,8 @@
 {$DEFINE ROMOFF}
 Uses
   MIDFiles,
-  Misc,
-  CIO,
   keys,
+  CIO,
   filestr,
   screen,
   list;
@@ -23,7 +22,6 @@ var
   ctm:Byte absolute $12;
   refreshRate:Byte absolute $D2;
   totalXMS:Byte absolute $D3; // this value is initialized by loader
-  scradr:Word absolute $D4;
   chn:Byte absolute $D6;
   v:shortint absolute $D7;
   _v:byte absolute $D7;
@@ -43,12 +41,6 @@ var
 
   listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
 
-  curdev:TDevString absolute CURDEV_ADDR;   // 6 (+1) // absolute $4f0;
-  curPath:TPath absolute CURPATH_ADDR;      // 64 (+1)
-  fn:TFilename absolute FN_PATH_ADDR;       // 32 (+1)
-  outstr:String[80] absolute OUTSTR_ADDR;   // 80 (+1)
-  Snull:String[80] absolute SNULL_ADDR;     // 80 (+1)
-
   ilch:Byte absolute $D6;
   ilpos:Byte absolute $54;
   ilscradr:Word absolute $55;
@@ -61,7 +53,6 @@ var
   counter:Longint absolute $88;
   cntBCD:Longint absolute $8c;
 
-procedure statusLoop; Forward;
 procedure drawListSelection; Forward;
 {$i myNMI.inc}
 {$i helpers.inc}

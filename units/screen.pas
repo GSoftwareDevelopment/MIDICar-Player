@@ -7,6 +7,7 @@ var
   DMACTL:Byte absolute $d400;
   SDLST:Word absolute $230;
   CHBASE:Byte absolute $2f4;
+  scradr:Word absolute $D4;
 
 procedure waitFrame; Inline; Assembler;
 procedure setColors; Assembler;

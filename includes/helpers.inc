@@ -1,11 +1,6 @@
 var
   SOUNDR:Byte absolute $41;
 
-procedure getCurrentPath(chn:byte; dev:PString; path:PString); register; assembler;
-asm
-  icl '../asms/getCurrentDirectory.a65'
-end;
-
 procedure resetMemoryPtr;
 begin
   memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
@@ -18,7 +13,6 @@ end;
 
 procedure updateMem;
 var
-  oscradr:word; {?}
   memAKB:Word;  {?}
 
 begin
@@ -31,21 +25,6 @@ begin
   if memAKB<100 then scradr:=SCREEN_FOOT+36;
   if memAKB<10 then scradr:=SCREEN_FOOT+37;
   {putINTText(#$4a);} putInt(memAKB); putINTText('KB'~);
-end;
-
-procedure clearStatus;
-var
-  l:byte;
-
-begin
-  fillchar(pointer(SCREEN_TIME),100,0);
-  scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
-  statusLoop;
-  updateMem;
-  l:=length(fn);
-  if l=0 then exit;
-  if l>16 then fn[0]:=#16;
-  scradr:=SCREEN_STATUS+40-l; putASCText(fn);
 end;
 
 procedure clearUVMeters; Assembler;

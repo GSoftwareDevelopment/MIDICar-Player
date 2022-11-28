@@ -1,4 +1,3 @@
-
 procedure show_inputLine; assembler;
 asm
 illen = 30
@@ -10,7 +9,7 @@ illen = 30
 
 ; get cursor position
   lda ilpos
-  sta OUTSTR_ADDR
+  sta MAIN.FILESTR.OUTSTR_ADDR
   beq cursor    ; if zero, draw cursor & clear inputline
 
 ; set outStr offset
@@ -27,7 +26,7 @@ setOffset:
 
 ; show input line content (outStr) on screen
 strLoop:
-  lda OUTSTR_ADDR,x
+  lda MAIN.FILESTR.OUTSTR_ADDR,x
 
   asl
   adc #$c0
@@ -74,7 +73,13 @@ end;
 
 procedure init_inputLine;
 begin
-  ilpos:=length(outstr);
+  // BUG Temporarily fixed
+  asm
+    lda MAIN.FILESTR.ADR.OUTSTR
+    sta ilpos
+  end;
+  // BUG Reported bug on MP GitHub Repo #110
+  // ilpos:=length(outstr);
   fillchar(outstr[ilpos+1],80-ilpos,$9b);
   keyb:=255;
   show_inputLine; ctm:=_tm;
@@ -86,11 +91,25 @@ procedure do_inputLine;
 begin
   if (keyb=k_ESC) or (keyb=k_RETURN) then
   begin
-    if (keyb=k_ESC) or (ilpos=0) then outStr:=Snull;
-    ilpos:=byte(outstr[0]);
+    if (keyb=k_ESC) or (ilpos=0) then
+    // BUG Temporarily fixe
+    asm
+      lda FILESTR.SNULL
+      sta @move.src
+      lda FILESTR.SNULL+1
+      sta @move.src+1
+      @moveSTRING MAIN.FILESTR.OUTSTR #81
+    end;
+    asm
+      lda MAIN.FILESTR.ADR.OUTSTR
+      sta ilpos
+    end;
+    // BUG Reported bug on MP GitHub Repo #110
+    // outStr:=Snull;
+    // ilpos:=byte(outstr[0]);
     stateInputLine:=ils_done*byte(keyb=K_RETURN);
     show_inputLine;
-    drawListSelection;
+    // drawListSelection;
     resultInputLine:=(keyb=K_RETURN) and (ilpos>0);
     exit;
   end;

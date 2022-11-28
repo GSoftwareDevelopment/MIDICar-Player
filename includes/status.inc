@@ -77,6 +77,27 @@ end;
 //   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading playlist'*~+#$ce);
 // end;
 
+procedure clearStatus;
+var
+  l:byte;
+
+begin
+  fillchar(pointer(SCREEN_TIME),100,0);
+  scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
+  statusLoop;
+  updateMem;
+  // BUG Temporarily fixed
+  asm
+    lda main.filestr.adr.fn
+    sta l
+  end;
+  // BUG Reported bug on MP GitHub Repo #110
+  // l:=length(FILESTR.fn);
+  if l=0 then exit;
+  if l>16 then fn[0]:=#16;
+  scradr:=SCREEN_STATUS+40-l; putASCText(fn);
+end;
+
 procedure statusError(err:byte);
 begin
   keyb:=255;

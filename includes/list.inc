@@ -32,7 +32,7 @@ begin
 
   putChar:
     ldy #0
-    sta (scradr),y
+    sta (screen.scradr),y
   end;
   inc(scradr,2);
   v:=byte(outstr[0]);
@@ -85,7 +85,16 @@ begin
     begin
       joinStrings(curPath,Snull);
       PathDelimiter(outStr,'>');
-      curPath:=outStr;
+      // BUG Temporarily fixed
+      asm
+        lda FILESTR.OUTSTR
+        sta @move.src
+        lda FILESTR.OUTSTR+1
+        sta @move.src+1
+        @moveSTRING FILESTR.CURPATH #65
+      end;
+      // BUG Reported bug on MP GitHub Repo #110
+      // curPath:=outStr;
       resultInputLine:=True;
     end;
     joinStrings(curDev,curPath);

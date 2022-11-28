@@ -9,9 +9,9 @@ updateUVMeter:
   stx regx // txa:pha
 
   lda #<SCREEN_CHANNELS
-  sta scradr
+  sta screen.scradr
   lda #>SCREEN_CHANNELS
-  sta scradr+1
+  sta screen.scradr+1
 
   ldx #0
 uvmeterLoop:
