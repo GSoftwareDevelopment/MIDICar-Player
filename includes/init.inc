@@ -21,7 +21,7 @@ begin
     // listScrAdr[chn]:=SCREEN_WORK+48+chn*40;
   // end;
 
-  resetMemoryPtr;
+  clearList;
   setColors;
   DMACTL:=34; waitFrame;
   otm:=_tm;
