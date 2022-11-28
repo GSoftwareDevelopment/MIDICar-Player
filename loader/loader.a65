@@ -16,8 +16,9 @@ playerStatus    = $D8
 screenStatus    = $D9
 tmp             = $80
 isSDX           = $82   ; SDX detected
-colors_tab      = $4e0
-SysEx_MSG       = $2700;
+colors_tab      = $4E0
+SysEx_MSG       = $2700
+outstr          = $55A  ; MCP full file spec input
 
 ; MCBASE  = $D8
 
@@ -128,6 +129,7 @@ exit:
     icl 'asm/set_refresh_rate.a65'
     icl 'asm/set_colors.a65'
     icl 'asm/set_sysexMsg.a65'
+    icl 'asm/set_file_spec.a65'
     icl 'asm/CIO.a65'
     icl 'asm/print.a65'
     icl 'asm/read_hex_data.a65'

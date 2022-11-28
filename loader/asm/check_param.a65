@@ -42,6 +42,7 @@ switchFound:
 switchNotFound:
 
 noSwitch:
+    jsr set_file_spec
 
     jmp nextParameter
 

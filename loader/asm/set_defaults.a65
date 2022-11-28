@@ -35,7 +35,19 @@
     dey
     bpl @-
 
+; file specification
+    ldy #0
+@:
+    lda defaultFileSpec,Y
+    sta outstr,Y
+    iny
+    cmp #$9b
+    bne @-
+
     rts
+
+defaultFileSpec:
+    dta 2,c'D:',$9b
 
 defaultColors:
 ; primary

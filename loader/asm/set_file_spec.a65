@@ -1,0 +1,22 @@
+    .local set_file_spec
+
+    ldy #1
+
+@:
+    lda parbuf,X
+    cmp #$9b
+    beq @+
+    sta outstr,y
+    iny
+    inx
+    bpl @-
+
+@:
+    dey
+    tya
+    ldy #0
+    sta outstr,Y
+
+    rts
+
+    .endl

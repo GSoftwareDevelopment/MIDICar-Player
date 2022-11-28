@@ -78,9 +78,14 @@ begin
   asm lda PORTB \ pha end;
   init;
 
-  outStr:='D:'; validPath;
+  validPath; // result in '_v' indi
+  _adr:=$ffff;
+  if (_v and dp_name=0) then
+    _bank:=fl_device
+  else
+    _bank:=fl_midifile;
 
-  gotoNEntry(0); _adr:=$ffff; _bank:=fl_device; addToList(outStr);
+  gotoNEntry(0); addToList(outStr);
   choiceListFile; stateInputLine:=ils_done; resultInputLine:=true; keyb:=k_RETURN;
 
   setNMI;
