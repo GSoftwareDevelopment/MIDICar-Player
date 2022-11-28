@@ -3,11 +3,11 @@ DestructureFullPath:
     txa:pha
 
     lda #0
-    sta result
+    sta _result
 
     ldy #0
     lda (inStr),y
-    beq endInStr            ; this means, that input string is empty
+    beq exitDestructureFullPath  ; this means, that input string is empty
 
     tay
     pha ; store inStr length
@@ -44,9 +44,9 @@ foundNameBegin:
     jsr copyInStr2Ptr
     beq skip_dp_name
 
-    lda result              ; set dp_name in result
+    lda _result              ; set dp_name in result
     ora #filestr.dp_name
-    sta result
+    sta _result
 
 skip_dp_name:
 ; now, try to extract device specification
@@ -54,9 +54,9 @@ skip_dp_name:
     lda FILESTR.getDeviceSpec.result
     beq skip_dp_dev
 
-    lda result              ; set dp_dev in result
+    lda _result              ; set dp_dev in result
     ora #filestr.dp_dev
-    sta result
+    sta _result
 
 skip_dp_dev:
 ; If device specification is found, then, its value is stored in devS pointer
@@ -80,15 +80,17 @@ skip_dp_dev:
     jsr copyInStr2Ptr
     beq skip_dp_path
 
-    lda result              ; set dp_path in result
+    lda _result              ; set dp_path in result
     ora #filestr.dp_path
-    sta result
+    sta _result
 
 skip_dp_path:
-endInStr:
+exitDestructureFullPath
 
     pla:tax
 
+    lda _result:#00
+    sta result
     rts
 
 ; copy input string (inStr) from position Y reg to
