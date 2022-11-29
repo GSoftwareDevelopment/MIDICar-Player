@@ -12,7 +12,6 @@ Uses
 {$I-}
 
 {$i const.inc}
-{$i type.inc}
 
 {$r player.rc}
 
