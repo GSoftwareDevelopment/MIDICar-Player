@@ -1,3 +1,37 @@
+unit inputLine;
+
+interface
+
+const
+// input line status
+  ils_pending    = 0;
+  ils_inprogress = 1;
+  ils_done       = 2;
+
+// input line variables
+var
+  ilch:Byte absolute $D6;
+  ilpos:Byte absolute $54;
+  ilscradr:Word absolute $55;
+
+  resultInputLine:boolean = false;
+  stateInputLine:Byte = 0;
+
+procedure init_inputLine;
+procedure show_inputLine; assembler;
+procedure do_inputLine;
+
+implementation
+uses keys;
+
+const
+  OUTSTR_ADDR = $55A;
+
+var
+  _tm:Byte absolute $14;
+  ctm:Byte absolute $12;
+  outstr:string[80] absolute OUTSTR_ADDR;
+
 procedure show_inputLine; assembler;
 asm
 illen = 30
@@ -129,3 +163,5 @@ begin
   end;
   show_inputLine;
 end;
+
+end.

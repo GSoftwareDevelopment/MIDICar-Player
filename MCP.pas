@@ -8,15 +8,16 @@ Uses
   CIO,
   filestr,
   screen,
-  list;
+  list,
+  inputLine;
 {$I-}
 
 {$i const.inc}
-{$i type.inc}
 
 {$r player.rc}
 
 var
+  listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
   _tm:Byte absolute $14;
   otm:Byte absolute $13;
   ctm:Byte absolute $12;
@@ -27,11 +28,14 @@ var
   _v:byte absolute $D7;
   playerStatus:Byte absolute $D8;
   screenStatus:Byte absolute $D9;
+
   memAvailable:longint;
 
-  lstY:Byte = 0;
-  lstShift:SmallInt = 0;
-  lstCurrent:SmallInt = 0;
+// selector variables
+
+  lstY:Byte;
+  lstShift:SmallInt;
+  lstCurrent:SmallInt;
   lstTotal:SmallInt;
 
   curPlay:SmallInt;
@@ -39,14 +43,7 @@ var
   last_bank:Byte;
   last_adr:Word;
 
-  listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
-
-  ilch:Byte absolute $D6;
-  ilpos:Byte absolute $54;
-  ilscradr:Word absolute $55;
-
-  resultInputLine:boolean = false;
-  stateInputLine:Byte = 0;
+// counter
 
   timeShowMode:Byte = 1;
 
@@ -58,7 +55,7 @@ procedure drawListSelection; Forward;
 {$i helpers.inc}
 {$i status.inc}
 {$i load.inc}
-{$i inputline.inc}
+// {$i inputline.inc}
 {$i list.inc}
 {$i getdirectory.inc}
 {$i keyboard.inc}
@@ -97,7 +94,7 @@ begin
       end;
 
       counter:=_totalTicks;
-      if _songTicks>0 then
+      if (playerStatus and ps_calcLen<>0) and (_songTicks>0) then
       begin
         _v:=(counter div _songTicks)-1;
         if _v<>255 then

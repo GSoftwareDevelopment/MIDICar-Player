@@ -17,6 +17,8 @@
     ;    %01 repeat one
     ;    %10 repeat all
     ;    %11 shuffle
+    ora #%01000000
+    ;      1 - determine song length
     sta playerStatus
 
 ; colors

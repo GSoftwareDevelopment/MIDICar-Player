@@ -26,16 +26,20 @@ begin
   loadProcess:=@loadPrc; thi:=0;
   result:=LoadMid;
   thi:=255;
-  clearStatus;
+
   if (result and %11111100)<>0 then
     totalTracks:=0
   else
   begin
     curPlay:=lstCurrent;
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
-    statusCalcLength;
-    determineSongLength;
-    _songTicks:=_songTicks div 160;
-    clearStatus;
+    if (playerStatus and ps_calcLen)<>0 then
+    begin
+      statusCalcLength;
+      determineSongLength;
+      _songTicks:=_songTicks div 160;
+    end;
   end;
+
+  clearStatus;
 end;

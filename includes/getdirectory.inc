@@ -2,6 +2,14 @@ function getDirectory:Byte;
 const
   CIO_CHN = 2;
 
+// file extentions
+  // fe_PLS = $504c5300;
+  fe_DIR = $c4c9d200;
+  fe_MID = $4d494400;
+
+// default search mask
+  dirMask = '*.*';
+
 var
   ext:DWord absolute $4ec;
 

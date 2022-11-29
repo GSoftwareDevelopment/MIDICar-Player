@@ -25,7 +25,7 @@ begin
   setColors;
   DMACTL:=34; waitFrame;
   otm:=_tm;
-  playerStatus:=(playerStatus and ps_loop) or ps_isStopped;
+  playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
   // thi:=255;
   // playDir:=1;
   // timeShowMode:=1;
