@@ -113,7 +113,7 @@ end;
 
 procedure fileAction; Keep;
 begin
-  choiceListFile;
+  if stateInputLine=ils_pending then choiceListFile;
   if stateInputLine<>ils_done then exit;
 
   stateInputLine:=ils_pending;
@@ -134,23 +134,22 @@ var
 begin
   if (keyb=k_Z) or (keyb=k_B) then // previous & next song
   begin
-    if keyb=k_B then v:=1 else v:=-1;
     playMode:=playerStatus and ps_loop;
     statusStopped;
+    stateInputLine:=stateInputLine xor 4;
     repeat
+      if keyb=k_B then v:=1 else v:=-1;
       if (playMode=ps_shuffle) then
         curPlay:=random(lstTotal)
       else
       begin
-        inc(curPlay,v);
-        if (curPlay=1) then curPlay:=lstTotal;
-        if (curPlay=lstTotal) then begin curPlay:=1; break; end;
+        inc(lstCurrent,v);
+        if (lstCurrent<0) then lstCurrent:=lstTotal;
+        if (lstCurrent>lstTotal) then lstCurrent:=0;
       end;
-      lstCurrent:=curPlay;
-      IOResult:=1;
       choiceListFile;
-      stateInputLine:=0;
     until (p_bank=fl_midifile) and (IOResult and %11111100=0);
+    stateInputLine:=stateInputLine xor 4;
     clearStatus;
     if IOResult and %11111100<>0 then statusError(IOResult);
     if totalTracks<>0 then statusPlaying;

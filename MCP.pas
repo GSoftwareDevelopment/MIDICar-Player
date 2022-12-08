@@ -72,7 +72,7 @@ begin
     _bank:=fl_midifile;
 
   gotoNEntry(0); addToList(outStr);
-  choiceListFile; stateInputLine:=ils_done; resultInputLine:=true; keyb:=k_RETURN;
+  choiceListFile; resultInputLine:=true; keyb:=k_RETURN;
 
   setNMI;
 

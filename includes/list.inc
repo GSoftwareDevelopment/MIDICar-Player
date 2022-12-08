@@ -77,36 +77,40 @@ end;
 
 procedure choiceListFile;
 begin
-  if stateInputline<>ils_pending then exit;
-
   gotoNEntry(lstCurrent);
   if getEntry(Snull) then
   begin
     getEntrySets(p_bank);
-    if (p_bank=fl_parentdir) then
+    if stateInputLine<3 then
     begin
-      parentDir(curPath);
-      resultInputLine:=True;
-    end;
-    if (p_bank=fl_directory) then
-    begin
-      joinStrings(curPath,Snull);
-      PathDelimiter(outStr,'>');
-      curPath:=outStr;
-      resultInputLine:=True;
+      if (p_bank=fl_parentdir) then
+      begin
+        parentDir(curPath);
+        resultInputLine:=True;
+      end;
+      if (p_bank=fl_directory) then
+      begin
+        joinStrings(curPath,Snull);
+        PathDelimiter(outStr,'>');
+        curPath:=outStr;
+        resultInputLine:=True;
+      end;
     end;
     joinStrings(curDev,curPath);
+    if stateInputLine<3 then
+    begin
+      stateInputLine:=ils_done;
+      if p_bank=fl_device then
+      begin
+        drawListSelection;
+        ilscradr:=listScrAdr[lstY]+2;
+        init_inputLine;
+      end;
+    end;
     if p_bank=fl_midifile then
     begin
       joinStrings(outStr,Snull);
       IOResult:=loadSong;
-    end;
-    stateInputLine:=ils_done;
-    if p_bank=fl_device then
-    begin
-      drawListSelection;
-      ilscradr:=listScrAdr[lstY]+2;
-      init_inputLine;
     end;
   end;
 end;

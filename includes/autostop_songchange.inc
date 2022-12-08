@@ -1,5 +1,6 @@
 procedure AutoStopAndSongChange;
 begin
+  if keyb<>255 then exit;
   if (playerStatus and ps_isStopped=0) and (playingTracks=0) then
   begin
     statusStopped;
