@@ -1,19 +1,54 @@
   .local
   stx regX
 
-; calculate pixel-fill inside byte
   lda v
-  and #%11
+  sub oldv
+  bpl update
+  lda #0
+  sta oldv
+  jmp dontUpdate
+
+update:
   tax
 
-; calculate position offset on screen
-  lda v
-  :2 lsr @
+; calculate pixel-fill inside byte
+  lda oldv
+  and #%11
   tay
 
-  lda progress_data,x
-  sta screen_timeline,y
+; calculate position offset on screen
+  lda oldv
+  :2 lsr @
+  add #<screen_timeline
+  sta scrptr
+  ; lda #>screen_timeline
+  ; adc #0
+  ; sta scrptr+1
 
+@:
+  lda progress_data,y
+  sta scrptr:screen_timeline
+  dex
+  bmi endUpdate
+  iny
+  cpy #4
+  bne @-
+  ldy #0
+
+  inc scrptr
+  bcs @-
+  ; inc scrPtr+1
+  ; bcc @-
+
+endUpdate:
   ldx regX:#00
 
+  lda v
+  sta oldv
+
+  jmp dontUpdate
+
+oldv  dta 0
+
+dontUpdate:
   .endl
