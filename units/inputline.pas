@@ -26,11 +26,13 @@ uses keys;
 
 const
   OUTSTR_ADDR = $55A;
+  SNULL_ADDR  = $5AB;
 
 var
   _tm:Byte absolute $14;
   ctm:Byte absolute $12;
   outstr:string[80] absolute OUTSTR_ADDR;
+  SNull:string[80] absolute SNULL_ADDR;
 
 procedure show_inputLine; assembler;
 asm
@@ -107,13 +109,7 @@ end;
 
 procedure init_inputLine;
 begin
-  // BUG Temporarily fixed
-  asm
-    lda MAIN.FILESTR.ADR.OUTSTR
-    sta ilpos
-  end;
-  // BUG Reported bug on MP GitHub Repo #110
-  // ilpos:=length(outstr);
+  ilpos:=length(outstr);
   fillchar(outstr[ilpos+1],80-ilpos,$9b);
   keyb:=255;
   show_inputLine; ctm:=_tm;
@@ -126,24 +122,13 @@ begin
   if (keyb=k_ESC) or (keyb=k_RETURN) then
   begin
     if (keyb=k_ESC) or (ilpos=0) then
-    // BUG Temporarily fixe
-    asm
-      lda FILESTR.SNULL
-      sta @move.src
-      lda FILESTR.SNULL+1
-      sta @move.src+1
-      @moveSTRING MAIN.FILESTR.OUTSTR #81
+    begin
+      outStr:=Snull;
+      keyb:=$ff;
     end;
-    asm
-      lda MAIN.FILESTR.ADR.OUTSTR
-      sta ilpos
-    end;
-    // BUG Reported bug on MP GitHub Repo #110
-    // outStr:=Snull;
-    // ilpos:=byte(outstr[0]);
+    ilpos:=byte(outstr[0]);
     stateInputLine:=ils_done*byte(keyb=K_RETURN);
     show_inputLine;
-    // drawListSelection;
     resultInputLine:=(keyb=K_RETURN) and (ilpos>0);
     exit;
   end;
@@ -161,6 +146,7 @@ begin
       outstr[ilpos]:=char(ilch);
     end;
   end;
+  keyb:=$ff;
   show_inputLine;
 end;
 

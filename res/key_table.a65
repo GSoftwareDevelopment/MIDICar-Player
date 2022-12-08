@@ -13,7 +13,7 @@ key_table:
   dta a(none)                    ; 9 - NOT USED
   dta a(none)                    ; k_P     = 10
   dta a(none)                    ; k_U     = 11
-  dta a(none)                    ; k_RETURN= 12
+  dta a(MAIN.fileAction)         ; k_RETURN= 12
   dta a(none)                    ; k_I     = 13
   dta a(MAIN.moveFileSelection)  ; k_UP    = 14
   dta a(MAIN.moveFileSelection)  ; k_DOWN  = 15
@@ -29,7 +29,7 @@ key_table:
   dta a(none)                    ; 25 - NOT USED
   dta a(none)                    ; k_3     = 26
   dta a(none)                    ; k_6     = 27
-  dta a(none)                    ; k_ESC   = 28
+  dta a(MAIN.exit2DOS)           ; k_ESC   = 28
   dta a(none)                    ; k_5     = 29
   dta a(none)                    ; k_2     = 30
   dta a(none)                    ; k_1     = 31

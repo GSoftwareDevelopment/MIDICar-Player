@@ -18,6 +18,9 @@ var
   end;
 
 begin
+  statusStopped;
+  validPath;
+
   resetMemoryPtr;
   _bank:=last_bank; _adr:=last_adr;
 

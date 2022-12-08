@@ -52,10 +52,8 @@ var
 
 procedure drawListSelection; Forward;
 {$i myNMI.inc}
-{$i helpers.inc}
 {$i status.inc}
 {$i load.inc}
-// {$i inputline.inc}
 {$i list.inc}
 {$i getdirectory.inc}
 {$i keyboard.inc}
@@ -66,7 +64,7 @@ begin
   asm lda PORTB \ pha end;
   init;
 
-  validPath; // result in '_v' indi
+  validPath; // result in '_v' indicate what part of file spec is available
   _adr:=$ffff;
   if (_v and dp_name=0) then
     _bank:=fl_device
@@ -114,7 +112,7 @@ begin
         putHex(cntBCD,6);
       end;
 
-      asm  icl 'asms/uvmeters.a65' end;
+      asm  icl 'asms/uvmeters_h.a65' end;
 
       if stateInputLine=ils_inprogress then
         if _tm-ctm>10 then
@@ -128,39 +126,32 @@ begin
     if (keyb<>255) or (hlpflg<>0) then
     begin
       if screenStatus and ss_isHelp<>0 then toggleHelpScreen;
-      if stateInputLine=ils_inprogress then
-        do_inputLine
-      else
-      begin
-        if keyb=k_ESC then break;
+      if stateInputLine=ils_inprogress then do_inputLine;
 
-        asm
-          lda MAIN.KEYS.hlpflg
-          seq:sta MAIN.KEYS.keyb
+      asm
+        lda MAIN.KEYS.hlpflg
+        seq:sta MAIN.KEYS.keyb
 
-          lda MAIN.KEYS.keyb
-          tay
-          and #%11000000
-          sta MAIN.KEYS.keymod
-          tya
-          and #%00111111
-          sta MAIN.KEYS.keyb
+        lda MAIN.KEYS.keyb
+        tay
+        and #%11000000
+        sta MAIN.KEYS.keymod
+        tya
+        and #%00111111
+        sta MAIN.KEYS.keyb
 
-          asl @
-          tay
+        asl @
+        tay
 
-          lda KEY_TABLE_ADDR+1,y
-          beq key_not_defined
-          sta jump_addr+1
-          lda KEY_TABLE_ADDR,y
-          sta jump_addr
+        lda KEY_TABLE_ADDR+1,y
+        beq key_not_defined
+        sta jump_addr+1
+        lda KEY_TABLE_ADDR,y
+        sta jump_addr
 
-          jsr jump_addr:$ffff
-        key_not_defined:
-        end;
+        jsr jump_addr:$ffff
+      key_not_defined:
       end;
-
-      if keyb=k_RETURN then fileAction;
 
       keyb:=255;
       hlpflg:=0;
@@ -169,8 +160,4 @@ begin
   until false;
 
 // End player loop
-  unsetNMI;
-
-  exit2DOS;
-  asm pla \ sta PORTB end;
 end.

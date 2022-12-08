@@ -1,3 +1,18 @@
+procedure clearList;
+begin
+  resetMemoryPtr;
+  fileList:=pointer(LIST_ADDR);
+  lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
+  chn:=0;
+  while (chn<LIST_VISIBLE_ITEMS) do
+  begin
+    scradr:=listScrAdr[chn];
+    putSpaces(32);
+    inc(chn);
+  end;
+  fillchar(fileList,$1000{$2700},$9B);
+end;
+
 procedure drawListSelection;
 begin
   scradr:=listScrAdr[lstY]; invers(32);
@@ -60,14 +75,6 @@ begin
   end;
 end;
 
-procedure validPath;
-begin
-  _v:=destructureFullPath(outstr,curDev,curPath,fn);
-  if (_v and dp_dev=0) then curDev:='D:';
-  if (_v and dp_path=0) then getCurrentPath(2,curDev,curPath);
-  PathDelimiter(curPath,'>');
-end;
-
 procedure choiceListFile;
 begin
   if stateInputline<>ils_pending then exit;
@@ -85,24 +92,13 @@ begin
     begin
       joinStrings(curPath,Snull);
       PathDelimiter(outStr,'>');
-      // BUG Temporarily fixed
-      asm
-        lda FILESTR.OUTSTR
-        sta @move.src
-        lda FILESTR.OUTSTR+1
-        sta @move.src+1
-        @moveSTRING FILESTR.CURPATH #65
-      end;
-      // BUG Reported bug on MP GitHub Repo #110
-      // curPath:=outStr;
+      curPath:=outStr;
       resultInputLine:=True;
     end;
     joinStrings(curDev,curPath);
     if p_bank=fl_midifile then
     begin
-      statusStopped;
       joinStrings(outStr,Snull);
-      validPath;
       IOResult:=loadSong;
     end;
     stateInputLine:=ils_done;

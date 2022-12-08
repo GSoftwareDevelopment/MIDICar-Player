@@ -19,6 +19,7 @@ begin
 
   statusStopped;
   statusReadDirectory;
+  validPath;
 
   clearList; _adr:=$ffff; _bank:=fl_device; addToList(outStr);
   if byte(curPath[0])>1 then
@@ -54,5 +55,6 @@ begin
   result:=IOResult;
   cls(CIO_CHN);
   thi:=255;
+  screenStatus:=screenStatus or ss_isRefresh;
 end;
 

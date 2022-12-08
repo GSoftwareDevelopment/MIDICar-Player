@@ -1,3 +1,18 @@
+procedure resetMemoryPtr;
+begin
+  memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
+  last_bank:=totalXMS;
+  if totalXMS>0 then
+    last_adr:=$4000
+  else
+    last_adr:=$d800;
+end;
+
+procedure clearUVMeters; Assembler;
+asm
+  icl 'asms/uvmeters_clear_h.a65'
+end;
+
 procedure statusLoop;
 const
   sloop:Array[0..3] of string[2] = ( {?}
@@ -77,25 +92,51 @@ end;
 //   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading playlist'*~+#$ce);
 // end;
 
-procedure clearStatus;
+procedure updateMem;
 var
-  l:byte;
+  memAKB:Word;  {?}
+
+begin
+  scradr:=SCREEN_FOOT; HLine;
+  scradr:=SCREEN_FOOT; putINTText(VERSION);
+  memAKB:=memAvailable div 1024;
+  scradr:=SCREEN_FOOT+33;
+  if memAKB<10000 then scradr:=SCREEN_FOOT+34;
+  if memAKB<1000 then scradr:=SCREEN_FOOT+35;
+  if memAKB<100 then scradr:=SCREEN_FOOT+36;
+  if memAKB<10 then scradr:=SCREEN_FOOT+37;
+  {putINTText(#$4a);} putInt(memAKB); putINTText('KB'~);
+end;
+
+procedure clearStatus;
+// var
+//   l:byte;
 
 begin
   fillchar(pointer(SCREEN_TIME),100,0);
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
   statusLoop;
   updateMem;
-  // BUG Temporarily fixed
   asm
     lda main.filestr.adr.fn
+    beq @exit
+    cmp #16
+    bmi skipTrim
+    beq skipTrim
+
+    lda #16
+    sta main.filestr.adr.fn
+  skipTrim:
+
     sta l
+    lda #<(SCREEN_STATUS+40)
+    sub l:#00
+    sta screen.scradr
+    lda #>(SCREEN_STATUS+40)
+    sbc #0
+    sta screen.scradr+1
   end;
-  // BUG Reported bug on MP GitHub Repo #110
-  // l:=length(FILESTR.fn);
-  if l=0 then exit;
-  if l>16 then fn[0]:=#16;
-  scradr:=SCREEN_STATUS+40-l; putASCText(fn);
+  putASCText(fn);
 end;
 
 procedure statusError(err:byte);

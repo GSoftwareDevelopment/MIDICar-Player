@@ -111,6 +111,23 @@ begin
   keyb:=255;
 end;
 
+procedure fileAction; Keep;
+begin
+  choiceListFile;
+  if stateInputLine<>ils_done then exit;
+
+  stateInputLine:=ils_pending;
+  if (p_bank=fl_device) or
+      (p_bank=fl_directory) or
+      (p_bank=fl_parentDir) then
+  begin
+
+    if resultInputLine then IOResult:=getDirectory;
+  end;
+  if IOResult and %11111100<>0 then statusError(IOResult);
+  if p_bank=fl_midifile then statusPlaying;
+end;
+
 procedure playerControl; Keep;
 var
   playMode:Byte;
@@ -130,7 +147,9 @@ begin
         if (curPlay=lstTotal) then begin curPlay:=1; break; end;
       end;
       lstCurrent:=curPlay;
-      IOResult:=1; choiceListFile; stateInputLine:=0;
+      IOResult:=1;
+      choiceListFile;
+      stateInputLine:=0;
     until (p_bank=fl_midifile) and (IOResult and %11111100=0);
     clearStatus;
     if IOResult and %11111100<>0 then statusError(IOResult);
@@ -160,26 +179,4 @@ begin
   if keyb=k_INSERT then dec(tempoShift,20000);
   if keyb=k_DELETE then tempoShift:=0;
   setTempo;
-end;
-
-procedure fileAction; Keep;
-begin
-  choiceListFile;
-  if stateInputLine<>ils_done then exit;
-
-  stateInputLine:=ils_pending;
-  if (p_bank=fl_device) or
-      (p_bank=fl_directory) or
-      (p_bank=fl_parentDir) then
-  begin
-
-    if resultInputLine then
-    begin
-      validPath;
-      IOResult:=getDirectory;
-      screenStatus:=screenStatus or ss_isRefresh;
-    end;
-  end;
-  if IOResult and %11111100<>0 then statusError(IOResult);
-  if p_bank=fl_midifile then statusPlaying;
 end;
