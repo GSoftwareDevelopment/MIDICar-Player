@@ -1,7 +1,7 @@
 const
 {$i memory.inc}
 
-  VERSION= 'v1.5 alpha'~;
+  VERSION= 'v1.5.3'~;
 // base memory (under 64KB) available
   FREE_MEM = ($8000-$4000)+($ff00-$d800);
 
@@ -22,7 +22,7 @@ const
 
 //
   LIST_VISIBLE_CHARS = 30;
-  LIST_VISIBLE_ITEMS = 16;
+  LIST_VISIBLE_ITEMS = 11;
 
 // file list flags
   fl_device    = $ff;
@@ -34,10 +34,6 @@ const
 
 // colors sets
   COLORS_ADDR = $4E0;
-  // colors:Array[0..1,0..4] of byte = (
-  //   ($A8,$00,$0A,$08,$0A),
-  //   ($A8,$0A,$00,$02,$00)
-  // );
 
 // MIDI Reset SysEx Message Address
   GM_RESET_ADDR = $2700;
