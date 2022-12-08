@@ -24,7 +24,7 @@ getbyte_loop:
     sta destAddr:$ffff,Y
 
     iny
-    cmp dataLength:#10
+    cpy dataLength:#10
     bne getbyte_loop
 
 ; Y-reg returns the number of readed bytes
