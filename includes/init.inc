@@ -9,6 +9,8 @@ begin
   clearWorkArea;
   clearStatus;
   clearUVMeters;
+  scradr:=SCREEN_CHANNELS; HLine;
+  scradr:=SCREEN_CHANNELS+15; putINTText(#$4e+'Channels'~*+#$ce);
   scradr:=SCREEN_TIME-40; HLine;
   scradr:=SCREEN_TIME-39; putINTText(#$4e+'Status'~*+#$ce);
   scradr:=SCREEN_TIME-10; putINTText(#$4e+'Counter'~*+#$ce);
@@ -18,7 +20,7 @@ begin
   // for chn:=0 to 15 do
   // begin
   //   // channelScrAdr[chn]:=SCREEN_WORK+42+chn*40;
-    // listScrAdr[chn]:=SCREEN_WORK+48+chn*40;
+  //   listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
   // end;
 
   clearList;
@@ -35,4 +37,18 @@ begin
   // stateInputLine:=0;
   // resultInputLine:=false;
 
+end;
+
+procedure exit2DOS; keep;
+begin
+  unsetNMI;
+  doneMIDI;
+  Cls(0); Opn(0,12,0,'E:'); // SOUNDR:=1;
+  asm
+    :2 pla
+
+    pla
+    sta PORTB
+    jmp main.@halt
+  end;
 end;
