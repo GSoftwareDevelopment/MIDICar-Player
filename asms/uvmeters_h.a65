@@ -1,0 +1,52 @@
+; hlpptr = $D6
+  .local
+
+  lda screenStatus
+  and #ss_view
+  bne dontUpdateUVMeter
+
+updateUVMeter:
+  stx regx // txa:pha
+
+  ldx #0
+uvmeterLoop:
+  lda MIDFILES.adr.CHNVOLUME,x
+  bmi dontUpdate
+  tay
+  bne deceaseValue
+
+  lda #255
+  sta MIDFILES.adr.CHNVOLUME,x
+  ldy #0
+  beq drawVolume
+
+deceaseValue:
+  sub #8
+  bpl storeVol
+  lda #0
+storeVol:
+  sta MIDFILES.adr.CHNVOLUME,x
+
+  tya
+  lsr @
+  and #%00111100
+  tay
+
+drawVolume
+  lda UVMETER_ADDR+3,y
+  sta SCREEN_CHANNELS+42,x
+  lda UVMETER_ADDR+2,y
+  sta SCREEN_CHANNELS+62,x
+  lda UVMETER_ADDR+1,y
+  sta SCREEN_CHANNELS+82,x
+  lda UVMETER_ADDR+0,y
+  sta SCREEN_CHANNELS+102,x
+
+dontUpdate:
+  inx
+  cpx #16
+  bne uvmeterLoop
+
+  ldx regx:#00 // pla:tax
+dontUpdateUVMeter
+  .endl

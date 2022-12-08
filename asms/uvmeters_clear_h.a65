@@ -1,0 +1,18 @@
+clearUVMeter:
+  txa:pha
+
+  ldx #0
+clearLoop:
+  lda #$4b
+VClr:
+  sta SCREEN_CHANNELS+42,x
+  sta SCREEN_CHANNELS+62,x
+  sta SCREEN_CHANNELS+82,x
+  sta SCREEN_CHANNELS+102,x
+
+dontClear:
+  inx
+  cpx #16
+  bne clearLoop
+
+  pla:tax
