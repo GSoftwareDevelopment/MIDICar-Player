@@ -3,7 +3,7 @@ begin
   gotoNEntry(lstCurrent);
   getEntry(outStr);
   getEntrySets(p_bank);
-  if (p_bank<>fl_device) and (p_bank and $7f<>0) then
+  if (p_bank and $7f=(fl_midifile and $7f)) then
   begin
     drawListSelection;
     p_bank:=p_bank xor $80;
@@ -113,15 +113,15 @@ end;
 
 procedure fileAction; Keep;
 begin
+  lstCurrent:=lstShift+lstY;
   if stateInputLine=ils_pending then choiceListFile;
   if stateInputLine<>ils_done then exit;
 
   stateInputLine:=ils_pending;
   if (p_bank=fl_device) or
-      (p_bank=fl_directory) or
-      (p_bank=fl_parentDir) then
+     (p_bank=fl_directory) or
+     (p_bank=fl_parentDir) then
   begin
-
     if resultInputLine then IOResult:=getDirectory;
   end;
   if IOResult and %11111100<>0 then statusError(IOResult);
@@ -129,23 +129,29 @@ begin
 end;
 
 procedure playerControl; Keep;
-var
-  playMode:Byte;
 begin
   if (keyb=k_Z) or (keyb=k_B) then // previous & next song
   begin
-    playMode:=playerStatus and ps_loop;
-    statusStopped;
     stateInputLine:=stateInputLine xor 4;
+    lstCurrent:=curPlay;
     repeat
       if keyb=k_B then v:=1 else v:=-1;
-      if (playMode=ps_shuffle) then
-        curPlay:=random(lstTotal)
-      else
-      begin
+      asm
+        lda playerStatus
+        and ps_loop
+        cmp #ps_shuffle
+        bne sequenceLoop
+      end;
+        curPlay:=random(lstTotal);
+      asm
+        jmp endChoice
+      sequenceLoop:
+      end;
         inc(lstCurrent,v);
         if (lstCurrent<0) then lstCurrent:=lstTotal;
         if (lstCurrent>lstTotal) then lstCurrent:=0;
+      asm
+      endChoice:
       end;
       choiceListFile;
     until (p_bank=fl_midifile) and (IOResult and %11111100=0);
