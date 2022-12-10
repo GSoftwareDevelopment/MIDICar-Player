@@ -61,8 +61,8 @@ end;
 procedure statusStopped;
 begin
   fillchar(pointer(SCREEN_TIMELINE),40,0);
-  if totalTracks=0 then exit;
-  if (playerStatus and ps_isStopped)<>0 then exit;
+  if (totalTracks=0) or
+     ((playerStatus and ps_isStopped)<>0) then exit;
   playerStatus:=playerStatus or ps_isStopped;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$3d);
   scradr:=SCREEN_STATUS; PutINTText(#$4e+'Stopped'*~+#$ce);
