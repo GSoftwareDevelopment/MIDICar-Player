@@ -17,7 +17,7 @@ fifo@put .macro
 
 // If it is full, flush it and wait until buffer is not empty
   pha
-  jsr FlushAll
+  jsr Flush.All
   pla
 
 storeInFIFO:

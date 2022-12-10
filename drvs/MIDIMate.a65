@@ -28,7 +28,7 @@ init:
 ;--------------------------------------------------
 ; Start serial port service
 
-Start:
+  .local Start
   lda OVSEROUT
   ora OVSEROUT+1
   bne exitStart
@@ -96,10 +96,12 @@ Start:
 exitStart:
   RTS
 
+  .endl
+
 ;--------------------------------------------------
 ;
 
-Send:
+  .local Send
 
   fifo@put
 
@@ -127,14 +129,16 @@ StartSend:
 exitSend:
   rts
 
+  .endl
+
 ;--------------------------------------------------
 ; Flush buffer
 ; C = 0 - start send if buffer is not empty and serial is free
 ; C = 1 -
-Flush:
-  bcs startSend
+  .local Flush
+  bcs Send.startSend
 
-FlushAll:
+All:
 
 flush_loop:
   lda XMTDON
@@ -142,16 +146,19 @@ flush_loop:
 
   rts
 
+  .endl
+
 ;--------------------------------------------------
 ; Stop serial port service
 
-Stop:
+  .local Stop
+
   lda OVSEROUT
   ora OVSEROUT
   beq exitUnInit
 
   bcc noFlush
-  jsr FlushAll
+  jsr Flush.All
 
 noFlush:
 
@@ -189,6 +196,8 @@ noFlush:
 
 exitUnInit:
   RTS
+
+  .endl
 
 ;--------------------------------------------------
 ;Output MIDI Data by Serial Bus - Interrupt

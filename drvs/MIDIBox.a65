@@ -29,7 +29,7 @@ init:
 ;--------------------------------------------------
 ; Start serial port service
 
-start:
+  .local start
   lda OVSEROUT
   ora OVSEROUT+1
   bne exitStart
@@ -107,11 +107,12 @@ start:
 
 exitStart:
     RTS
+  .endl
 
 ;--------------------------------------------------
 ;
 
-Send:
+  .local Send
 
   fifo@put
 
@@ -140,31 +141,36 @@ startSend:
 exitSend:
   rts
 
+  .endl
+
 ;--------------------------------------------------
 ; Flush buffer
 ; C = 0 - start send if buffer is not empty and serial is free
 ; C = 1 -
-Flush:
-  bcs startSend
+  .local Flush
 
-FlushAll:
+  bcs Send.startSend
+
+All:
 
 flush_loop:
   lda XMTDON
   beq flush_loop
 
   rts
+  .endl
 
 ;--------------------------------------------------
 ; Stop serial port service
 
-Stop:
+  .local Stop
+
   lda OVSEROUT
   ora OVSEROUT
   beq exitUnInit
 
   bcc noFlush
-  jsr FlushAll
+  jsr Flush.All
 
 noFlush:
 ;restore old vector
@@ -199,6 +205,8 @@ set_AUDC:
   sta fifo_tail
 exitUnInit:
   RTS
+
+  .endl
 
 ;--------------------------------------------------
 ;Output MIDI Data by Serial Bus - Interrupt
