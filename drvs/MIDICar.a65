@@ -1,0 +1,228 @@
+    org $2000
+
+drvjtab:
+
+  jmp serial_drv.init
+  jmp serial_drv.start
+  jmp serial_drv.send
+  jmp serial_drv.flush
+  jmp serial_drv.stop
+
+
+    .local serial_drv
+
+  icl './atari.hea'
+  icl './fifo.hea'
+  icl './mc6850.hea'
+
+;--------------------------------------------------
+; Initialize
+
+DESC	dta c'MIDICar Driver 1.0 by GSD',$9B
+
+init:
+  lda #<DESC
+  ldy #>DESC
+  jsr PRINT
+
+  jsr detect_MC
+  bcs MCNotFound
+
+MCFound:
+  sty MCBASE
+  stx MCBASE+1
+
+  lda #<MCBASEADDR
+  sta A2HEX.msgptr
+  lda #>MCBASEADDR
+  sta A2HEX.msgptr+1
+
+  lda MCBASE+1
+  jsr A2HEX
+  lda MCBASE
+  jsr A2HEX
+
+  lda #<MIDICAR_EXIST
+  ldy #>MIDICAR_EXIST
+  jsr PRINT
+
+  jmp setMCPort
+
+MCNotFound:
+  lda #100
+  sta MCBASE
+  lda #0
+  sta MCBASE+1
+  lda #$02
+  sta 100
+  lda #<MIDICAR_NOT_FOUND
+  ldy #>MIDICAR_NOT_FOUND
+  jsr PRINT
+
+setMCPort:
+  ldy MCBASE
+  ldx MCBASE+1
+
+  sty MCReset.MCBaseState
+  stx MCReset.MCBaseState+1
+  sty Send.MCBaseState
+  stx Send.MCBaseState+1
+  sty Flush.MCBaseState
+  stx Flush.MCBaseState+1
+
+  iny
+
+  sty Send.MCBaseBuf
+  stx Send.MCBaseBuf+1
+  sty Flush.MCBaseBuf
+  stx Flush.MCBaseBuf+1
+
+  rts
+
+;--------------------------------------------------
+; MC6850 Reset
+  .local MCReset
+;  MC6850_Init(MasterReset);
+    sta MCBaseState:$D500
+
+    rts
+  .endl
+
+;--------------------------------------------------
+; Start serial port service
+
+  .local Start
+    bit isMCInit
+    bne exitStart
+
+    lda #1
+    sta isMCInit
+
+    lda #MC6850.MasterReset
+    jsr MCReset
+
+;  MC6850_Init(CD_64+WS_OddParity+WS_8bits+WS_2BitStop{+IRQ_Receive});
+    lda #(MC6850.CD_64+MC6850.WS_OddParity+MC6850.WS_8bits+MC6850.WS_2BitStop)
+    jsr MCReset
+
+; Reset FIFO
+    lda #0
+    sta fifo_head
+    sta fifo_tail
+
+exitStart:
+    RTS
+  .endl
+
+;--------------------------------------------------
+;
+
+  .local Send
+
+    fifo@put
+
+StartSend:
+    ldy fifo_tail
+    cpy fifo_head
+    beq exitSend
+
+; check MC buffer is clear
+    lda MCBaseState:$d500 // MC6850.MC6850_CNTRREG
+    and #MC6850.TDRE
+    beq exitSend
+
+; start transmission by send byte to serial out
+    LDA FIFO_BUF,Y
+    STA MCBaseBuf:$d500
+    inc fifo_tail
+
+exitSend:
+    rts
+
+  .endl
+
+;--------------------------------------------------
+; Flush buffer
+; C = 0 - start send if buffer is not empty and serial is free
+; C = 1 -
+  .local Flush
+    bcs Send.startSend
+
+All:
+
+    sei
+
+    ldy FIFO_Tail
+flushLoop:
+    cpy FIFO_Head
+    beq endFlush
+
+waitOnMC:
+    lda MCBaseState:$d500 // MC6850.MC6850_CNTRReg
+    and #MC6850.TDRE
+    beq waitOnMc
+
+    lda FIFO_BUF,y
+    sta MCBaseBuf:$d500   // MC6850.MC6850_BUFFER
+
+    iny
+    jmp flushLoop
+
+endFlush:
+    sty FIFO_Tail
+
+    cli
+
+    rts
+  .endl
+
+;--------------------------------------------------
+; Stop serial port service
+
+  .local Stop
+    bit isMCInit
+    beq exitUnInit
+
+    bcc noFlush
+    jsr Flush.All
+
+noFlush:
+
+    lda #0
+    sta isMCInit
+
+    lda #MC6850.MasterReset
+    jsr MCReset
+
+; Reset FIFO
+    LDA #$00
+    sta fifo_head
+    sta fifo_tail
+
+exitUnInit:
+    RTS
+  .endl
+
+;--------------------------------------------------
+;
+
+  icl './print.a65'
+  icl './detect_mc.a65'
+  icl '../loader/asm/A2hex.a65'
+
+;--------------------------------------------------
+; driver variables
+
+; old serial out vector
+isMCInit    dta b(0)
+MCBASE      dta a(0)
+MIDICAR_EXIST:
+            dta c'MIDICar detected at $'
+MCBASEADDR:
+            dta c'0000',$9B
+MIDICAR_NOT_FOUND:
+            dta c'Can''t detect MIDICar :(',$9B
+
+    .endl
+
+  ; ini serial_drv.init

@@ -1,4 +1,4 @@
-
+    .local detect_MC
 MC_SETUP = $16
 MC_RESET = $03
 
@@ -6,7 +6,6 @@ MC_RESET = $03
 ; C - MC found
 ; A,Y - base of MC
 
-detect_MC:
     ldx #$d5
 
 MCBegin:
@@ -77,3 +76,5 @@ notfound:
     ldy #0
     sec
     rts
+
+    .endl
