@@ -25,7 +25,7 @@ JSYSVB = $E45F
   ldx thi
   bmi skipTHI
   lda thumblr,x
-  sta SCREEN_STATUS
+  sta SCREEN_STATUS+1
   dex
   spl:ldx #3
   stx thi
@@ -38,7 +38,7 @@ skipTHI:
   // jmp JSYSVB
 
 thumblr:
-    .byte $29,$1c,$1d,$1e
+    .byte $a9,$9c,$9d,$9e
 end;
 
 procedure setNMI;

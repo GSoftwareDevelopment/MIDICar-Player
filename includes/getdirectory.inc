@@ -18,7 +18,7 @@ begin
   scradr:=SCREEN_WORK+28; putINTText(#$4e+'Directory'~*+#$ce);
 
   statusStopped;
-  statusReadDirectory;
+  putStatus(statusMsgs[6]);
   validPath;
 
   clearList; _adr:=$ffff; _bank:=fl_device; addToList(outStr);

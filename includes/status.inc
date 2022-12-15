@@ -1,3 +1,10 @@
+{$i statuses.inc}
+
+procedure putStatus(msg:PString); Register;
+begin
+  scradr:=SCREEN_STATUS; PutINTText(msg);
+end;
+
 procedure resetMemoryPtr;
 begin
   memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
@@ -34,7 +41,7 @@ begin
   if totalTracks>0 then
   begin
     putINTText(#$3b+#0+#$fc+#0+#$fd);
-    scradr:=SCREEN_STATUS; PutINTText(#$4e+'Playing'*~+#$ce);
+    putStatus(statusMsgs[0]);
     if (playerStatus and ps_isStopped)<>0 then
     begin
       initMIDI;
@@ -46,7 +53,7 @@ begin
   else
   begin
     putINTText(#$fb+#0+#$fc+#0+#$fd);
-    scradr:=SCREEN_STATUS; PutINTText(#$4e+'No song'*~+#$ce);
+    putStatus(statusMsgs[1]);
   end;
 end;
 
@@ -54,7 +61,7 @@ procedure statusPause;
 begin
   if (playerStatus and ps_isStopped)<>0 then exit;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$3c+#0+#$fd);
-  scradr:=SCREEN_STATUS; PutINTText(#$4e+' Pause '*~+#$ce);
+  putStatus(statusMsgs[2]);
   _timerStatus:=_timerStatus or f_counter;
 end;
 
@@ -65,53 +72,30 @@ begin
      ((playerStatus and ps_isStopped)<>0) then exit;
   playerStatus:=playerStatus or ps_isStopped;
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$3d);
-  scradr:=SCREEN_STATUS; PutINTText(#$4e+'Stopped'*~+#$ce);
+  putStatus(statusMsgs[3]);
   doneMIDI;
   move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
   chn:=0;
   clearUVMeters;
 end;
 
-procedure statusLoading;
-begin
-  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Loading '*~);
-end;
-
-procedure statusCalcLength;
-begin
-  scradr:=SCREEN_STATUS; PutINTText(#$4e+'Calculating length'*~+#$ce);
-end;
-
-procedure statusReadDirectory;
-begin
-  scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading directory'*~+#$ce);
-end;
-
-// procedure statusReadPlaylist;
-// begin
-//   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading playlist'*~+#$ce);
-// end;
-
 procedure updateMem;
 var
   memAKB:Word;  {?}
 
 begin
+  memAKB:=memAvailable div 1024;
   scradr:=SCREEN_FOOT; HLine;
   scradr:=SCREEN_FOOT; putINTText(VERSION);
-  memAKB:=memAvailable div 1024;
   scradr:=SCREEN_FOOT+33;
   if memAKB<10000 then scradr:=SCREEN_FOOT+34;
   if memAKB<1000 then scradr:=SCREEN_FOOT+35;
   if memAKB<100 then scradr:=SCREEN_FOOT+36;
   if memAKB<10 then scradr:=SCREEN_FOOT+37;
-  {putINTText(#$4a);} putInt(memAKB); putINTText('KB'~);
+  putInt(memAKB); putINTText('KB'~);
 end;
 
 procedure clearStatus;
-// var
-//   l:byte;
-
 begin
   fillchar(pointer(SCREEN_TIME),100,0);
   scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
@@ -144,13 +128,14 @@ begin
   keyb:=255;
   scradr:=SCREEN_STATUS+1;
   case err of
-    ERR_UNSUPPORTED_FORMAT: PutINTText(#$4e+'Unsupported format'~*+#$ce);
-    ERR_NOT_ENOUGHT_MEMORY: PutINTText(#$4e+'Not enought memory'~*+#$ce);
-    ERR_NOT_A_MIDI_FILE:    PutINTText(#$4e+'Not a MIDI file'~*+#$ce);
-    ERR_FULL_LIST:          PutINTText(#$4e+'List is full'~*+#$ce);
+    ERR_UNSUPPORTED_FORMAT: putStatus(errorMsgs[1]);
+    ERR_NOT_ENOUGHT_MEMORY: putStatus(errorMsgs[2]);
+    ERR_NOT_A_MIDI_FILE:    putStatus(errorMsgs[3]);
+    ERR_FULL_LIST:          putStatus(errorMsgs[4]);
   else
     puttextinvert:=128;
-    PutINTText(#$4e+'I/O Error #'*~); putInt(err); poke(scradr,$ce);
+    putStatus(errorMsgs[0]);
+    putInt(err); poke(scradr,$ce);
     puttextinvert:=0;
   end;
   while keyb=255 do ;

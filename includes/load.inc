@@ -7,7 +7,7 @@ var
     if v>0 then
     begin
       puttextinvert:=128;
-      scradr:=SCREEN_STATUS+10;
+      scradr:=SCREEN_STATUS+11;
       putInt(v-1); poke(scradr,$8f); inc(scradr);
       putInt(totalTracks);
       poke(scradr,$ce);
@@ -25,7 +25,7 @@ begin
   _bank:=last_bank; _adr:=last_adr;
 
   clearStatus;
-  statusLoading;
+  putStatus(statusMsgs[4]);
   loadProcess:=@loadPrc; thi:=0;
   result:=LoadMid;
   thi:=255;
@@ -38,7 +38,7 @@ begin
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
     if (playerStatus and ps_calcLen)<>0 then
     begin
-      statusCalcLength;
+      putStatus(statusMsgs[5]);
       determineSongLength;
       _songTicks:=_songTicks div 160;
     end;

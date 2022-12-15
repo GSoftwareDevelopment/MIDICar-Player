@@ -1,3 +1,8 @@
+// procedure statusReadPlaylist;
+// begin
+//   scradr:=SCREEN_STATUS+1; PutINTText(#$4e+'Reading playlist'*~+#$ce);
+// end;
+
 function loadPlaylist(PLSFilename:PString):Byte;
 const
   CIO_CHN = 1;
