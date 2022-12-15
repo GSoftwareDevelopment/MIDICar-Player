@@ -21,15 +21,15 @@ The master counter cannot operate directly at a frequency below ~251Hz,
 so it is multiplied by the value of the sub-counter divisor.
 This yields apparently lower frequencies for the main counter.
 }
-  ratio:=250.9803/freq; // 250.9803 Smallest possible _frequency_ for TIMER1 with 8-bit resolution
+  ratio:=250.6706/freq; // 250.6706 Smallest possible _frequency_ for TIMER1 with 8-bit resolution
   _ratio:=1+trunc(ratio);
-  if _ratio>15 then ratio:=15;
+  if _ratio>15 then _ratio:=15;
 
   // store timer ratio in status
   _timerStatus:=(_timerStatus and f_flags) or _ratio;
   _subCnt:=1;
   // calc frequency divider for timer
-  fdiv:=round(64000/(freq*_ratio));
+  fdiv:=round(63921/(freq*_ratio));
 
 {$IFDEF USE_SUPPORT_VARS}
   // calc tempo (Beats Per Minutes)
