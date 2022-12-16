@@ -80,7 +80,6 @@ begin
     begin
       inc(trackCount);
 
-      // trkData^.status:=0;
       trkData^.trackTime:=0;
       trkData^.bank:=_bank;
       trkData^.ptr:=pointer(_adr);

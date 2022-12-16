@@ -10,7 +10,6 @@ type
 
   PMIDTrack = ^TMIDTrack;
   TMIDTrack = record
-    // status:byte;
     bank:Byte;
     ptr:Pointer;
     trackTime:TDeltaVar;

@@ -25,7 +25,6 @@ skipVolumeUpdate:
   .endm
 
   .macro event@send2bytes
-    ; jsr eventMidi2
     jsr $2006
     m@read "sta event \ jsr $2006" ""
 
@@ -34,7 +33,6 @@ skipVolumeUpdate:
   .endm
 
   .macro event@send3bytes
-    ; jsr eventMidi3
     jsr $2006
     m@read "jsr $2006" ""
     m@read "sta event \ jsr $2006" ""
@@ -44,7 +42,6 @@ skipVolumeUpdate:
   .endm
 
   .macro event@sendMulti
-    ; jsr eventSysEx
     jsr $2006
     jsr MAIN.MIDFILES.READVARL
 

@@ -29,16 +29,8 @@ begin
     lda (curTrackPtr),y
     spl:rts
 
-    // ldy #0
-    // lda (curTrackPtr),y
-    // and #f_stop
-    // beq checkTicks
-    // rts
-    // bne skipProcessTrack
-
 checkTicks:
 // temporary remove f_skipDelta flag
-    // lda (curTrackPtr),y
     and #%00111111
     sta tmp
 
@@ -72,7 +64,6 @@ checkTicks:
   L5:
     jpl doProcessTrack
     rts
-    // jmi skipProcessTrack
 
 doProcessTrack:
   // copy current track data to work registers
@@ -101,19 +92,6 @@ doProcessTrack:
     iny                   //  2
     lda (curTrackPtr),y   //  5*
     sta _trkRegs+7        //  3
-    // iny                   //  2
-    // lda (curTrackPtr),y   //  5*
-    // sta _trkRegs+8        //  3
-
-                          //  10*8=80
-
-  //   ldy #sizeOf_TMIDTrack-1  // 2
-  // loop:
-  //   lda (curTrackPtr),y   // 5*
-  //   sta _trkRegs,y        // 5
-  //   dey                   // 2
-  //   bpl loop              // 3*
-  //                         // 2 + 8 * 15 = 129
   end;
 
   ProcessTrack;
@@ -145,19 +123,7 @@ doProcessTrack:
   iny                       // 2
   lda _trkRegs+7            // 3
   sta (curTrackPtr),y       // 6
-  // iny                       // 2
-  // lda _trkRegs+8            // 3
-  // sta (curTrackPtr),y       // 6
-                            // 8 * 11 = 88
-  //   ldy #sizeOf_TMIDTrack-1
-  // loop2:
-  //   lda _trkRegs,y        // 4*
-  //   sta (curTrackPtr),y   // 6
-  //   dey                   // 2
-  //   bpl loop2             // 3*
-                             // = 2 + 15 * 9 = 137
 
-  // skipProcessTrack:
   end;
 
 end;
