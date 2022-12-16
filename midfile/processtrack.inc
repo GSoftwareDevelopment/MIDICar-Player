@@ -35,15 +35,15 @@ event = $FF ; yes, this is the same address as `FIFO_Byte` and `MC_Byte` :)
 
   ldy _bank \ lda $100,y \ sta PORTB
 
-  jmp checkTrackProcess
+  // jmp checkTrackProcess
 
 ; ------------------------
 ; begin track process loop
 
   loopTrackProcess:
 
-  lda _status
-  bmi skipDeltaTime
+  bit _trackTime+3
+  bvs skipDeltaTime
 
   jsr readVarL
   bcc continueTrackProcess
@@ -61,27 +61,30 @@ event = $FF ; yes, this is the same address as `FIFO_Byte` and `MC_Byte` :)
   adc _delta+3
   sta _trackTime+3
 
-  jmp endTrackProcess
+  lda _trackTime+3
+  ora #f_skipDelta
+  sta _trackTime+3
+
+  rts
+  // jmp endTrackProcess
 
 skipDeltaTime:
-  eor #f_skipDelta
-  sta _status
+  lda _trackTime+3
+  and #%00111111
+  sta _trackTime+3
 
 continueTrackProcess:
   icl 'midfile/asms/get_event_byte.a65'
   icl 'midfile/asms/events_cases.a65'
 
-checkTrackProcess:
-  bit _status
-  bvs endTrackProcess
+// checkTrackProcess:
+  // bit _delta+3
+  // bmi endTrackProcess
   jmp loopTrackProcess
 
 ; end track process loop
 ; ----------------------
 
 endTrackProcess:
-  lda _status
-  ora #f_skipDelta
-  sta _status
 
 end;

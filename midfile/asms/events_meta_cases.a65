@@ -11,7 +11,7 @@
 
     meta@endOfTrack
 
-    jmp case_endEvent
+    rts
 
 eMeta2:
 ; check meta event - set tempo
@@ -20,7 +20,7 @@ eMeta2:
 
     meta@setTempo
 
-    jmp case_endEvent
+    jmp loopTrackProcess
 
 eMeta3:
 .ifdef USE_SUPPORT_VARS
@@ -29,7 +29,7 @@ eMeta3:
 
     meta@timeSignature
 
-    jmp case_endEvent
+    jmp loopTrackProcess
 .endif
 
 eMeta4:

@@ -20,12 +20,12 @@ var
   _songTicks:TDeltaVar    absolute $e9; {e9, ea, eb, ec}
 
 // the order of the registers MUST be the same as in the TMIDTrack record!!!
-  _status:Byte            absolute _trkRegs;
-  _bank:Byte              absolute _trkRegs+1;
-  _ptr:^Byte              absolute _trkRegs+2;   {16-bits}
-  _adr:Word               absolute _trkRegs+2;   // must be the same address as _ptr!!
-  _trackTime:TDeltaVar    absolute _trkRegs+4;   {32-bits}
-  _eStatusRun:Byte        absolute _trkRegs+8;
+  // _status:Byte            absolute _trkRegs;
+  _bank:Byte              absolute _trkRegs;
+  _ptr:^Byte              absolute _trkRegs+1;   {16-bits}
+  _adr:Word               absolute _trkRegs+1;   // must be the same address as _ptr!!
+  _trackTime:TDeltaVar    absolute _trkRegs+3;   {32-bits}
+  _eStatusRun:Byte        absolute _trkRegs+7;
 
 //
   MIDData:Pointer         ;

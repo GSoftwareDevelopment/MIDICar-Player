@@ -1,28 +1,6 @@
 {
 
 }
-{
-procedure ProcessMIDI;
-begin
-  curTrackPtr:=@MIDTracks;
-  PlayingTracks:=totalTracks;
-  for cTrk:=1 to totalTracks do
-  begin
-    move(curTrackPtr,pointer(_trkRegs),sizeOf(TMIDTrack)); // copy current track data
-
-    if _status and f_stop=0 then
-    begin
-      if _totalTicks>=_trackTime then ProcessTrack;
-    end
-    else
-      Dec(PlayingTracks);
-
-    move(pointer(_trkRegs),curTrackPtr,sizeOf(TMIDTrack)); // store current track data
-    inc(curTrackPtr,sizeOf(TMIDTrack));
-  end;
-end;
-}
-
 procedure ProcessMIDI;
 begin
 {$IFDEF USE_FIFO}
@@ -47,15 +25,26 @@ begin
 
   asm
 // if _status and f_stop=0 then
-    ldy #0
+    ldy #6
     lda (curTrackPtr),y
-    and #f_stop
-    bne skipProcessTrack
+    spl:rts
+
+    // ldy #0
+    // lda (curTrackPtr),y
+    // and #f_stop
+    // beq checkTicks
+    // rts
+    // bne skipProcessTrack
+
+checkTicks:
+// temporary remove f_skipDelta flag
+    // lda (curTrackPtr),y
+    and #%00111111
+    sta tmp
 
 // if _totalTicks>=_trackTime then ProcessTrack;
-    ldy #7
     lda _totalTicks+3
-    sub (curTrackPtr),y
+    sub tmp:#0
     bne L4
     lda _totalTicks+2
     dey
@@ -81,30 +70,94 @@ begin
     eor #$ff
     ora #$01
   L5:
-    jmi skipProcessTrack
+    jpl doProcessTrack
+    rts
+    // jmi skipProcessTrack
 
+doProcessTrack:
   // copy current track data to work registers
-    ldy #sizeOf_TMIDTrack-1
-  loop:
-    lda (curTrackPtr),y
-    sta _trkRegs,y
-    dey
-    bpl loop
+    ldy #0
 
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+0        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+1        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+2        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+3        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+4        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+5        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+6        //  3
+    iny                   //  2
+    lda (curTrackPtr),y   //  5*
+    sta _trkRegs+7        //  3
+    // iny                   //  2
+    // lda (curTrackPtr),y   //  5*
+    // sta _trkRegs+8        //  3
+
+                          //  10*8=80
+
+  //   ldy #sizeOf_TMIDTrack-1  // 2
+  // loop:
+  //   lda (curTrackPtr),y   // 5*
+  //   sta _trkRegs,y        // 5
+  //   dey                   // 2
+  //   bpl loop              // 3*
+  //                         // 2 + 8 * 15 = 129
   end;
 
   ProcessTrack;
 
   asm
 // store work registers in track data
-    ldy #sizeOf_TMIDTrack-1
-  loop2:
-    lda _trkRegs,y
-    sta (curTrackPtr),y
-    dey
-    bpl loop2
+  ldy #0
 
-  skipProcessTrack:
+  lda _trkRegs+0            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+1            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+2            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+3            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+4            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+5            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+6            // 3
+  sta (curTrackPtr),y       // 6
+  iny                       // 2
+  lda _trkRegs+7            // 3
+  sta (curTrackPtr),y       // 6
+  // iny                       // 2
+  // lda _trkRegs+8            // 3
+  // sta (curTrackPtr),y       // 6
+                            // 8 * 11 = 88
+  //   ldy #sizeOf_TMIDTrack-1
+  // loop2:
+  //   lda _trkRegs,y        // 4*
+  //   sta (curTrackPtr),y   // 6
+  //   dey                   // 2
+  //   bpl loop2             // 3*
+                             // = 2 + 15 * 9 = 137
+
+  // skipProcessTrack:
   end;
 
 end;

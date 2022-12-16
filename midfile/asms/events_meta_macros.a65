@@ -1,8 +1,13 @@
   .macro meta@endOfTrack
     dec PlayingTracks
-    lda _status
-    ora #f_stop
-    sta _status
+    lda #$ff
+    sta _trackTime
+    sta _trackTime+1
+    sta _trackTime+2
+    sta _trackTime+3
+    ; lda _status
+    ; ora #f_stop
+    ; sta _status
   .endm
 
   .macro meta@setTempo
@@ -36,7 +41,7 @@ skipLoop:
     jsr memBoundCheck+5
 
 skipMemBoundCheck:
-    
+
 checkSkipLoop:
     lda _tmp
     bne skipLoop

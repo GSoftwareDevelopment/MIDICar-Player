@@ -8,8 +8,8 @@ const
   f_flags   = %11000000; // flags mask
   f_ratio   = %00001111; // timer divider mask
 
-  f_skipDelta = %10000000;
-  f_stop      = %01000000;
+  f_skipDelta = %01000000;
+  // f_stop      = %01000000;
 
   _trkRegs  = $e0;       // ZP registers for track processing
 

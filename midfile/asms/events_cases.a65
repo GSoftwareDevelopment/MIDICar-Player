@@ -12,7 +12,7 @@ case_ev2:
 
 ; send 2 bytes for events $C0..$DF
     event@send2bytes
-    jmp case_endEvent
+    jmp loopTrackProcess
 
 case_ev3:
     cmp #$F0            ; for events $E0..$EF
@@ -21,7 +21,7 @@ case_ev3:
 ; send 3 bytes for events $80..$BF & $E0..$EF
 _ev3:
     event@send3bytes
-    jmp case_endEvent
+    jmp loopTrackProcess
 
 ; case for SysEx event
 case_evSysEx:
@@ -30,13 +30,13 @@ case_evSysEx:
 
 ; send multiple bytes for events $F0..$F7
     event@sendMulti
-    jmp case_endEvent
+    jmp loopTrackProcess
 
 
 case_evMeta:
     cmp #$FF
     beq evMeta
-    jmp case_endEvent
+    jmp loopTrackProcess
 
 evMeta:
     icl 'midfile/asms/events_meta_cases.a65'
