@@ -20,15 +20,14 @@
 | `$F6-$F9`  |              | long    | `_delta`        |                                                              | midfiles  |
 | `$F6`      |              | byte    | `_tmp`          | first byte of `_delta`                                       | midfiles  |
 |            |              |         |                 |                                                              |           |
-| `$E0`      | (_trkRegs+0) | byte    | `_status`       | track status                                                 | midfiles  |
-| `$E1`      | (_trkRegs+1) | byte    | `_bank`         | extended memory bank index                                   | midfiles  |
-| `$E2-$E3`  | (_trkRegs+2) | pointer | `_ptr`          | data pointer                                                 | midfiles  |
-| `$E2`      | (_trkRegs+2) | word    | `_adr`          | data address (word)                                          | midfiles  |
-| `$E4-$E7`  | (_trkRegs+4) | longint | `_trackTime`    | the time at which the track will be played                   | midfiles  |
-| `$E8`      | (_trkRegs+8) | byte    | `_event`        | last MIDI event                                              | midfiles  |
+| `$E0`      | (_trkRegs+0) | byte    | `_bank`         | extended memory bank index                                   | midfiles  |
+| `$E1-$E2`  | (_trkRegs+1) | pointer | `_ptr`          | data pointer                                                 | midfiles  |
+| `$E1`      | (_trkRegs+1) | word    | `_adr`          | data address (word)                                          | midfiles  |
+| `$E3-$E6`  | (_trkRegs+3) | longint | `_trackTime`    | the time at which the track will be played                   | midfiles  |
+| `$E7`      | (_trkRegs+7) | byte    | `_event`        | last MIDI event                                              | midfiles  |
 |            |              |         |                 |                                                              |           |
-| `$E9` | | long | `_songTicks` | Song size in ticks | midfiles |
-| | | | | | |
+| `$E9`      |              | long    | `_songTicks`    | Song size in ticks                                           | midfiles  |
+|            |              |         |                 |                                                              |           |
 | `$FF`      |              | byte    | `MC_Byte`       | data for and from MC6850                                     | mc6850    |
 |            |              |         |                 |                                                              |           |
 | `$FD`      |              | byte    | `FIFO_Head`     |                                                              | midi_fifo |
@@ -91,3 +90,10 @@
 | `$4000..$7FFF` |             |                  | Song data                                                    | midfiles |
 | `$D800..$FF00` |             |                  | Song data                                                    | midfiles |
 
+
+
+# Driver
+
+| Address        | Size        | Name             | Function                                                     | Source   |
+| -------------- | ----------- | ---------------- | ------------------------------------------------------------ | -------- |
+| `$2000..$27FF` | 2048 ($800) |                  | MIDI Driver                                                  | driver   |
