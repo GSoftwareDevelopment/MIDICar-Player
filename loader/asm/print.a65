@@ -45,3 +45,19 @@ ExitPRINT:
     rts
 
     .endl
+
+    .macro m@print msgadr
+
+    lda #<:msgadr
+    ldy #>:msgadr
+    jsr Print
+
+    .endm
+
+    .macro m@mprint msgadr
+
+    lda #<:msgadr
+    ldy #>:msgadr
+    jsr mlprint
+
+    .endm

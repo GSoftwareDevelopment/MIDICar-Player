@@ -11,6 +11,10 @@ _eadr   = $2004
 
     stx tmp             ; store position in parbuf in tmp variable
 
+.ifdef DEBUG
+    m@print msg_LoadDriver
+.endif
+
     jsr CIO._find_IOCB
     bmi IOError
     ; spl:jmp IOError
@@ -77,10 +81,18 @@ _eadr   = $2004
 
 ; verify that the loaded file is a valid driver file
 testDRV:
+.ifdef DEBUG
+    m@print msg_DriverTest
+.endif
+
     jsr test_driver
     bcs wrongDriver
 
     sty isLoaded
+
+.ifdef DEBUG
+    m@print msg_DriverInit
+.endif
 
 ; call driver - init
     jsr $2000

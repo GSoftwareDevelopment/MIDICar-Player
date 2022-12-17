@@ -5,6 +5,10 @@ nextParameter:
     jsr get_param
     bcc endOfCMD
 
+.ifdef DEBUG
+    m@print parbuf
+.endif
+
     ldx #0
     lda parbuf,x
     cmp #'/'
@@ -13,21 +17,22 @@ nextParameter:
 ; switches
 
     inx
-    lda parbuf,x
-
     ldy #0
 
 switch_loop:
-    cmp #EOST
-    beq switchNotFound
-
+    lda parbuf,x
     cmp switchTab,y
     beq switchFound
+
+    lda switchTab,Y
+    cmp #EOST
+    beq switchNotFound
 
 nextSwitch:
     iny
     iny
     iny
+
     jmp switch_loop
 
 switchFound:
@@ -40,6 +45,9 @@ switchFound:
     jmp nextParameter
 
 switchNotFound:
+    lda #<MSG_UNRECOGNIZED_SWITCH_PARAM
+    ldy #>MSG_UNRECOGNIZED_SWITCH_PARAM
+    jmp exit2DOS
 
 noSwitch:
     jsr set_file_spec

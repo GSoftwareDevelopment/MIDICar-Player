@@ -1,3 +1,5 @@
+; .def DEBUG
+
     org $8000
 
 ; constants
@@ -27,6 +29,10 @@ START:
     sta load_Driver.isLoaded
 
 ; SpartaDOS X detect
+.ifdef DEBUG
+    m@print msg_detectSDX
+.endif
+
 step1:
     jsr sdx.detect
     sta isSDX
@@ -34,6 +40,10 @@ step1:
     beq step3
 
 ; SDX user
+
+.ifdef DEBUG
+    m@print msg_SDXxmsDetect
+.endif
 
     jsr sdx.detect_xms
 
@@ -43,6 +53,10 @@ step1:
 
 ; AXLON Memory extention detect
 step3:
+.ifdef DEBUG
+    m@print msg_AXLONDetect
+.endif
+
     jsr ext_RAM.detect_axlon
     cpy #$00
     beq step4
@@ -53,6 +67,11 @@ step3:
 
 ; Determine extended memory size (PORTB based)
 step4:
+
+.ifdef DEBUG
+    m@print msg_PORTBDetect
+.endif
+
     jsr ext_RAM.detect_portb
 
 ;
@@ -62,13 +81,25 @@ run_mcplay:
     lda #$fe
     sta $0100
 
+.ifdef DEBUG
+    m@print msg_setDefaults
+.endif
+
     jsr set_defaults
 
 ; -------------------
 ; Detect Command Line
 
+.ifdef DEBUG
+    m@print msg_CMDLnDetect
+.endif
+
     jsr detect_CMD
     bne endOfCMD
+
+.ifdef DEBUG
+    m@print msg_getParameters
+.endif
 
 getParameters:
     icl 'asm/check_param.a65'
@@ -80,10 +111,7 @@ endOfCMD:
     jsr test_driver
     bcc skipTestDriver
 
-    lda #<MSG_DRIVERNEED
-    ldy #>MSG_DRIVERNEED
-
-    jsr mlprint
+    m@mprint MSG_DRIVERNEED
 
     jmp exit2DOS+3      ; skip print
 
@@ -95,6 +123,9 @@ skipTestDriver:
     ora #2
     sta PORTB
 
+.ifdef DEBUG
+    m@print msg_LoaderEdn
+.endif
     rts
 
 exit2DOS:
@@ -162,6 +193,24 @@ MSG_DRIVERNEED:
     dta EOL
     dta c'or try load it, before run MCP!',EOL
     dta $ff
+MSG_UNRECOGNIZED_SWITCH_PARAM:
+    dta c'Unrecognized switch parameter!',EOL
+
+.ifdef debug
+msg_detectSDX   dta c'detect SDX...',EOL
+msg_PORTBDetect dta c'detect PORTB extention...',EOL
+msg_AXLONDetect dta c'detect AXLON extention...',EOL
+msg_SDXxmsDetect dta c'SDX free RAM detect...',EOL
+msg_setDefaults dta c'set defaults...',EOL
+msg_CMDLnDetect dta c'Command line detect...',EOL
+msg_getParameters dta c'Get parameters...',EOL
+
+msg_LoadDriver  dta c'Driver load...',EOL
+msg_DriverTest  dta c'Driver test...',EOL
+msg_DriverInit  dta c'Driver init...',EOL
+
+msg_LoaderEdn   dta c'Loader end.',EOL
+.endif
 
 parbuf  equ *
 
