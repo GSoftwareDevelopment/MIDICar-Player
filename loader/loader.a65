@@ -47,7 +47,7 @@ step1:
 
     jsr sdx.detect_xms
 
-    jmp run_mcplay
+    jmp skip_steps_3_4
 
 ; extended RAM detection for non-SDX user
 
@@ -75,11 +75,14 @@ step4:
     jsr ext_RAM.detect_portb
 
 ;
-run_mcplay:
+skip_steps_3_4:
 	sty AEXTMEM
 
     lda #$fe
     sta $0100
+
+; --------------------
+; set defaults for MCP
 
 .ifdef DEBUG
     m@print msg_setDefaults
@@ -101,22 +104,24 @@ run_mcplay:
     m@print msg_getParameters
 .endif
 
+; -----------------------------
+; Parse command line parameters
+
 getParameters:
     icl 'asm/check_param.a65'
 
 endOfCMD:
-    lda load_driver.isLoaded
-    bne skipTestDriver
 
-    jsr test_driver
-    bcc skipTestDriver
+; ---------------
+; validate driver
 
-    m@mprint MSG_DRIVERNEED
+    jsr verify_driver
+    bcs run_MCP
 
-    jmp exit2DOS+3      ; skip print
+    m@print MSG_DRIVERNEED
+    jmp exit2DOS+3
 
-skipTestDriver:
-
+run_MCP:
 ; Turn off BASIC
 
     lda PORTB
@@ -127,6 +132,9 @@ skipTestDriver:
     m@print msg_LoaderEdn
 .endif
     rts
+
+; ---------------------
+;
 
 exit2DOS:
 kbcodes = $02FC
@@ -156,7 +164,7 @@ exit:
     icl 'asm/A2hex.a65'
     icl 'asm/get_param.a65'
     icl 'asm/load_driver.a65'
-    icl 'asm/test_driver.a65'
+    icl 'asm/verify_driver.a65'
     icl 'asm/set_refresh_rate.a65'
     icl 'asm/set_colors.a65'
     icl 'asm/set_sysexMsg.a65'
