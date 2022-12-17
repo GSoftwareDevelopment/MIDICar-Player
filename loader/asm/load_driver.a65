@@ -17,7 +17,6 @@ _eadr   = $2004
 
     jsr CIO._find_IOCB
     bmi IOError
-    ; spl:jmp IOError
 
 ; -------------------------
 ; begin of driver file load
@@ -32,7 +31,6 @@ _eadr   = $2004
 
     jsr CIO._open_channel
     bmi IOError
-    ; spl:jmp IOError
 
 ; load file header
     lda #<$2000     ; set load address
@@ -79,23 +77,8 @@ _eadr   = $2004
 ; end of driver file load
 ; -----------------------
 
-; verify that the loaded file is a valid driver file
-testDRV:
-.ifdef DEBUG
-    m@print msg_DriverTest
-.endif
-
-    jsr test_driver
-    bcs wrongDriver
-
-    sty isLoaded
-
-.ifdef DEBUG
-    m@print msg_DriverInit
-.endif
-
-; call driver - init
-    jsr $2000
+    lda #$ff
+    sta isLoaded
 
     rts
 
@@ -113,9 +96,9 @@ IOError:
 
     pla
     jsr A2HEX
+
     lda #<MSG_IOERR
     ldy #>MSG_IOERR
-    ; jsr print
     jmp exit2DOS
 
 ; ------------------------------------------
@@ -127,7 +110,6 @@ wrongDriver:
 
     lda #<MSG_NODRIVER
     ldy #>MSG_NODRIVER
-    ; jsr print
     jmp exit2DOS
 
 ; -----------------------------------------
@@ -137,7 +119,6 @@ wrongDriver:
 cantLoadDriverTwice:
     lda #<MSG_DRV_TWICE
     ldy #>MSG_DRV_TWICE
-    ; jsr print
     jmp exit2DOS
 
     .endl
