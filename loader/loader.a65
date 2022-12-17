@@ -189,7 +189,7 @@ MSG_NODRIVER:
     dta c'Specified file isnt correct driver.',EOL
 MSG_DRIVERNEED:
     dta c'Specify driver using:',EOL
-    dta c'MCPLAY /Dx:filename.ext',EOL
+    dta c'MCP /Dx:filename.ext',EOL
     dta EOL
     dta c'or try load it, before run MCP!',EOL
     dta $ff
