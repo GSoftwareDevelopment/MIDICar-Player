@@ -1,5 +1,7 @@
 POKMSK		= $10
 
+RCLOCK      = $14
+
 // STATUS		= $30
 CHKSUM      = $31
 XMTDON		= $3A

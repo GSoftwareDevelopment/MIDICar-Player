@@ -17,7 +17,7 @@ drvjtab:
 ;--------------------------------------------------
 ; Initialize
 
-DESC	dta c'MIDIBox Driver 1.0 by GSD',$9B
+DESC	dta c'MIDIBox Driver 1.01 by GSD',$9B
 
 init:
   lda #<DESC
@@ -152,11 +152,33 @@ exitSend:
   bcs Send.startSend
 
 All:
+  txa:pha
+
+; time out counter for flush FIFO
+; 5 = roundUp(((1 / 3125) * 256) * 50)
+; 256 = FIFO buffer size
+; 50 = frame per second for PAL (for NTSC = 60)
+
+  ldx #5
+
+setClock:
+  ldy RCLOCK
 
 flush_loop:
   lda XMTDON
+  bne flush_done
+  cpy RCLOCK
   beq flush_loop
+  dex
+  bne setClock
 
+flush_timeout:
+  lda #0
+  sta fifo_head
+  sta fifo_tail
+
+flush_done:
+  pla:tax
   rts
   .endl
 
