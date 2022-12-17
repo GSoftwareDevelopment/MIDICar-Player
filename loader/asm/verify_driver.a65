@@ -1,0 +1,44 @@
+; verify that the loaded file is a valid driver file
+
+    .local verify_Driver
+.ifdef DEBUG
+    m@print msg_DriverTest
+.endif
+
+    ldx #12
+driverTestLoop:
+    lda $2000,x
+    cmp #$4c        ; $4c=jmp
+    beq next
+
+    clc
+    rts
+
+next:
+    dex
+    dex
+    dex
+    bpl driverTestLoop
+
+
+.ifdef DEBUG
+    m@print msg_DriverInit
+.endif
+
+; call driver - init
+
+    jsr $2000
+
+    sec
+    rts
+
+    .endl
+
+; --------------------------
+;
+
+    .local test_driver
+
+    rts
+
+    .endl
