@@ -148,8 +148,8 @@ begin
       sequenceLoop:
       end;
         inc(lstCurrent,v);
+        if (lstCurrent>=lstTotal) then lstCurrent:=0;
         if (lstCurrent<0) then lstCurrent:=lstTotal;
-        if (lstCurrent>lstTotal) then lstCurrent:=0;
       asm
       endChoice:
       end;
