@@ -1,9 +1,3 @@
-; sparta_detect.asm
-; (c) idea by KMK, code: mikey
-;
-; $Id: sparta_detect.asm,v 1.2 2006/09/27 22:59:27 mikey Exp $
-;
-
     .local sdx
 
 comtab  = $0A
@@ -11,6 +5,13 @@ fsymbol = $07EB
 
 T_      = $F0   ; pointer to SDX T_ symbol
 _nbanks = $1D   ; COMTAB offset to free banks of extended memory
+
+; -------------------
+; Sparta DOS X Detect
+; (c) idea by KMK, code: mikey
+;
+; $Id: sparta_detect.asm,v 1.2 2006/09/27 22:59:27 mikey Exp $
+;
 
 detect:
 ; if peek($700) = 'S' and bit($701) sets V then we're SDX
@@ -61,12 +62,11 @@ no_sparta
 ; if A=$00 -> SDX doesn't use any XMS banks
 ; if A=anything else -> BANKED mode, and A is the bank number
 
-; -------------------
-;
+
+; --------------------------
+; extended RAM detect by SDX
 
 detect_xms:
-
-; extended RAM detect by SDX
 
 ; incrase T_ pointer to the beginig table of portb calulation
 
