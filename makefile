@@ -38,7 +38,7 @@ link: ${BINPATH}/loader.bin ${BINPATH}/mcp.bin
 
 ifdef DRIVER
 	@echo "Linking with driver..."
-	cat ${BINPATH}/loader.bin ${BINPATH}/${DRIVER}.drv ${BINPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
+	cat ${BINPATH}/${DRIVER}.drv ${BINPATH}/loader.bin ${BINPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
 else
 	@echo "Linking without driver..."
 	cat ${BINPATH}/loader.bin ${BINPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
