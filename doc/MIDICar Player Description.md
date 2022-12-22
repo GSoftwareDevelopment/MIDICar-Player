@@ -1,12 +1,15 @@
-![image-20220625130033100](./image-20220625130033100.png)
+![MIDICar Logo](MIDICar Logo.png)
 
 **MIDICar Player** is a MID files player and was created in cooperation with **MIDICar** interface creator (*Błażej "Pancio" Biernat*) to be connected to CART/ECI or PBI connector of 8-bit Atari.
 
-The player automatically detects if **MIDICar** is connected to the computer and if not it simply won't start. The situation is similar for **Axlon** type memory extensions and for **SDX operating system** for which a separate player version is being developed.
+## Evolution
 
-The program offers simple interface and intuitive operation from the computer keyboard. Most of the control is done with `arrow keys` and the `Return` key. A help screen is also available, which is displayed by pressing the `H` key.
+1.2 - Sparta DOS X support
+1.5 - Supports other MIDI devices, including: MIDIMate and MIDIBox, using the SIO connector. This is supported by the drivers included with the software.
 
-![image-20220625130129839](./image-20220625130129839.png)
+## Using
+
+The program offers simple interface and intuitive operation from the computer keyboard. Most of the control is done with `arrow keys` and the `Return` key. A help screen is also available, which is displayed by pressing the `H` or `HELP` key.
 
 The layout of the playback controls are taken from WinAMP and are respectively:
 
@@ -14,8 +17,6 @@ The layout of the playback controls are taken from WinAMP and are respectively:
 - `C` - Pause
 - `V` - Stop
 - `Z` and `B` - for changing the track Previous and Next respectively.
-
-A word of explanation is needed for these last two functions. They only work in looping mode **123** and **Shuffle**.
 
 The looping mode can be changed with the `L` key and is done sequentially:
 
@@ -30,16 +31,13 @@ It is possible to change the speed of the track being played. Using the `<`, `>`
 
 You can also change the colour scheme of the player from light to dark with the `INVERS` key.
 
-![image-20220625125913151](./image-20220625125913151.png)
-
 The `M` key can be used to turn off the channel volume preview, which can have some effect on song playback.
 
 Exit the program by pressing the `ESC` key - the program does not confirm this operation.
 
----
+## Requirements
 
-Minimum requirements:
-- 64KB of RAM, where approximately 35KB will be available per song, hence memory expansion to at least 128KB is recommended
+- 64KB of RAM, where approximately 26KB will be available per song, hence memory expansion to at least 128KB is recommended
 - the program only supports PORTB-based extensions, e.g. Compy, Rambo, U1MB.
 - DOS MEMLO must be below $2000
 - no use of RAM under ROM and extended memory - data placed in RAM disks may be destroyed!
