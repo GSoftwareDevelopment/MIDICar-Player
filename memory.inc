@@ -13,8 +13,7 @@
 
   KEY_TABLE_ADDR  = $3400;              // $080 ( 128)
 
-  PROGRESS_DATA   = $3500;              // $004 (   4)
-  UVMETER_ADDR    = PROGRESS_DATA+4;    // $040 (  64)
+  UVMETER_ADDR    = $3500;              // $040 (  64)
   SCREEN_ADRSES   = UVMETER_ADDR+$40;   // $020 (  32)
   HELPSCR_ADDR    = SCREEN_ADRSES+$20;  // $2d0 ( 720)
   DLIST_ADDR      = $2FAC;              // $054 (  84)

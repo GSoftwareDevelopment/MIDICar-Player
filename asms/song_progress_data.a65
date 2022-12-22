@@ -1,5 +1,0 @@
-progressData:
-  .byte %01000000
-  .byte %01010000
-  .byte %01010100
-  .byte %01010101
