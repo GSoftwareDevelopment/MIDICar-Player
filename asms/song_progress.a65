@@ -3,12 +3,14 @@
 
   lda v
   sub oldv
-  bpl update
+  bcs update
+
   lda #0
   sta oldv
   jmp dontUpdate
 
 update:
+  beq dontUpdate
   tax
 
 ; calculate pixel-fill inside byte
@@ -48,7 +50,16 @@ endUpdate:
 
   jmp dontUpdate
 
+; data
+progress_data:
+  .byte %01000000
+  .byte %01010000
+  .byte %01010100
+  .byte %01010101
+
+; variables
 oldv  dta 0
 
+;
 dontUpdate:
   .endl
