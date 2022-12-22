@@ -118,7 +118,7 @@ endOfCMD:
     jsr verify_driver
     bcs run_MCP
 
-    m@print MSG_DRIVERNEED
+    m@mprint MSG_DRIVERNEED
     jmp exit2DOS+3
 
 run_MCP:
