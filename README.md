@@ -1,4 +1,4 @@
-![MIDICar Logo](MIDICar Logo.png)
+![](/home/pebe/Projekty/Atari/MIDIcar/doc/MIDICar Logo.png)
 
 # Introduction
 
@@ -64,6 +64,18 @@ These are bootable, non-relocatable files. They do not set MEMLO, so they can be
 They load in the area from $2000 onward. After running, a corresponding message should appear on the screen (the name of the driver)
 
 More about the drivers in the document `general drivers concept.md` in the `/doc` directory.
+
+## Bundling 
+
+There may be problems loading the driver from under DOS that do not have a Command Line with parameter passing. The solution to this is to be able to link the driver together with the main program.
+
+The important thing with this operation is that the main program is CONNECTED TO the driver, not the other way around.
+
+The linking operation can be performed on a PC using (under Linux) the command:
+
+`cat driver MCP.EXE >> mcpbundl.exe`.
+
+in place of `driver` specify the name of the driver file. Of course, the name of the resulting file can be different :)
 
 # Compilation
 
