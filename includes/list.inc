@@ -28,14 +28,14 @@ const
     $1a   // fl_device
   );
 
-var
-  p_bank:byte;  //  \
-  p_adr:word;   //  / It is important that this order remains intact
+// var
+//   p_bank:byte;  //  \
+//   p_adr:word;   //  / It is important that this order remains intact
 
 begin
   getEntrySets(p_bank);
   asm
-    lda p_bank
+    lda MAIN.LIST.p_bank
     sub #fl_midifile
     bcc nullChar
     tay
@@ -48,18 +48,76 @@ begin
   putChar:
     ldy #0
     sta (screen.scradr),y
+
+    lda MAIN.FILESTR.OUTSTR_ADDR
+    cmp #LIST_VISIBLE_CHARS
+    bmi putString
+    beq putString
+
+// truncate String
+    stx v     ; temporarly store X-Reg
+
+    sub #LIST_VISIBLE_CHARS-2
+    tax
+
+    lda #$60
+    ldy #2
+    sta (screen.scradr),y
+
+@:
+    lda MAIN.FILESTR.OUTSTR_ADDR,x
+
+    asl
+    adc #$c0
+    spl:eor #$40
+    lsr
+    scc:eor #$80
+
+    iny
+    sta (screen.scradr),y
+    inx
+    cpy #LIST_VISIBLE_CHARS+2
+    bne @-
+
+    ldx v       ; restore X-Reg
+
+    rts
+
+// put string on screen
+putString:
+    stx v     ; temporarly store X-Reg
+    tax
+
+    ldy #2
+@:
+    lda MAIN.FILESTR.OUTSTR_ADDR-1,y
+
+    asl
+    adc #$c0
+    spl:eor #$40
+    lsr
+    scc:eor #$80
+
+    sta (screen.scradr),y
+    iny
+    dex
+    bne @-
+
+    ldx v       ; restore X-Reg
+
+// clear rest of line
+    lda #0
+    jmp checkClear
+  clear:
+    sta (screen.scradr),y
+    iny
+  checkClear:
+    cpy #LIST_VISIBLE_CHARS+2
+    bmi clear
+    beq clear
+
+  dontClear:
   end;
-  inc(scradr,2);
-  v:=byte(outstr[0]);
-  if v>LIST_VISIBLE_CHARS then
-  begin
-    outstr[0]:=char(LIST_VISIBLE_CHARS);
-    move(outstr[v-LIST_VISIBLE_CHARS+2],outstr[2],LIST_VISIBLE_CHARS);
-    outstr[1]:=#$60;
-    v:=LIST_VISIBLE_CHARS
-  end;
-  putASCText(outstr);
-  putSpaces(30-v);
 end;
 
 procedure showList;
