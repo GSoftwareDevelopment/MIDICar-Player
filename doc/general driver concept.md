@@ -1,12 +1,14 @@
 # General driver concept for MIDICar Player
 
-A description of how to build a driver for MIDICar Player is given below.
+A description of how to build a driver for MIDICar Player.
+
+It is worth studying with the code of the drivers that have already been written to get a good understanding of their design and functionality.
 
 The code presented below is for the MADS Assembler compiler.
 
 ## Lets start
 
-~~~assembler
+~~~assembly
 
     org $2000
     
@@ -16,7 +18,7 @@ The driver __must__ be loaded at address $2000 and __must__ start with a Jump Ta
 
 Generally, there is 2KB allocated for the driver which should be completely sufficient.
 
-~~~assembler
+~~~assembly
 ;-------------------
 ; Driver Jump Table
 
@@ -48,13 +50,15 @@ This section must contain everything needed for the device to initialize properl
 - store the original vectors, the change of which is required for the correct operation of the device
 - initialization of the FIFO buffer.
 
-~~~assembler
+~~~assembly
 ;---------------
 ; Setup driver
 
-Setup:
+  .local Setup
 
-  rts
+	rts
+	
+  .endl
 ~~~
 
 ## Send byte section
@@ -63,13 +67,19 @@ This section is responsible for sending one byte, the value of which is passed i
 
 Here, FIFO buffer support is also provided since the MPC, by itself, does not support such a buffer.
 
-~~~assembler
+~~~assembly
 ;-------------------------
 ; Send one byte by driver
 
-Send:
+  .local Send
 
-  rts
+	fifo@put
+	
+StartSend:
+
+    rts
+  
+  .endl
 ~~~
 
 ## Flush section
@@ -83,13 +93,19 @@ This is also the polling hook for MCP and should recognize the Carry flag, accor
 - Carry Set - try to send a byte if the device is ready
 - Catty Clear - wait until the device sends all the information
 
-~~~assembler
+~~~assembly
 ;--------------
 ; Flush buffer
 
-Flush:
+  .local Flush
 
-  rts
+    bcc Send.startSend
+  
+All:
+
+    rts
+  
+  .endl
 ~~~
 
 ## Shut down section
@@ -101,18 +117,20 @@ The section responsible for shutting down the device.
 
 The section should not send MIDI reset data - this is handled by MCP
 
-~~~assembler
+~~~assembly
 ;------------------
 ; Shut down driver
 
-ShutDown:
+  .local ShutDown
 
   rts
+  
+  .endl
 ~~~
 
 ## Variables section
 
-~~~assembler
+~~~assembly
 ;------------------
 ; Driver variables
 
@@ -125,7 +143,7 @@ The reason why it is placed at the end of the code is so that once the controlle
 
 Also, it is a good idea to include here the code responsible for displaying the driver message.
 
-~~~assembler
+~~~assembly
 ;------------
 ; Initialize
 
@@ -137,14 +155,18 @@ Also, it is a good idea to include here the code responsible for displaying the 
     ldy #>DESC
     jsr PRINT
 
+	sec
+	
 	rts
-  
-  .endl
 ~~~
 
-## External procedures
+The above section should return a set flag `C` when the device has been correctly detected. Otherwise, this flag should be cleared.
 
-~~~assembler
+### External procedures
+
+All the functions and procedures needed in the initiation process are well placed in this section.
+
+~~~assembly
 ;----------------------------
 ; External procedures
 
@@ -167,7 +189,7 @@ CIOV    = $E456
     lda ICCHID,x
     bmi ExitPRINT
     jmp CIOV
-ExitPRINT:
+
     rts
 
   .endl
@@ -175,8 +197,12 @@ ExitPRINT:
 
 ## Finish
 
-```assemb
-.endl
+Close section `Init`, and main section `Driver`
+
+```assembly
+  .endl
+
+  .endl
 ```
 
 
