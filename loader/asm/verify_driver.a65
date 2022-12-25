@@ -11,6 +11,8 @@ driverTestLoop:
     cmp #$4c        ; $4c=jmp
     beq next
 
+    m@print MSG_NODRIVER
+
     clc
     rts
 
@@ -28,16 +30,6 @@ next:
 ; call driver - init
 
     jsr $2000
-
-    sec
-    rts
-
-    .endl
-
-; --------------------------
-;
-
-    .local test_driver
 
     rts
 

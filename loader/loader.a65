@@ -118,7 +118,6 @@ endOfCMD:
     jsr verify_driver
     bcs run_MCP
 
-    m@mprint MSG_DRIVERNEED
     jmp exit2DOS+3
 
 run_MCP:
@@ -177,12 +176,6 @@ exit:
 //
 
 ; Strings
-; MIDICAR_EXIST:
-;     dta 'Yoppie! MIDICar found at $'
-; MIDICAR_BASE:
-;     dta 'xxxx',$9b
-; MIDICAR_NOT_FOUND:
-;     dta 'Ouch! MIDICar not found :(',$9B
 AXLON_FOUND:
     dta 'Oh, AXLON extention is not supported :(',EOL
 MSG_NO_DOS:
@@ -195,12 +188,6 @@ MSG_DRV_TWICE:
     dta c'Unable to load more drivers.',EOL
 MSG_NODRIVER:
     dta c'Specified file isnt correct driver.',EOL
-MSG_DRIVERNEED:
-    dta c'Specify driver using:',EOL
-    dta c'MCP /Dx:filename.ext',EOL
-    dta EOL
-    dta c'or try load it, before run MCP!',EOL
-    dta $ff
 MSG_UNRECOGNIZED_SWITCH_PARAM:
     dta c'Unrecognized switch parameter!',EOL
 
