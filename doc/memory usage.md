@@ -38,57 +38,61 @@
 
 ## Variables
 
-| Address        |         | Type               | Name       | Description | source    |
-| -------------- | ------- | ------------------ | ---------- | ----------- | --------- |
-| `$D6`          |         | Byte               | chn        |             | main      |
-| `$D7`          |         | ShortInt<br />Byte | v<br />_v  |             | main      |
-|                |         |                    |            |             |           |
-| `$3540..$355F` |         | Array of Word      | listScrAdr |             | main      |
-| `$D6`          |         | Byte               | ilch       |             | inputLine |
-| `$54`          |         | Byte               | ilpos      |             | inputLine |
-| `$55`          |         | Word               | ilscradr   |             | inputLine |
-|                |         |                    |            |             |           |
-| `$88`          |         | Long               | counter    |             | main      |
-| `$8c`          |         | Long               | cntBCD     |             | main      |
-|                |         |                    |            |             |           |
-| `$4f0..$4f7`   | 6 (+1)  | TDevString         | curDev     |             | main      |
-| `$4f8..$538`   | 64 (+1) | TPath              | curPath    |             | main      |
-| `$539..$559`   | 32 (+1) | TFilename          | fn         |             | main      |
-|                |         |                    |            |             |           |
+| Address      |         | Type               | Name      | Description | source    |
+| ------------ | ------- | ------------------ | --------- | ----------- | --------- |
+| `$D6`        |         | Byte               | chn       |             | main      |
+| `$D7`        |         | ShortInt<br />Byte | v<br />_v |             | main      |
+|              |         |                    |           |             |           |
+|              |         |                    |           |             |           |
+| `$D6`        |         | Byte               | ilch      |             | inputLine |
+| `$54`        |         | Byte               | ilpos     |             | inputLine |
+| `$55`        |         | Word               | ilscradr  |             | inputLine |
+|              |         |                    |           |             |           |
+| `$88`        |         | Long               | counter   |             | main      |
+| `$8c`        |         | Long               | cntBCD    |             | main      |
+|              |         |                    |           |             |           |
+| `$4f0..$4f7` | 6 (+1)  | TDevString         | curDev    |             | main      |
+| `$4f8..$538` | 64 (+1) | TPath              | curPath   |             | main      |
+| `$539..$559` | 32 (+1) | TFilename          | fn        |             | main      |
+|              |         |                    |           |             |           |
 
 
 
 ## Buffers
 
-| Start          | Size  | Name       | Function                        | Source    |
-| -------------- | ----- | ---------- | ------------------------------- | --------- |
-| `$55A..$5AA`   | 80    | outstr     |                                 | main      |
-| `$5AB..$5FB`   | 80    | snull      |                                 | main      |
-| `$0600`        | 256   | `FIFO_Buf` | FIFO Buffer                     | midi_fifo |
-| `$4000..$7FFF` | 16384 | `RBuf`     | I/O buffer for MID file loading | midfiles  |
+| Start        | Size | Name       | Function    | Source    |
+| ------------ | ---- | ---------- | ----------- | --------- |
+| `$55A..$5AA` | 80   | outstr     |             | main      |
+| `$5AB..$5FB` | 80   | snull      |             | main      |
+| `$0600`      | 256  | `FIFO_Buf` | FIFO Buffer | midi_fifo |
 
 
 
 ## Data
 
-| Address        | Size        | Name             | Function                                                     | Source   |
-| -------------- | ----------- | ---------------- | ------------------------------------------------------------ | -------- |
-| `$3000..$33FF` | 1024 ($400) | `CHARS_ADDR`     | Char set definition                                          | main     |
-| `$3FAC..$3FFF` |             | `DLIST_ADDR`     | Display List                                                 | main     |
-| `$2000..$26F3` | 1780 ($6F4) | `SCREEN_ADDR`    | Screen data                                                  | main     |
-| `$3400..$347F` | 128 ($80)   | `KEY_TABLE_ADDR` | Keys jump table                                              | main     |
-| `$3500..$353F` | 64          | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
-|                |             |                  |                                                              |          |
-| `$2C00`        | 512         |                  | Tracks data right after loading the file<br />fast return to the beginning of the track |          |
-| `$2E00`        | 512         |                  | Tracks information                                           | midfiles |
-|                |             |                  |                                                              |          |
-| `$80..$D3`     |             | ZPAGE            | MADPascal ZP variables                                       | EXE      |
-| `$8000..$AB21` |             | CODE             | MADPascal executable code                                    | EXE      |
-| `$0400..$0484` |             | DATA             | MADPascal Static Data                                        | EXE      |
-|                |             |                  |                                                              |          |
-|                |             |                  |                                                              |          |
-| `$4000..$7FFF` |             |                  | Song data                                                    | midfiles |
-| `$D800..$FF00` |             |                  | Song data                                                    | midfiles |
+| Address        | Size         | Name             | Function                                                     | Source   |
+| -------------- | ------------ | ---------------- | ------------------------------------------------------------ | -------- |
+| `$2800..$2E03` | 1540 ($604)  |                  | Screen data                                                  | main     |
+|                |              |                  |                                                              |          |
+| `$2FB3..$2FFF` | 76 ($4C)     | `DLIST_ADDR`     | Display List                                                 | main     |
+| `$3000..$33FF` | 1024 ($400)  | `CHARS_ADDR`     | Char set definition                                          | main     |
+| `$3400..$347F` | 128 ($80)    | `KEY_TABLE_ADDR` | Keys jump table                                              | main     |
+| `$3500..$353F` | 64 ($40)     | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
+| `$3540..$355F` | 32 ($20)     | `SCREEN_ADRSES`  | listScrAdr                                                   | main     |
+| `$3560..$382F` | 720 ($2D0)   | `HELPSCR_ADDR`   |                                                              | main     |
+| `$3830..$3AFF` | 720 ($2D0)   |                  |                                                              | main     |
+|                |              |                  |                                                              |          |
+| `$3C00`        | 512          |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles |
+| `$3E00`        | 512          |                  | Tracks information                                           | midfiles |
+|                |              |                  |                                                              |          |
+| `$80..$D3`     |              | ZPAGE            | MADPascal ZP variables                                       | EXE      |
+| `$8000..$ACEC` |              | CODE             | MADPascal executable code                                    | EXE      |
+| `$0400..$0482` |              | DATA             | MADPascal Static Data                                        | EXE      |
+|                |              |                  |                                                              |          |
+|                |              |                  |                                                              |          |
+| `$4000..$7FFF` |              |                  | Song data                                                    | midfiles |
+| `$C000..$CFFF` | 4096 ($1000) | `LIST_ADDR`      |                                                              | main     |
+| `$D800..$FF00` |              |                  | Song data                                                    | midfiles |
 
 
 
