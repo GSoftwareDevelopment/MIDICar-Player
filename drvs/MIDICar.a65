@@ -1,88 +1,33 @@
-    org $2000
+  org $2000
 
-drvjtab:
+; -----------------
+; Driver Jump Table
 
-  jmp serial_drv.init
-  jmp serial_drv.start
-  jmp serial_drv.send
-  jmp serial_drv.flush
-  jmp serial_drv.stop
+  .local jumpTable
 
+  jmp driver.init
+  jmp driver.start
+  jmp driver.send
+  jmp driver.flush
+  jmp driver.stop
 
-    .local serial_drv
+DESC	dta c'MIDICar Driver 2.0 by GSD',$9B
 
-  icl './atari.hea'
-  icl './fifo.hea'
-  icl './mc6850.hea'
+  .endl
 
-;--------------------------------------------------
-; Initialize
+; ----------------------
+; Main driver procedures
 
-DESC	dta c'MIDICar Driver 1.0 by GSD',$9B
+  .local driver
 
-init:
-  lda #<DESC
-  ldy #>DESC
-  jsr PRINT
-
-  jsr detect_MC
-  bcs MCNotFound
-
-MCFound:
-  sty MCBASE
-  stx MCBASE+1
-
-  lda #<MCBASEADDR
-  sta A2HEX.msgptr
-  lda #>MCBASEADDR
-  sta A2HEX.msgptr+1
-
-  lda MCBASE+1
-  jsr A2HEX
-  lda MCBASE
-  jsr A2HEX
-
-  lda #<MIDICAR_EXIST
-  ldy #>MIDICAR_EXIST
-  jsr PRINT
-
-  jmp setMCPort
-
-MCNotFound:
-  lda #100
-  sta MCBASE
-  lda #0
-  sta MCBASE+1
-  lda #$02
-  sta 100
-  lda #<MIDICAR_NOT_FOUND
-  ldy #>MIDICAR_NOT_FOUND
-  jsr PRINT
-
-setMCPort:
-  ldy MCBASE
-  ldx MCBASE+1
-
-  sty MCReset.MCBaseState
-  stx MCReset.MCBaseState+1
-  sty Send.MCBaseState
-  stx Send.MCBaseState+1
-  sty Flush.MCBaseState
-  stx Flush.MCBaseState+1
-
-  iny
-
-  sty Send.MCBaseBuf
-  stx Send.MCBaseBuf+1
-  sty Flush.MCBaseBuf
-  stx Flush.MCBaseBuf+1
-
-  rts
+    icl './atari.hea'
+    icl './fifo.hea'
+    icl './mc6850.hea'
 
 ;--------------------------------------------------
 ; MC6850 Reset
-  .local MCReset
-;  MC6850_Init(MasterReset);
+  .local setMCState
+
     sta MCBaseState:$D500
 
     rts
@@ -99,11 +44,11 @@ setMCPort:
     sta isMCInit
 
     lda #MC6850.MasterReset
-    jsr MCReset
+    jsr setMCState
 
 ;  MC6850_Init(CD_64+WS_OddParity+WS_8bits+WS_2BitStop{+IRQ_Receive});
     lda #(MC6850.CD_64+MC6850.WS_OddParity+MC6850.WS_8bits+MC6850.WS_2BitStop)
-    jsr MCReset
+    jsr setMCState
 
 ; Reset FIFO
     lda #0
@@ -112,6 +57,7 @@ setMCPort:
 
 exitStart:
     RTS
+
   .endl
 
 ;--------------------------------------------------
@@ -145,11 +91,12 @@ exitSend:
 ; Flush buffer
 ; C = 0 - start send if buffer is not empty and serial is free
 ; C = 1 -
+
   .local Flush
+
     bcs Send.startSend
 
 All:
-
     sei
 
     ldy FIFO_Tail
@@ -180,6 +127,7 @@ endFlush:
 ; Stop serial port service
 
   .local Stop
+
     bit isMCInit
     beq exitUnInit
 
@@ -187,12 +135,11 @@ endFlush:
     jsr Flush.All
 
 noFlush:
-
     lda #0
     sta isMCInit
 
     lda #MC6850.MasterReset
-    jsr MCReset
+    jsr setMCState
 
 ; Reset FIFO
     LDA #$00
@@ -201,28 +148,102 @@ noFlush:
 
 exitUnInit:
     RTS
+
   .endl
-
-;--------------------------------------------------
-;
-
-  icl './print.a65'
-  icl './detect_mc.a65'
-  icl '../loader/asm/A2hex.a65'
 
 ;--------------------------------------------------
 ; driver variables
 
 ; old serial out vector
 isMCInit    dta b(0)
-MCBASE      dta a(0)
-MIDICAR_EXIST:
-            dta c'MIDICar detected at $'
-MCBASEADDR:
-            dta c'0000',$9B
-MIDICAR_NOT_FOUND:
-            dta c'Can''t detect MIDICar :(',$9B
 
-    .endl
+;--------------------------------------------------
+; initialize driver (detect & setup)
 
-  ; ini serial_drv.init
+  .local init
+
+    lda #<jumpTable.DESC
+    ldy #>jumpTable.DESC
+    jsr PRINT
+
+    jsr detect_MC
+    bcs MCNotFound
+
+MCFound:
+    sty MCBASE
+    stx MCBASE+1
+
+    lda #<MCBASEADDR
+    sta A2HEX.msgptr
+    lda #>MCBASEADDR
+    sta A2HEX.msgptr+1
+
+    lda MCBASE+1
+    jsr A2HEX
+    lda MCBASE
+    jsr A2HEX
+
+    lda #<MIDICAR_EXIST
+    ldy #>MIDICAR_EXIST
+    jsr PRINT
+
+    sec
+
+    jmp setMCPort
+
+MCNotFound:
+    lda #100
+    sta MCBASE
+    lda #0
+    sta MCBASE+1
+    lda #$02
+    sta 100
+    lda #<MIDICAR_NOT_FOUND
+    ldy #>MIDICAR_NOT_FOUND
+    jsr PRINT
+
+    clc
+
+setMCPort:
+    ldy MCBASE
+    ldx MCBASE+1
+
+    sty setMCState.MCBaseState
+    stx setMCState.MCBaseState+1
+    sty Send.MCBaseState
+    stx Send.MCBaseState+1
+    sty Flush.MCBaseState
+    stx Flush.MCBaseState+1
+
+    iny
+
+    sty Send.MCBaseBuf
+    stx Send.MCBaseBuf+1
+    sty Flush.MCBaseBuf
+    stx Flush.MCBaseBuf+1
+
+    rts
+
+;--------------------------------------------------
+;
+
+    icl './print.a65'
+    icl './detect_mc.a65'
+    icl '../loader/asm/A2hex.a65'
+
+;--------------------------------------------------
+; initialise variables & constants
+
+MCBASE              dta a(0)
+MIDICAR_EXIST:      dta c'MIDICar detected at $'
+MCBASEADDR:         dta c'0000',$9B
+MIDICAR_NOT_FOUND:  dta c'Can''t detect MIDICar :(',$9B
+
+  .endl
+
+  .endl
+
+;--------------------------------------------------
+
+  icl 'driver_summary.a65'
+

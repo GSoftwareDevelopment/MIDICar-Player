@@ -1,109 +1,107 @@
     org $2000
 
-drvjtab:
+; -----------------
+; Driver Jump Table
 
-  jmp serial_drv.init
-  jmp serial_drv.start
-  jmp serial_drv.send
-  jmp serial_drv.flush
-  jmp serial_drv.stop
+  .local jumpTable
 
+  jmp driver.init
+  jmp driver.start
+  jmp driver.send
+  jmp driver.flush
+  jmp driver.stop
 
-  .local serial_drv
+DESC	dta c'MIDIBox Driver 2.0 by GSD',$9B
+
+  .endl
+
+; ----------------------
+; Main driver procedures
+
+  .local driver
 
   icl './atari.hea'
   icl './fifo.hea'
 
 ;--------------------------------------------------
-; Initialize
-
-DESC	dta c'MIDIBox Driver 1.01 by GSD',$9B
-
-init:
-  lda #<DESC
-  ldy #>DESC
-  jsr PRINT
-
-  rts
-
-;--------------------------------------------------
 ; Start serial port service
 
   .local start
-  lda OVSEROUT
-  ora OVSEROUT+1
-  bne exitStart
+
+    lda OVSEROUT
+    ora OVSEROUT+1
+    bne exitStart
 
 ; store old vector
-  lda VSEROUT
-  sta OVSEROUT
-  lda VSEROUT+1
-  sta OVSEROUT+1
+    lda VSEROUT
+    sta OVSEROUT
+    lda VSEROUT+1
+    sta OVSEROUT+1
 
 ; set new vector
-  lda #<IOutMIDISer
-  sta VSEROUT
-  lda #>IOutMIDISer
-  sta VSEROUT+1
+    lda #<IOutMIDISer
+    sta VSEROUT
+    lda #>IOutMIDISer
+    sta VSEROUT+1
 
 ; set serial transmission speed - ~31669 baud=1773447/(2*(0x15+7))
 ; altirra says (under debbug) it is 31960.2 baud = ?how?
-  LDA #$15
-  STA AUDF3
-  LDA #$00
-  STA AUDF4
+    LDA #$15
+    STA AUDF3
+    LDA #$00
+    STA AUDF4
 
 ; set serial
-  LDA #%00000111	; $07
-    ; -------x - keep keyboard debounce as is
-    ; ------x- - keep keyboard scanning as is
-    ; -----x-- - keep fast POT scan as is
-    ; ----0--- - clear POKEY two-tone mode
-    ; 0------- - clear force break; serial output to zero
-  AND SSKCTL
-  ORA #%00100000	; $20
-    ; -010---- - Trans. & Receive rates set by Channel 4
-    ;		   - Channel 4 output on Bi-Directional clock line
-  STA SSKCTL
-  STA SKCTL
+    LDA #%00000111	; $07
+      ; -------x - keep keyboard debounce as is
+      ; ------x- - keep keyboard scanning as is
+      ; -----x-- - keep fast POT scan as is
+      ; ----0--- - clear POKEY two-tone mode
+      ; 0------- - clear force break; serial output to zero
+    AND SSKCTL
+    ORA #%00100000	; $20
+      ; -010---- - Trans. & Receive rates set by Channel 4
+      ;		   - Channel 4 output on Bi-Directional clock line
+    STA SSKCTL
+    STA SKCTL
 
 ; set interrupts
-  LDA #%11000111	; $C7
-    ; x-------  - keep Break IRQ
-    ; -x------  - keep Other key IRQ
-    ; -----xxx  - keep timer 4,2 & 1 IRQs
-  AND POKMSK
-  ORA #%00010000	; $10
-    ; --0-----  - disable serial input data ready
-    ; ---1----  - enabled serial output data ready
-    ; ----0---  - disable serial output transmission done
-  STA POKMSK
-  STA IRQEN
+    LDA #%11000111	; $C7
+      ; x-------  - keep Break IRQ
+      ; -x------  - keep Other key IRQ
+      ; -----xxx  - keep timer 4,2 & 1 IRQs
+    AND POKMSK
+    ORA #%00010000	; $10
+      ; --0-----  - disable serial input data ready
+      ; ---1----  - enabled serial output data ready
+      ; ----0---  - disable serial output transmission done
+    STA POKMSK
+    STA IRQEN
 
-;set POKEY
-  LDA #%00101000 ; $28
-    ; --1----- - clock channel three with 1.79 MHz
-    ; ----1--- - join channels 4 & 3 (16 bit)
-  STA AUDCTL
+; set POKEY
+    LDA #%00101000 ; $28
+      ; --1----- - clock channel three with 1.79 MHz
+      ; ----1--- - join channels 4 & 3 (16 bit)
+    STA AUDCTL
 
-  LDA #%10100000 ; $A0
-    ; 101----- - no poly counters (pure tone)
-    ; ---00000 - silence (0 volume)
-  STA AUDC3
-  STA AUDC4
+    LDA #%10100000 ; $A0
+      ; 101----- - no poly counters (pure tone)
+      ; ---00000 - silence (0 volume)
+    STA AUDC3
+    STA AUDC4
 
 ; checksum sent flag ($ff equals sent)
-  LDA #$FF
-  STA CHKSNT
+    LDA #$FF
+    STA CHKSNT
 
 ; Transmission done flag - pending
-  LDY #$01
-  STY XMTDON
+    LDY #$01
+    STY XMTDON
 
 ; Reset FIFO
-  lda #0
-  sta fifo_head
-  sta fifo_tail
+    lda #0
+    sta fifo_head
+    sta fifo_tail
 
 exitStart:
     RTS
@@ -114,32 +112,32 @@ exitStart:
 
   .local Send
 
-  fifo@put
+    fifo@put
 
 startSend:
 ; skip if trasmission not end
-  LDA XMTDON
-  BEQ exitSend
+    LDA XMTDON
+    BEQ exitSend
 
 ; skip if fifo is empty
-  ldy fifo_tail
-  cpy fifo_head
-  beq exitSend
+    ldy fifo_tail
+    cpy fifo_head
+    beq exitSend
 
 ;
-  LDA #$01
-  STA CRITIC
+    LDA #$01
+    STA CRITIC
 
 ; reset transmission done flag
-  LDA #$00
-  STA XMTDON
+    LDA #$00
+    STA XMTDON
 
 ; start transmission by send byte to serial out
-  LDA FIFO_BUF,Y
-  STA SEROUT
+    LDA FIFO_BUF,Y
+    STA SEROUT
 
 exitSend:
-  rts
+    rts
 
   .endl
 
@@ -149,37 +147,39 @@ exitSend:
 ; C = 1 -
   .local Flush
 
-  bcs Send.startSend
+    bcs Send.startSend
 
 All:
-  txa:pha
+    txa:pha
 
 ; time out counter for flush FIFO
 ; 5 = roundUp(((1 / 3125) * 256) * 50)
 ; 256 = FIFO buffer size
 ; 50 = frame per second for PAL (for NTSC = 60)
 
-  ldx #5
+    ldx #5
 
 setClock:
-  ldy RCLOCK
+    ldy RCLOCK
 
 flush_loop:
-  lda XMTDON
-  bne flush_done
-  cpy RCLOCK
-  beq flush_loop
-  dex
-  bne setClock
+    lda XMTDON
+    bne flush_done
+    cpy RCLOCK
+    beq flush_loop
+    dex
+    bne setClock
 
 flush_timeout:
-  lda #0
-  sta fifo_head
-  sta fifo_tail
+    lda #0
+    sta fifo_head
+    sta fifo_tail
 
 flush_done:
-  pla:tax
-  rts
+    pla:tax
+
+    rts
+
   .endl
 
 ;--------------------------------------------------
@@ -187,46 +187,48 @@ flush_done:
 
   .local Stop
 
-  lda OVSEROUT
-  ora OVSEROUT
-  beq exitUnInit
+    lda OVSEROUT
+    ora OVSEROUT
+    beq exitUnInit
 
-  bcc noFlush
-  jsr Flush.All
+    bcc noFlush
+    jsr Flush.All
 
 noFlush:
 ;restore old vector
-  lda OVSEROUT
-  sta VSEROUT
-  lda OVSEROUT+1
-  sta VSEROUT+1
+    lda OVSEROUT
+    sta VSEROUT
+    lda OVSEROUT+1
+    sta VSEROUT+1
 
 ; Clear interrupts
 ; (5) serial input data ready
 ; (4) serial output data required
 ; (3) serial out transmission finished
-  LDA #%11000111 ; $C7
-  AND POKMSK
-  STA POKMSK
-  STA IRQEN
+    LDA #%11000111 ; $C7
+    AND POKMSK
+    STA POKMSK
+    STA IRQEN
 
 ; clear critic NMI time
-  LDA #$00
-  STA CRITIC
+    LDA #$00
+    STA CRITIC
 
 ; clear old vector
-  sta OVSEROUT
-  sta OVSEROUT+1
+    sta OVSEROUT
+    sta OVSEROUT+1
 
 ; set POKEY AUDC's registers
 set_AUDC:
-  STA AUDC3
-  STA AUDC4
+    STA AUDC3
+    STA AUDC4
 
-  sta fifo_head
-  sta fifo_tail
+    sta fifo_head
+    sta fifo_tail
+
 exitUnInit:
-  RTS
+
+    RTS
 
   .endl
 
@@ -251,8 +253,8 @@ send_stop:
   LDA #$00
   STA CRITIC
 
-
   pla:tay:pla
+
   rti
 
 send_next:
@@ -260,12 +262,8 @@ send_next:
   sta SEROUT
 
   pla:tay:pla
+
   rti
-
-;--------------------------------------------------
-;
-
-  icl './print.a65'
 
 ;--------------------------------------------------
 ; driver variables
@@ -273,6 +271,25 @@ send_next:
 ; old serial out vector
 OVSEROUT    dta a(0)
 
+;--------------------------------------------------
+; Initialize
+
+  .local init
+
+    lda #<jumpTable.DESC
+    ldy #>jumpTable.DESC
+    jsr PRINT
+
+    sec
+
+    rts
+
+    icl './print.a65'
   .endl
 
-  ; ini serial_drv.init
+  .endl
+
+;--------------------------------------------------
+
+  icl 'driver_summary.a65'
+

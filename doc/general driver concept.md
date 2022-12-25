@@ -9,6 +9,7 @@ The code presented below is for the MADS Assembler compiler.
 ~~~assembler
 
     org $2000
+    
 ~~~
 
 The driver __must__ be loaded at address $2000 and __must__ start with a Jump Table!
@@ -19,40 +20,26 @@ Generally, there is 2KB allocated for the driver which should be completely suff
 ;-------------------
 ; Driver Jump Table
 
-drvjtab:
-  jmp driver.init
-  jmp driver.setup
-  jmp driver.send
-  jmp driver.flush
-  jmp driver.shutdown
-~~~
-
-## Initialize section
-
-This section is designed to detect the device.
-
-Also, it is a good idea to include here the code responsible for displaying the driver message.
-
-~~~assembler
-  .local driver
-
-;------------
-; Initialize
-
+  .local jumpTable
+  
+    jmp driver.init
+    jmp driver.setup
+    jmp driver.send
+    jmp driver.flush
+    jmp driver.shutdown
+  
 DESC	dta c'Driver name',$9B
 
-init:
-
-; Show info about driver
-
-  lda #<DESC
-  ldy #>DESC
-  jsr PRINT
-
-;
-
-  rts
+  .endl
 ~~~
+
+
+
+## Driver Main block
+
+```assembly
+  .local driver
+```
 
 ## Setup section
 
@@ -65,7 +52,7 @@ This section must contain everything needed for the device to initialize properl
 ;---------------
 ; Setup driver
 
-setup:
+Setup:
 
   rts
 ~~~
@@ -123,15 +110,45 @@ ShutDown:
   rts
 ~~~
 
+## Variables section
+
+~~~assembler
+;------------------
+; Driver variables
+
+~~~
+
+## Initialize section
+
+This section is designed to detect the device, and is only called once, during driver initialisation from the loader block.
+The reason why it is placed at the end of the code is so that once the controller is correctly initialised, this code can be overwritten - it is not used later in the main program.
+
+Also, it is a good idea to include here the code responsible for displaying the driver message.
+
+~~~assembler
+;------------
+; Initialize
+
+  .local init
+
+; Show info about driver
+
+    lda #<DESC
+    ldy #>DESC
+    jsr PRINT
+
+	rts
+  
+  .endl
+~~~
+
 ## External procedures
 
 ~~~assembler
 ;----------------------------
 ; External procedures
 
-PRINT:
-
-    .local
+  .local PRINT
 
 ICCHID  = $0340
 ICCMD   = $0342
@@ -153,26 +170,15 @@ CIOV    = $E456
 ExitPRINT:
     rts
 
-    .endl
-~~~
-
-## Variables section
-
-~~~assembler
-;------------------
-; Driver variables
-
   .endl
 ~~~
 
-## Run driver
+## Finish
 
-The compiler should create a runnable file.
+```assemb
+.endl
+```
 
-~~~assembler
-; Run driver
 
-  ini driver.init
-~~~
 
 ## That's all

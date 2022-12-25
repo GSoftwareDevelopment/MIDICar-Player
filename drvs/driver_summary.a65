@@ -1,0 +1,12 @@
+;--------------------------------------------------
+; Driver summary
+
+  .macro single_sum name method
+    .print :name,': ', driver.:method,'..', driver.:method+.sizeof(driver.:method), ' (', .sizeof(driver.:method),')'
+  .endm
+
+  single_sum 'INIT' init
+  single_sum 'START' start
+  single_sum 'SEND' send
+  single_sum 'FLUSH' flush
+  single_sum 'STOP' stop
