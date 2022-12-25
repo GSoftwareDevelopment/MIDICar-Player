@@ -3,8 +3,10 @@ clearUVMeter:
 
   ldx #0
 clearLoop:
-  lda #$4b
 VClr:
+  lda #$00
+  sta MIDFILES.adr.CHNVOLUME,x
+  lda #$4b
   sta SCREEN_CHANNELS+42,x
   sta SCREEN_CHANNELS+62,x
   sta SCREEN_CHANNELS+82,x
