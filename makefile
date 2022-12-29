@@ -31,7 +31,7 @@ compile_pas: MCP.pas
 	${CPAS} MCP.pas -ipath:./ -define:USE_FIFO -code:8000 -data:0400 -o:${ASMPATH}/MCP.a65
 
 compile_asm: ${ASMPATH}/MCP.a65
-	${CASM} ${ASMPATH}/MCP.a65 ${CFLAGS} -i:${MPBASE} -o:${BINPATH}/mcp.bin
+	${CASM} ${ASMPATH}/MCP.a65 -m:../res/macros.a65 ${CFLAGS} -i:${MPBASE} -o:${BINPATH}/mcp.bin
 
 link: ${BINPATH}/loader.bin ${BINPATH}/mcp.bin
 	rm -vf ${BINPATH}/${EXEFILE}.exe
