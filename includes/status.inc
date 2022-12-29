@@ -5,14 +5,9 @@ begin
   scradr:=SCREEN_STATUS; PutINTText(msg);
 end;
 
-procedure resetMemoryPtr;
+procedure calcAvailableMem;
 begin
   memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
-  last_bank:=totalXMS;
-  if totalXMS>0 then
-    last_adr:=$4000
-  else
-    last_adr:=$d800;
 end;
 
 procedure clearUVMeters; Assembler;

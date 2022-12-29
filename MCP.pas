@@ -17,7 +17,6 @@ Uses
 {$r player.rc}
 
 var
-  listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
   _tm:Byte absolute $14;
   otm:Byte absolute $13;
   ctm:Byte absolute $12;
@@ -36,15 +35,14 @@ var
 
 // selector variables
 
+  listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
+
   lstY:Byte;
   lstShift:SmallInt;
   lstCurrent:SmallInt;
   lstTotal:SmallInt;
 
   curPlay:SmallInt;
-
-  last_bank:Byte;
-  last_adr:Word;
 
 // counter
 
@@ -53,7 +51,6 @@ var
   counter:Longint absolute $88;
   cntBCD:Longint absolute $8c;
 
-procedure drawListSelection; Forward;
 {$i myNMI.inc}
 {$i status.inc}
 {$i load.inc}

@@ -21,8 +21,8 @@ begin
   statusStopped;
   validPath;
 
-  resetMemoryPtr;
-  _bank:=last_bank; _adr:=last_adr;
+  calcAvailableMem;
+  _bank:=totalXMS; _adr:=$4000;
 
   clearStatus;
   putStatus(statusMsgs[4]);

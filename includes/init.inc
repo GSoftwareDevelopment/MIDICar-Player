@@ -23,6 +23,7 @@ begin
   //   listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
   // end;
 
+  calcAvailableMem;
   clearList;
   setColors;
   DMACTL:=34; waitFrame;

@@ -1,6 +1,5 @@
 procedure clearList;
 begin
-  resetMemoryPtr;
   fileList:=pointer(LIST_ADDR);
   lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
   chn:=0;
