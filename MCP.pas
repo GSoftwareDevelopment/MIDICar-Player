@@ -21,14 +21,17 @@ var
   _tm:Byte absolute $14;
   otm:Byte absolute $13;
   ctm:Byte absolute $12;
-  refreshRate:Byte absolute $D2;
-  totalXMS:Byte absolute $D3; // this value is initialized by loader
   chn:Byte absolute $D6;
   v:shortint absolute $D7;
   _v:byte absolute $D7;
   playerStatus:Byte absolute $D8;
   screenStatus:Byte absolute $D9;
 
+// this value is initialized by loader
+  refreshRate:Byte absolute $D2;
+  totalXMS:Byte absolute $D3;
+
+//
   memAvailable:longint;
 
 // selector variables
@@ -64,13 +67,15 @@ begin
   asm lda PORTB \ pha end;
   init;
 
+// Loader init `outstr` and now its time to check for correct file specification
   validPath; // result in '_v' indicate what part of file spec is available
   _adr:=$ffff;
-  if (_v and dp_name=0) then
-    _bank:=fl_device
+  if (_v and dp_name=0) then // if file name is not specified...
+    _bank:=fl_device // set entry type as Device
   else
-    _bank:=fl_midifile;
+    _bank:=fl_midifile; // set entry type as MIDIFila
 
+  // create new entry
   gotoNEntry(0); addToList(outStr);
   choiceListFile; resultInputLine:=true; keyb:=k_RETURN;
 
@@ -101,7 +106,7 @@ begin
         end;
       end;
 
-      scradr:=screen_time+14;
+      scradr:=screen_time+54;
       if timeShowMode=1 then
         putHex(counter,6)
       else if timeShowMode=2 then

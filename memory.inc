@@ -1,20 +1,38 @@
-SCREEN_ADDR     = $2800;              // $604 (1540)
+CHARS_ADDR      = $2400;              // $400 (1024)
+SCREEN_ADDR     = $2800;              // $6A4 (1700)
+
+UVMETER_ADDR    = $2E04;              // $040 (  64)
+SCREEN_ADRSES   = UVMETER_ADDR+$40;   // $020 (  32)
+KEY_TABLE_ADDR  = $2F00;              // $080 ( 128)
+
 DLIST_ADDR      = $2FB3;              // $04C (  76)
 
-  SCREEN_HEAD     = SCREEN_ADDR;        // $2f8 ( 760)
-  SCREEN_FOOT     = SCREEN_HEAD+19*40;  // $028 (  40)
-  SCREEN_WORK     = SCREEN_FOOT+40;     // $2d0 ( 720)
-  SCREEN_CHANNELS = SCREEN_WORK+12*40;  // $0a0 ( 160)
-  SCREEN_TIME     = SCREEN_WORK+16*40;  // $014 (  20)
-  SCREEN_STATUS   = SCREEN_TIME+20;     // $028 (  40)
-  SCREEN_TIMELINE = SCREEN_STATUS+40;   // $028 (  40)
+// -------------------------------------------------
 
-CHARS_ADDR      = $3000;              // $400 (1024)
-KEY_TABLE_ADDR  = $3400;              // $080 ( 128)
-UVMETER_ADDR    = $3500;              // $040 (  64)
-  SCREEN_ADRSES   = UVMETER_ADDR+$40;   // $020 (  32)
-  HELPSCR_ADDR    = SCREEN_ADRSES+$20;  // $2d0 ( 720)
+SCREEN_HEAD     = SCREEN_ADDR;
+HEAD_SIZE       = 19*40;              // $2f8 ( 760)
 
+SCREEN_FOOT     = SCREEN_HEAD+HEAD_SIZE;
+FOOT_SIZE       = 40;                 // $028 (  40)
+
+SCREEN_WORK     = SCREEN_FOOT+FOOT_SIZE;
+WORK_SIZE       = 12*40;              // $2d0 ( 720)
+
+SCREEN_CHANNELS = SCREEN_WORK+WORK_SIZE;
+CHANNELS_SIZE   = 40+4*20;            // $078 ( 120)
+
+SCREEN_TIME     = SCREEN_CHANNELS+CHANNELS_SIZE;
+TIME_SIZE       = 40+20;              // $03C (  60)
+
+SCREEN_TIMELINE = SCREEN_TIME+TIME_SIZE;
+TIMELINE_SIZE   = 40;                 // $028 (  40)
+
+SCREEN_STATUS   = SCREEN_TIMELINE+TIMELINE_SIZE;
+STATUS_SIZE     = 40;                 // $028 (  40)
+
+// -------------------------------------------------
+
+HELPSCR_ADDR    = $3000;              // $2d0 ( 720)
 START_INFO_ADDR = $3C00;              // $200 ( 512)
 TRACK_DATA_ADDR = $3E00;              // $200 ( 512)
 

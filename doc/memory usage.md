@@ -70,34 +70,43 @@
 
 ## Data
 
-| Address        | Size         | Name             | Function                                                     | Source   |
-| -------------- | ------------ | ---------------- | ------------------------------------------------------------ | -------- |
-| `$2800..$2E03` | 1540 ($604)  |                  | Screen data                                                  | main     |
-|                |              |                  |                                                              |          |
-| `$2FB3..$2FFF` | 76 ($4C)     | `DLIST_ADDR`     | Display List                                                 | main     |
-| `$3000..$33FF` | 1024 ($400)  | `CHARS_ADDR`     | Char set definition                                          | main     |
-| `$3400..$347F` | 128 ($80)    | `KEY_TABLE_ADDR` | Keys jump table                                              | main     |
-| `$3500..$353F` | 64 ($40)     | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
-| `$3540..$355F` | 32 ($20)     | `SCREEN_ADRSES`  | listScrAdr                                                   | main     |
-| `$3560..$382F` | 720 ($2D0)   | `HELPSCR_ADDR`   |                                                              | main     |
-| `$3830..$3AFF` | 720 ($2D0)   |                  |                                                              | main     |
-|                |              |                  |                                                              |          |
-| `$3C00`        | 512          |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles |
-| `$3E00`        | 512          |                  | Tracks information                                           | midfiles |
-|                |              |                  |                                                              |          |
-| `$80..$D3`     |              | ZPAGE            | MADPascal ZP variables                                       | EXE      |
-| `$8000..$ACEC` |              | CODE             | MADPascal executable code                                    | EXE      |
-| `$0400..$0482` |              | DATA             | MADPascal Static Data                                        | EXE      |
-|                |              |                  |                                                              |          |
-|                |              |                  |                                                              |          |
-| `$4000..$7FFF` |              |                  | Song data                                                    | midfiles |
-| `$C000..$CFFF` | 4096 ($1000) | `LIST_ADDR`      |                                                              | main     |
-| `$D800..$FF00` |              |                  | Song data                                                    | midfiles |
+| Address            |            Size | Name             | Function                                                     | Source   |
+| ------------------ | --------------: | ---------------- | ------------------------------------------------------------ | -------- |
+| `$2380..$23FF`     |       128 ($80) | `KEY_TABLE_ADDR` | Keys jump table                                              | main     |
+| `$2400..$27FF`     |     1024 ($400) | `CHARS_ADDR`     | Char set definition                                          | main     |
+|                    |                 |                  |                                                              |          |
+| **`$2800..$2E03`** | **1780 ($6F4)** |                  | **Screen data**                                              | **main** |
+| `$2800..$2AF7`     |      760 ($2F8) | SCREEN_HEAD      | Screen header                                                |          |
+| `$2AF8..$2B1F`     |       40 ($028) | SCREEN_FOOT      | Screen footer                                                |          |
+| `$2B20..$2CFF`     |      720 ($2D0) | SCREEN_WORK      | Screen Work Area                                             |          |
+| `$2D00..$2D77`     |      120 ($078) | SCREEN_CHANNELS  | Screen Channels View                                         |          |
+| `$2D78..$2D83`     |       60 ($03C) | SCREEN_TIME      | Screen control & time                                        |          |
+| `$2D84..$2DDB`     |       40 ($028) | SCREEN_TIMELINE  | Screen song time line progress                               |          |
+| `$2DDC..$2E03`     |       40 ($028) | SCREEN_STATUS    | Screen status line                                           |          |
+|                    |                 |                  |                                                              |          |
+| `$2FB3..$2FFF`     |        76 ($4C) | `DLIST_ADDR`     | Display List                                                 | main     |
+| `$3500..$353F`     |        64 ($40) | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
+| `$3540..$355F`     |        32 ($20) | `SCREEN_ADRSES`  | listScrAdr                                                   | main     |
+|                    |                 |                  |                                                              |          |
+| `$3560..$382F`     |      720 ($2D0) | `HELPSCR_ADDR`   |                                                              | main     |
+| `$3830..$3AFF`     |      720 ($2D0) |                  |                                                              | main     |
+|                    |                 |                  |                                                              |          |
+| `$3C00`            |             512 |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles |
+| `$3E00`            |             512 |                  | Tracks information                                           | midfiles |
+|                    |                 |                  |                                                              |          |
+| `$80..$D3`         |                 | ZPAGE            | MADPascal ZP variables                                       | EXE      |
+| `$8000..$ACDD`     |                 | CODE             | MADPascal executable code                                    | EXE      |
+| `$0400..$0480`     |                 | DATA             | MADPascal Static Data                                        | EXE      |
+|                    |                 |                  |                                                              |          |
+|                    |                 |                  |                                                              |          |
+| `$4000..$7FFF`     |                 |                  | Song data                                                    | midfiles |
+| `$C000..$CFFF`     |    4096 ($1000) | `LIST_ADDR`      |                                                              | main     |
+| `$D800..$FF00`     |                 |                  | Song data                                                    | midfiles |
 
 
 
 # Driver
 
-| Address        | Size        | Name             | Function                                                     | Source   |
-| -------------- | ----------- | ---------------- | ------------------------------------------------------------ | -------- |
-| `$2000..$27FF` | 2048 ($800) |                  | MIDI Driver                                                  | driver   |
+| Address        | Size       | Name | Function    | Source |
+| -------------- | ---------- | ---- | ----------- | ------ |
+| `$2000..$22FF` | 768 ($300) |      | MIDI Driver | driver |

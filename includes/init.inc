@@ -3,7 +3,7 @@ begin
   DMACTL:=0;
   waitFrame;
 
-  CHBASE:=$32;
+  CHBASE:=hi(CHARS_ADDR)+2; // $32;
   SDLST:=DLIST_ADDR;
 
   clearWorkArea;
@@ -11,9 +11,9 @@ begin
   clearUVMeters;
   scradr:=SCREEN_CHANNELS; HLine;
   scradr:=SCREEN_CHANNELS+15; putINTText(#$4e+'Channels'~*+#$ce);
-  scradr:=SCREEN_TIME-40; HLine;
-  scradr:=SCREEN_TIME-39; putINTText(#$4e+'Status'~*+#$ce);
-  scradr:=SCREEN_TIME-10; putINTText(#$4e+'Counter'~*+#$ce);
+  scradr:=SCREEN_TIME; HLine;
+  scradr:=SCREEN_TIME+1; putINTText(#$4e+'Status'~*+#$ce);
+  scradr:=SCREEN_TIME+30; putINTText(#$4e+'Counter'~*+#$ce);
 
   MIDTracks:=Pointer(TRACK_DATA_ADDR);
 

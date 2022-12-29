@@ -30,14 +30,14 @@ const
   );
 
 begin
-  scradr:=SCREEN_TIME+6;
+  scradr:=SCREEN_TIME+46;
   v:=playerStatus and ps_loop;
   putINTText(sloop[v]);
 end;
 
 procedure statusPlaying;
 begin
-  scradr:=SCREEN_TIME;
+  scradr:=SCREEN_TIME+40;
   if totalTracks>0 then
   begin
     putINTText(#$3b+#0+#$fc+#0+#$fd);
@@ -60,7 +60,7 @@ end;
 procedure statusPause;
 begin
   if (playerStatus and ps_isStopped)<>0 then exit;
-  scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$3c+#0+#$fd);
+  scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$3c+#0+#$fd);
   putStatus(statusMsgs[2]);
   _timerStatus:=_timerStatus or f_counter;
 end;
@@ -71,7 +71,7 @@ begin
   if (totalTracks=0) or
      ((playerStatus and ps_isStopped)<>0) then exit;
   playerStatus:=playerStatus or ps_isStopped;
-  scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$3d);
+  scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$fc+#0+#$3d);
   putStatus(statusMsgs[3]);
   doneMIDI;
   move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
@@ -81,7 +81,7 @@ end;
 
 procedure updateMem;
 var
-  memAKB:Word;  {?}
+  memAKB:Word absolute $8c; {?}
 
 begin
   memAKB:=memAvailable div 1024;
@@ -97,8 +97,8 @@ end;
 
 procedure clearStatus;
 begin
-  fillchar(pointer(SCREEN_TIME),100,0);
-  scradr:=SCREEN_TIME; putINTText(#$fb+#0+#$fc+#0+#$fd);
+  fillchar(pointer(SCREEN_TIME+40),100,0);
+  scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$fc+#0+#$fd);
   statusLoop;
   updateMem;
   asm
