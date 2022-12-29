@@ -1,0 +1,3 @@
+    .macro single_sum desc start size
+        .print '  SCREEN-', :desc, ' ', MAIN.:start, '..', MAIN.:start+MAIN.:size-1, ' (', MAIN.:size, ')'
+    .endm
