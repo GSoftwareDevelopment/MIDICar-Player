@@ -36,6 +36,6 @@ const
   COLORS_ADDR = $4E0;
 
 // MIDI Reset SysEx Message Address
-  GM_RESET_ADDR = $2700;
+  GM_RESET_ADDR = $3B00;
 
   ERR_FULL_LIST = 99;

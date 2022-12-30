@@ -19,7 +19,7 @@ screenStatus    = $D9
 tmp             = $80
 isSDX           = $82   ; SDX detected
 colors_tab      = $4E0
-SysEx_MSG       = $2700
+SysEx_MSG       = $3B00
 outstr          = $55A  ; MCP full file spec input
 
 ; MCBASE  = $D8
