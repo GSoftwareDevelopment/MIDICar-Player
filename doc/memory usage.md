@@ -38,33 +38,36 @@
 
 ## Variables
 
-| Address      |         | Type               | Name      | Description | source    |
-| ------------ | ------- | ------------------ | --------- | ----------- | --------- |
-| `$D6`        |         | Byte               | chn       |             | main      |
-| `$D7`        |         | ShortInt<br />Byte | v<br />_v |             | main      |
-|              |         |                    |           |             |           |
-|              |         |                    |           |             |           |
-| `$D6`        |         | Byte               | ilch      |             | inputLine |
-| `$54`        |         | Byte               | ilpos     |             | inputLine |
-| `$55`        |         | Word               | ilscradr  |             | inputLine |
-|              |         |                    |           |             |           |
-| `$88`        |         | Long               | counter   |             | main      |
-| `$8c`        |         | Long               | cntBCD    |             | main      |
-|              |         |                    |           |             |           |
-| `$4f0..$4f7` | 6 (+1)  | TDevString         | curDev    |             | main      |
-| `$4f8..$538` | 64 (+1) | TPath              | curPath   |             | main      |
-| `$539..$559` | 32 (+1) | TFilename          | fn        |             | main      |
-|              |         |                    |           |             |           |
+| Address        |         | Type               | Name        | Description | source    |
+| -------------- | ------- | ------------------ | ----------- | ----------- | --------- |
+| `$D6`          |         | Byte               | chn         |             | main      |
+| `$D7`          |         | ShortInt<br />Byte | v<br />_v   |             | main      |
+|                |         |                    |             |             |           |
+|                |         |                    |             |             |           |
+| `$D6`          |         | Byte               | ilch        |             | inputLine |
+| `$54`          |         | Byte               | ilpos       |             | inputLine |
+| `$55`          |         | Word               | ilscradr    |             | inputLine |
+|                |         |                    |             |             |           |
+| `$88`          |         | Long               | counter     |             | main      |
+| `$8c`          |         | Long               | cntBCD      |             | main      |
+|                |         |                    |             |             |           |
+| `$0400..$047D` |         | MCP Variables      |             |             | MCP       |
+|                |         |                    |             |             |           |
+| `$4e0..$4ef`   | 16      | array              | COLORS_ADDR |             | main      |
+| `$4f0..$4f7`   | 6 (+1)  | TDevString         | curDev      |             | main      |
+| `$4f8..$538`   | 64 (+1) | TPath              | curPath     |             | main      |
+| `$539..$559`   | 32 (+1) | TFilename          | fn          |             | main      |
+|                |         |                    |             |             |           |
 
 
 
 ## Buffers
 
-| Start        | Size | Name       | Function    | Source    |
-| ------------ | ---- | ---------- | ----------- | --------- |
-| `$55A..$5AA` | 80   | outstr     |             | main      |
-| `$5AB..$5FB` | 80   | snull      |             | main      |
-| `$0600`      | 256  | `FIFO_Buf` | FIFO Buffer | midi_fifo |
+| Start        | Size | Name   | Function | Source |
+| ------------ | ---- | ------ | -------- | ------ |
+| `$55A..$5AA` | 80   | outstr |          | main   |
+| `$5AB..$5FB` | 80   | snull  |          | main   |
+|              |      |        |          |        |
 
 
 
@@ -91,12 +94,13 @@
 | `$3560..$382F`     |      720 ($2D0) | `HELPSCR_ADDR`   |                                                              | main     |
 | `$3830..$3AFF`     |      720 ($2D0) |                  |                                                              | main     |
 |                    |                 |                  |                                                              |          |
+| `$3B00..$3BFF`     |             256 |                  |                                                              |          |
 | `$3C00`            |             512 |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles |
 | `$3E00`            |             512 |                  | Tracks information                                           | midfiles |
 |                    |                 |                  |                                                              |          |
 | `$80..$D3`         |                 | ZPAGE            | MADPascal ZP variables                                       | EXE      |
 | `$8000..$ACDD`     |                 | CODE             | MADPascal executable code                                    | EXE      |
-| `$0400..$0480`     |                 | DATA             | MADPascal Static Data                                        | EXE      |
+|                    |                 |                  | MADPascal Static Data                                        | EXE      |
 |                    |                 |                  |                                                              |          |
 |                    |                 |                  |                                                              |          |
 | `$4000..$7FFF`     |                 |                  | Song data                                                    | midfiles |
@@ -107,6 +111,7 @@
 
 # Driver
 
-| Address        | Size       | Name | Function    | Source |
-| -------------- | ---------- | ---- | ----------- | ------ |
-| `$2000..$22FF` | 768 ($300) |      | MIDI Driver | driver |
+| Address        | Size       | Name       | Function    |
+| -------------- | ---------- | ---------- | ----------- |
+| `$0600`        | 256        | `FIFO_Buf` | FIFO Buffer |
+| `$2000..$22FF` | 768 ($300) |            | MIDI Driver |
