@@ -1,4 +1,4 @@
-![](./MIDICar Logo.png)
+![](./doc/MIDICar Logo.png)
 
 # Introduction
 
