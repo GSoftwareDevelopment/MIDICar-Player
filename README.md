@@ -1,4 +1,4 @@
-![MIDICar logo](/doc/MIDICar Logo.png)
+![MIDICar logo](/main/doc/MIDICar%20Logo.png)
 
 # Introduction
 
