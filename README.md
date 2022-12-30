@@ -1,4 +1,4 @@
-![](/home/pebe/Projekty/Atari/MIDIcar/doc/MIDICar Logo.png)
+![](./MIDICar Logo.png)
 
 # Introduction
 
@@ -65,7 +65,7 @@ They load in the area from $2000 onward. After running, a corresponding message 
 
 More about the drivers in the document `general drivers concept.md` in the `/doc` directory.
 
-## Bundling 
+## Bundling
 
 There may be problems loading the driver from under DOS that do not have a Command Line with parameter passing. The solution to this is to be able to link the driver together with the main program.
 
