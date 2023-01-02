@@ -100,6 +100,10 @@ Jerzy "Mono" Kut
 
 All PTODT Users
 
+# If you like this...
+
+[![ByMeCaffee](../../../GSoftwareDevelopment/raw/main/bmc.png)](https://www.buymeacoffee.com/PeBe)
+
 # Licence
 
 Copyright (c) 2021-2022 GSD
@@ -121,7 +125,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-# If you like this...
-
-[![ByMeCaffee](../../../GSoftwareDevelopment/raw/main/bmc.png)](https://www.buymeacoffee.com/PeBe)
