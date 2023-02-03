@@ -11,7 +11,7 @@
   jmp driver.flush
   jmp driver.stop
 
-DESC	dta c'MIDICar Driver 2.0 by GSD',$9B
+DESC	dta c'MIDICar Driver 2.1 by GSD',$9B
 
   .endl
 
@@ -162,10 +162,19 @@ isMCInit    dta b(0)
 
   .local init
 
+MCBASE = $82
+
     lda #<jumpTable.DESC
     ldy #>jumpTable.DESC
     jsr PRINT
 
+    lda MCBASE+1
+    bne ForceMCBase
+    lda MCBASE
+    cmp #100
+    bne ForceMCBase
+
+MCdetect:
     jsr detect_MC
     bcs MCNotFound
 
@@ -192,17 +201,18 @@ MCFound:
     jmp setMCPort
 
 MCNotFound:
-    lda #100
-    sta MCBASE
-    lda #0
-    sta MCBASE+1
-    lda #$02
-    sta 100
     lda #<MIDICAR_NOT_FOUND
     ldy #>MIDICAR_NOT_FOUND
     jsr PRINT
 
     clc
+
+    rts
+
+ForceMCBase:
+    lda #$03
+    ldy #0
+    sta (MCBASE),y
 
 setMCPort:
     ldy MCBASE
@@ -234,7 +244,6 @@ setMCPort:
 ;--------------------------------------------------
 ; initialise variables & constants
 
-MCBASE              dta a(0)
 MIDICAR_EXIST:      dta c'MIDICar detected at $'
 MCBASEADDR:         dta c'0000',$9B
 MIDICAR_NOT_FOUND:  dta c'Can''t detect MIDICar :(',$9B
