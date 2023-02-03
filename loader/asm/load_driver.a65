@@ -1,6 +1,4 @@
     .local load_Driver
-isLoaded= $81   ; driver is loaded
-
 _head   = $2000
 _sadr   = $2002
 _eadr   = $2004

@@ -58,6 +58,7 @@ noSwitch:
 
 switchTab:
     dta 'D',a(load_driver)
+    dta 'A',a(set_driverBaseAddr)
     dta 'R',a(set_refreshRate)
     dta 'C',a(set_colors)
     dta 'S',a(set_sysexMsg)

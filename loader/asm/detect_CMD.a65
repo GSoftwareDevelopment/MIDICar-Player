@@ -8,7 +8,9 @@ detect_DOS:
 NoDOS:
     lda #<MSG_NO_DOS
     ldy #>MSG_NO_DOS
-    jmp Halt
+    pla
+    pla
+    jmp exit2DOS
 
 FoundDOS:
     lda dosvec+1        ; a jeśli tak, czy DOSVEC nie wskazuje ROM-u
@@ -21,12 +23,6 @@ DOSbeforeROM:
     ldy #$03
     lda (dosvec),y
     cmp #$4c
-    ; bne _no_command_line
     rts
-
-Halt:
-    pla
-    pla
-    jmp exit2DOS
 
     .endl

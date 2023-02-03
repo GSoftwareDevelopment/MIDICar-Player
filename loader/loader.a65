@@ -16,17 +16,20 @@ refreshRate     = $D2
 AEXTMEM         = $D3
 playerStatus    = $D8
 screenStatus    = $D9
+
+isLoaded        = $81   ; driver is loaded
 tmp             = $80
 isSDX           = $82   ; SDX detected
 colors_tab      = $4E0
 SysEx_MSG       = $3B00
 outstr          = $55A  ; MCP full file spec input
+driverBaseAddr  = $82
 
 ; MCBASE  = $D8
 
 START:
     lda #0
-    sta load_Driver.isLoaded
+    sta isLoaded
 
 ; SpartaDOS X detect
 .ifdef DEBUG
@@ -164,6 +167,7 @@ exit:
     icl 'asm/get_param.a65'
     icl 'asm/load_driver.a65'
     icl 'asm/verify_driver.a65'
+    icl 'asm/set_driverBaseAddr.a65'
     icl 'asm/set_refresh_rate.a65'
     icl 'asm/set_colors.a65'
     icl 'asm/set_sysexMsg.a65'

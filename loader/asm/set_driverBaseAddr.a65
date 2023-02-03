@@ -1,0 +1,21 @@
+    .local set_driverBaseAddr
+
+    lda #4
+    sta read_hex_data.dataLength
+    lda #<driverBaseAddr
+    sta read_hex_data.destAddr
+    lda #>driverBaseAddr
+    sta read_hex_data.destAddr+1
+    jsr read_hex_data
+
+    bcc Error
+
+    lda driverBaseAddr
+    ldx driverBaseAddr+1
+    sta driverBaseAddr+1
+    stx driverBaseAddr
+
+Error:
+    rts
+
+    .endl
