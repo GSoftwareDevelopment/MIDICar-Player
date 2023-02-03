@@ -118,6 +118,8 @@ end;
 
 procedure resetMIDI; assembler;
 asm
+GM_RESET_ADDR = $3B00;
+
   txa:pha
 
 // call driver - setup
