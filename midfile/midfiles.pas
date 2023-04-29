@@ -59,6 +59,7 @@ procedure setTempo;
 procedure ProcessTrack; Assembler;
 procedure ProcessMIDI;
 procedure determineSongLength;
+procedure sendClearPushLCD; Keep;
 
 implementation
 Uses

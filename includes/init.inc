@@ -42,6 +42,8 @@ end;
 
 procedure exit2DOS; keep;
 begin
+  sendClearPushLCD;
+
   unsetNMI;
   doneMIDI;
   Cls(0); Opn(0,12,0,'E:'); // SOUNDR:=1;

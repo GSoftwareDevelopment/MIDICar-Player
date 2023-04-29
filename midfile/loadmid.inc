@@ -1,3 +1,38 @@
+procedure sendClearPushLCD; Keep;
+const
+  push_sysex:array[0..5] of byte = (
+    $f0, $47, $7f, $15, $00, $F7
+  );
+
+begin
+  asm
+  event = $ff
+
+    sei
+    jsr $2003
+    cli
+
+    ldx #0
+
+  sysex_header_loop:
+    txa
+    pha
+    lda ADR.PUSH_SYSEX,x
+    sta event
+    jsr $2006
+    pla
+    tax
+    inx
+    cpx #6
+    bne sysex_header_loop
+
+    sei
+    sec       ; flush buffer & uninitialize driver
+    jsr $200c
+    cli
+  end;
+end;
+
 function LoadMID:shortint;
 const
   LOADBUF_SIZE=16*1024;
@@ -36,6 +71,8 @@ var
   end;
 
 begin
+  sendClearPushLCD;
+
   Opn(CIO_CHN,4,0,fn);
   if IOResult>127 then
   begin

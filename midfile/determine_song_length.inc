@@ -1,3 +1,54 @@
+procedure sendPushLCDText; Keep;
+const
+  push_sysex:array[0..7] of byte = (
+    $f0, $47, $7f, $15, $01, $00, $45, $00
+  );
+
+begin
+  asm
+  event = $ff
+
+    sei
+    jsr $2003
+    cli
+
+    ldx #0
+
+  sysex_header_loop:
+    txa
+    pha
+    lda ADR.PUSH_SYSEX,x
+    sta event
+    jsr $2006
+    pla
+    tax
+    inx
+    cpx #8
+    bne sysex_header_loop
+
+  // sysex data loop
+    jmp checkDataLen
+  readLoop:
+    jsr MAIN.MIDFILES.readB
+    jsr $2006
+
+    dec _tmp
+
+  checkDataLen:
+    lda _tmp
+    bne readLoop
+
+    lda #$F7
+    sta event
+    jsr $2006
+
+    sei
+    sec       ; flush buffer & uninitialize driver
+    jsr $200c
+    cli
+  end;
+end;
+
 procedure determineSongLength;
 begin
   _songTicks:=0; curTrackPtr:=@MIDTracks;
@@ -83,6 +134,22 @@ begin
       lda event
       cmp #$2F      ; end of track
       beq exitUntil
+
+      cmp #$01      ; meta for Text
+      beq pushText
+      cmp #$02      ; meta for Copyright
+      beq pushText
+      cmp #$03      ; meta for Sequence/Track name
+      bne endCase
+
+    pushText:
+      // lda cTrk
+      // cmp #1        ; only for track #1 (0)
+      // bne endCase
+
+      jsr sendPushLCDText
+
+      jmp processTrack
 
     endCase:
 

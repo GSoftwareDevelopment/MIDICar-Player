@@ -1,6 +1,6 @@
-{$LIBRARYPATH midfile/}
-{$LIBRARYPATH units/}
-{$LIBRARYPATH includes/}
+{$LIBRARYPATH './midfile/'}
+{$LIBRARYPATH './units/'}
+{$LIBRARYPATH './includes/'}
 {$DEFINE ROMOFF}
 Uses
   MIDFiles,
@@ -9,12 +9,12 @@ Uses
   filestr,
   screen,
   list,
-  inputLine;
+  inputline;
 {$I-}
 
-{$i const.inc}
+{$i 'const.inc'}
 
-{$r player.rc}
+{$r 'player.rc'}
 
 var
   _tm:Byte absolute $14;
@@ -51,14 +51,14 @@ var
   counter:Longint absolute $88;
   cntBCD:Longint absolute $8c;
 
-{$i myNMI.inc}
-{$i status.inc}
-{$i load.inc}
-{$i list.inc}
-{$i getdirectory.inc}
-{$i keyboard.inc}
-{$i autostop_songchange.inc}
-{$i init.inc}
+{$i 'myNMI.inc'}
+{$i 'status.inc'}
+{$i 'load.inc'}
+{$i 'list.inc'}
+{$i 'getdirectory.inc'}
+{$i 'keyboard.inc'}
+{$i 'autostop_songchange.inc'}
+{$i 'init.inc'}
 
 begin
   asm lda PORTB \ pha end;
@@ -83,7 +83,7 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    if _tm-otm>refreshRate then
+    if {_tm-otm<>0} byte(_tm-otm)>refreshRate then
     begin
       otm:=_tm;
       if screenStatus and ss_isRefresh<>0 then

@@ -1,4 +1,4 @@
-unit inputLine;
+unit inputline;
 
 interface
 

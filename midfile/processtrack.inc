@@ -2,7 +2,7 @@
 
 }
 
-procedure readB; Inline; Assembler;
+procedure readB; Keep; Assembler;
 asm
 event = $ff;
 
