@@ -11,7 +11,7 @@
   jmp driver.flush
   jmp driver.stop
 
-DESC	dta c'MIDIBox Driver 2.0 by GSD',$9B
+DESC	dta c'MIDIBox Driver 2.0a by GSD',$9B
 
   .endl
 
@@ -176,6 +176,13 @@ flush_timeout:
     sta fifo_tail
 
 flush_done:
+
+waitFrame:
+    bit VCOUNT
+    bmi *-3
+    bit VCOUNT
+    bpl *-3
+
     pla:tax
 
     rts

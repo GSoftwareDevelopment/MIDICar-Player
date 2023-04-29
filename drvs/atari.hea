@@ -23,3 +23,6 @@ SEROUT		= $D20D
 IRQEN		= $D20E
 
 PACTL       = $d302
+PBCTL       = $d303
+
+VCOUNT      = $D40B

@@ -11,7 +11,7 @@
   jmp driver.flush
   jmp driver.stop
 
-DESC	dta c'MIDIMate Driver 2.0 by GSD',$9B
+DESC	dta c'MIDIMate Driver 2.0a by GSD',$9B
 
   .endl
 
@@ -48,6 +48,10 @@ DESC	dta c'MIDIMate Driver 2.0 by GSD',$9B
     lda pactl
     and #$f7
     sta pactl
+; set COMMAND LINE active
+    lda pbctl
+    and #$f7
+    sta pbctl
 
 ; set serial
     LDA #%00000111	; $07
@@ -159,6 +163,13 @@ flush_timeout:
     sta fifo_tail
 
 flush_done:
+
+waitFrame:
+    bit VCOUNT
+    bmi *-3
+    bit VCOUNT
+    bpl *-3
+
     pla:tax
 
     rts
@@ -189,6 +200,10 @@ noFlush:
     lda pactl
     ora #$08
     sta pactl
+; clear COMMAND LINE
+    lda pbctl
+    ora #$08
+    sta pbctl
 
 ; Clear interrupts
 ; (5) serial input data ready

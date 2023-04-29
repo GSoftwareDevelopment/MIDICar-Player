@@ -11,7 +11,7 @@
   jmp driver.flush
   jmp driver.stop
 
-DESC	dta c'MIDICar Driver 2.1 by GSD',$9B
+DESC	dta c'MIDICar Driver 2.1a by GSD',$9B
 
   .endl
 
@@ -37,7 +37,7 @@ DESC	dta c'MIDICar Driver 2.1 by GSD',$9B
 ; Start serial port service
 
   .local Start
-    bit isMCInit
+    lda isMCInit
     bne exitStart
 
     lda #1
@@ -116,6 +116,13 @@ waitOnMC:
     jmp flushLoop
 
 endFlush:
+
+waitFrame:
+    bit VCOUNT
+    bmi *-3
+    bit VCOUNT
+    bpl *-3
+
     sty FIFO_Tail
 
     cli
@@ -128,7 +135,7 @@ endFlush:
 
   .local Stop
 
-    bit isMCInit
+    lda isMCInit
     beq exitUnInit
 
     bcc noFlush
