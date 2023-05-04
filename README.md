@@ -1,5 +1,7 @@
 ![MIDICar logo](/doc/MIDICar%20Logo.png)
 
+[About MIDICar](https://github.com/GSoftwareDevelopment/MIDICar-Player)
+
 # Introduction
 
 The repository contains source code for a MIDI file player designed for the ATARI 8-bit platform.

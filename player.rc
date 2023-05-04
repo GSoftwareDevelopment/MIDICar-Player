@@ -1,11 +1,13 @@
-SCREEN_HEAD rcdata 'res/graph.obj';
-DLIST_ADDR rcasm 'res/dlist.asm';
+SCREEN_HEAD rcdata 'res/graph.obj'
 
-CHARS_ADDR rcdata 'res/font_blk-uvh.fnt';
+DLIST_ADDR rcasm 'res/dlist.asm'
 
-KEY_TABLE_ADDR rcasm 'res/key_table.a65';
+CHARS_ADDR rcdata 'res/font_blk2-uvh.fnt'
 
-UVMETER_ADDR rcdata 'res/uvmeter-h.obj';
+KEY_TABLE_ADDR rcasm 'res/key_table.a65'
+
+UVMETER_ADDR rcdata 'res/uvmeter-h.obj'
+
 SCREEN_ADRSES rcdata 'res/screen_addresses.obj'
 
-HELPSCR_ADDR rcdata 'res/help.obj';
+HELPSCR_ADDR rcdata 'res/help.obj'

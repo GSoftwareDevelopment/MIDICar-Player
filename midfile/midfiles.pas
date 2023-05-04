@@ -2,8 +2,8 @@ unit MIDFiles;
 
 interface
 
-{$i types.inc}
-{$i consts.inc}
+{$i 'types.inc'}
+{$i 'consts.inc'}
 
 var
 // Zero page work registers
@@ -60,6 +60,7 @@ procedure ProcessTrack; Assembler;
 procedure ProcessMIDI;
 procedure determineSongLength;
 procedure sendClearPushLCD; Keep;
+procedure sendPushLCDText(str:PString); register; Keep;
 
 implementation
 Uses
@@ -75,11 +76,12 @@ asm
   icl 'midfile/asms/memory_bound_check.a65'
 end;
 
-{$i loadmid.inc}
-{$i settempo.inc}
-{$i processtrack.inc}
-{$i processmidi.inc}
-{$i determine_song_length.inc}
+{$i 'sysex_push_text.inc'}
+{$i 'loadmid.inc'}
+{$i 'settempo.inc'}
+{$i 'processtrack.inc'}
+{$i 'processmidi.inc'}
+{$i 'determine_song_length.inc'}
 
 procedure initMIDI;
 begin

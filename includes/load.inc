@@ -23,6 +23,8 @@ begin
 
   calcAvailableMem;
   _bank:=totalXMS; _adr:=$4000;
+  sendClearPushLCD;
+  sendPushLCDText(fn);
 
   clearStatus;
   putStatus(statusMsgs[4]);

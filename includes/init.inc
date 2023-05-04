@@ -14,6 +14,7 @@ begin
   scradr:=SCREEN_TIME; HLine;
   scradr:=SCREEN_TIME+1; putINTText(#$4e+'Status'~*+#$ce);
   scradr:=SCREEN_TIME+30; putINTText(#$4e+'Counter'~*+#$ce);
+  scradr:=SCREEN_OSD+40; putSpaces(20);
 
   MIDTracks:=Pointer(TRACK_DATA_ADDR);
 
@@ -29,6 +30,9 @@ begin
   DMACTL:=34; waitFrame;
   otm:=_tm;
   playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
+  screenStatus:=screenStatus and (not ss_isOSD);
+  inc(refreshRate);
+
   // thi:=255;
   // playDir:=1;
   // timeShowMode:=1;

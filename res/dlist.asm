@@ -24,8 +24,8 @@ dl_start
         dta DL_BLANK1
         dta work_area + DL_LMS, A(SCREEN_TIME)
         dta DL_BLANK1
-
         dta stat_area
+
         dta prgs_area + DL_LMS, A(SCREEN_TIMELINE)
         dta DL_BLANK1
         dta work_area + DL_LMS, A(SCREEN_STATUS)

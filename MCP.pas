@@ -51,7 +51,13 @@ var
   counter:Longint absolute $88;
   cntBCD:Longint absolute $8c;
 
+//
+
+  OSDTm:Byte;
+
 {$i 'myNMI.inc'}
+{$i 'NRPM.inc'}
+{$i 'osd.inc'}
 {$i 'status.inc'}
 {$i 'load.inc'}
 {$i 'list.inc'}
@@ -59,6 +65,7 @@ var
 {$i 'keyboard.inc'}
 {$i 'autostop_songchange.inc'}
 {$i 'init.inc'}
+{$i 'remote_control.inc'}
 
 begin
   asm lda PORTB \ pha end;
@@ -83,9 +90,17 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    if {_tm-otm<>0} byte(_tm-otm)>refreshRate then
+    plugin_remoteControl;
+
+    if byte(_tm-otm)>=refreshRate then
     begin
       otm:=_tm;
+
+      if screenStatus and ss_isOSD<>0 then
+      begin
+        if OSDTm>200 then OSDOff else inc(OSDTm,refreshRate);
+      end;
+
       if screenStatus and ss_isRefresh<>0 then
       begin
         screenStatus:=screenStatus xor ss_isRefresh;

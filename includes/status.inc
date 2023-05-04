@@ -82,6 +82,27 @@ begin
   memAKB:=memAvailable div 1024;
   scradr:=SCREEN_FOOT; HLine;
   scradr:=SCREEN_FOOT; putINTText(VERSION);
+  inc(scradr);
+  asm
+    ldy #0
+
+  loop:
+    lda $2012,y
+    cmp #$20
+    beq stopLoop
+
+    asl
+    adc #$c0
+    spl:eor #$40
+    lsr
+    scc:eor #$80
+
+    sta (main.screen.scradr),y
+    iny
+    jmp loop
+  stopLoop:
+  end;
+
   scradr:=SCREEN_FOOT+33;
   if memAKB<10000 then scradr:=SCREEN_FOOT+34;
   if memAKB<1000 then scradr:=SCREEN_FOOT+35;
@@ -92,7 +113,8 @@ end;
 
 procedure clearStatus;
 begin
-  fillchar(pointer(SCREEN_TIME+40),100,0);
+  fillchar(pointer(SCREEN_TIME+40),60,0);
+  fillchar(pointer(SCREEN_STATUS),40,0);
   scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$fc+#0+#$fd);
   statusLoop;
   updateMem;

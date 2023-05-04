@@ -1,0 +1,33 @@
+  .local
+
+  lda #<(SCREEN_OSD+42)
+  sta MAIN.SCREEN.scradr
+  lda #>(SCREEN_OSD+42)
+  sta MAIN.SCREEN.scradr+1
+
+  lda _v
+  lsr @
+  lsr @
+  lsr @
+  sta _tmp
+
+  ldy #0
+drawLoop:
+  cpy _tmp:#00
+  bne dotsChar
+  lda _v
+  lsr @
+  and #3
+  add #2
+  jmp putChar
+
+dotsChar:
+  lda #1
+putChar
+
+  sta (MAIN.SCREEN.scradr),y
+  iny
+  cpy #16
+  bne drawLoop
+
+  .endl

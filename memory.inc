@@ -1,9 +1,9 @@
 CHARS_ADDR      = $2400;              // $400 (1024)
 SCREEN_ADDR     = $2800;              // $6A4 (1700)
 
-UVMETER_ADDR    = $2E04;              // $040 (  64)
+UVMETER_ADDR    = $2EA0;              // $040 (  64)
 SCREEN_ADRSES   = UVMETER_ADDR+$40;   // $020 (  32)
-KEY_TABLE_ADDR  = $2F00;              // $080 ( 128)
+KEY_TABLE_ADDR  = $2380;              // $080 ( 128)
 
 DLIST_ADDR      = $2FB3;              // $04C (  76)
 
@@ -27,7 +27,10 @@ TIME_SIZE       = 40+20;              // $03C (  60)
 SCREEN_TIMELINE = SCREEN_TIME+TIME_SIZE;
 TIMELINE_SIZE   = 40;                 // $028 (  40)
 
-SCREEN_STATUS   = SCREEN_TIMELINE+TIMELINE_SIZE;
+SCREEN_OSD      = SCREEN_TIMELINE+TIMELINE_SIZE;
+OSD_SIZE        = 40+20;              // $03C (  60)
+
+SCREEN_STATUS   = SCREEN_OSD+OSD_SIZE;
 STATUS_SIZE     = 40;                 // $028 (  40)
 
 // -------------------------------------------------

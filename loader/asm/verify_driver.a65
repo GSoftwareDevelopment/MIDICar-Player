@@ -5,7 +5,7 @@
     m@print msg_DriverTest
 .endif
 
-    ldx #12
+    ldx #15
 driverTestLoop:
     lda $2000,x
     cmp #$4c        ; $4c=jmp

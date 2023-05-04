@@ -34,8 +34,6 @@
 | `$FE`      |              | byte    | `FIFO_Tail`     |                                                              | midi_fifo |
 | `$FF`      |              | byte    | `FIFO_Byte`     | data for and from FIFO                                       | midi_fifo |
 
-
-
 ## Variables
 
 | Address        |         | Type               | Name        | Description | source    |
@@ -59,17 +57,14 @@
 | `$539..$559`   | 32 (+1) | TFilename          | fn          |             | main      |
 |                |         |                    |             |             |           |
 
-
-
 ## Buffers
 
-| Start        | Size | Name   | Function | Source |
-| ------------ | ---- | ------ | -------- | ------ |
-| `$55A..$5AA` | 80   | outstr |          | main   |
-| `$5AB..$5FB` | 80   | snull  |          | main   |
-|              |      |        |          |        |
-
-
+| Start        | Size | Name   | Function      | Source |
+| ------------ | ---- | ------ | ------------- | ------ |
+| `$55A..$5AA` | 80   | outstr |               | main   |
+| `$5AB..$5FB` | 80   | snull  |               | main   |
+| `$600..$6FF` | 256  |        | MIDI-Out FIFO | driver |
+|              |      |        |               |        |
 
 ## Data
 
@@ -84,30 +79,26 @@
 | `$2B20..$2CFF`     |      720 ($2D0) | SCREEN_WORK      | Screen Work Area                                             |          |
 | `$2D00..$2D77`     |      120 ($078) | SCREEN_CHANNELS  | Screen Channels View                                         |          |
 | `$2D78..$2D83`     |       60 ($03C) | SCREEN_TIME      | Screen control & time                                        |          |
-| `$2D84..$2DDB`     |       40 ($028) | SCREEN_TIMELINE  | Screen song time line progress                               |          |
-| `$2DDC..$2E03`     |       40 ($028) | SCREEN_STATUS    | Screen status line                                           |          |
+| `$2D84..$2DAB`     |       40 ($028) | SCREEN_TIMELINE  | Screen song time line progress                               |          |
+| `$2DAC..$2DE7`     |       60 ($03C) | SCREEN_OSD       | Screen for OSD                                               | main     |
+| `$2ED8..$2E10`     |       40 ($028) | SCREEN_STATUS    | Screen status line                                           |          |
+|                    |                 |                  |                                                              |          |
+| `$2EA0..$2EDF`     |        64 ($40) | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
+| `$2EE0..$2EFF`     |        32 ($20) | `SCREEN_ADRSES`  | listScrAdr                                                   | main     |
 |                    |                 |                  |                                                              |          |
 | `$2FB3..$2FFF`     |        76 ($4C) | `DLIST_ADDR`     | Display List                                                 | main     |
-| `$3500..$353F`     |        64 ($40) | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
-| `$3540..$355F`     |        32 ($20) | `SCREEN_ADRSES`  | listScrAdr                                                   | main     |
 |                    |                 |                  |                                                              |          |
-| `$3560..$382F`     |      720 ($2D0) | `HELPSCR_ADDR`   |                                                              | main     |
-| `$3830..$3AFF`     |      720 ($2D0) |                  |                                                              | main     |
+| `$3000..$32CF`     |      720 ($2D0) | `HELPSCR_ADDR`   | Screen for help                                              | main     |
 |                    |                 |                  |                                                              |          |
-| `$3B00..$3BFF`     |             256 |                  |                                                              |          |
 | `$3C00`            |             512 |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles |
 | `$3E00`            |             512 |                  | Tracks information                                           | midfiles |
 |                    |                 |                  |                                                              |          |
 | `$80..$D3`         |                 | ZPAGE            | MADPascal ZP variables                                       | EXE      |
-| `$8000..$ACDD`     |                 | CODE             | MADPascal executable code                                    | EXE      |
-|                    |                 |                  | MADPascal Static Data                                        | EXE      |
-|                    |                 |                  |                                                              |          |
+| `$8000..$BFFF`     |                 | CODE             | MADPascal executable code                                    | EXE      |
 |                    |                 |                  |                                                              |          |
 | `$4000..$7FFF`     |                 |                  | Song data                                                    | midfiles |
 | `$C000..$CFFF`     |    4096 ($1000) | `LIST_ADDR`      |                                                              | main     |
 | `$D800..$FF00`     |                 |                  | Song data                                                    | midfiles |
-
-
 
 # Driver
 

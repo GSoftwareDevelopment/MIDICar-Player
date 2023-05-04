@@ -1,54 +1,3 @@
-procedure sendPushLCDText; Keep;
-const
-  push_sysex:array[0..7] of byte = (
-    $f0, $47, $7f, $15, $01, $00, $45, $00
-  );
-
-begin
-  asm
-  event = $ff
-
-    sei
-    jsr $2003
-    cli
-
-    ldx #0
-
-  sysex_header_loop:
-    txa
-    pha
-    lda ADR.PUSH_SYSEX,x
-    sta event
-    jsr $2006
-    pla
-    tax
-    inx
-    cpx #8
-    bne sysex_header_loop
-
-  // sysex data loop
-    jmp checkDataLen
-  readLoop:
-    jsr MAIN.MIDFILES.readB
-    jsr $2006
-
-    dec _tmp
-
-  checkDataLen:
-    lda _tmp
-    bne readLoop
-
-    lda #$F7
-    sta event
-    jsr $2006
-
-    sei
-    sec       ; flush buffer & uninitialize driver
-    jsr $200c
-    cli
-  end;
-end;
-
 procedure determineSongLength;
 begin
   _songTicks:=0; curTrackPtr:=@MIDTracks;
@@ -143,9 +92,36 @@ begin
       bne endCase
 
     pushText:
-      // lda cTrk
-      // cmp #1        ; only for track #1 (0)
-      // bne endCase
+
+      ldx #1
+    textCopyLoop:
+      jsr MAIN.MIDFILES.readB
+      sta MAIN.FILESTR.SNULL_ADDR,x
+      dec _tmp
+      beq sendPushText
+      inx
+      cpx #48
+      bne textCopyLoop
+
+    skipRestText:
+      dec _tmp
+      inc _ADR
+      bne checkLen
+      inc _ADR+1
+      jsr memBoundCheck
+
+    checkLen:
+      lda _tmp
+      bne skipRestText
+
+    sendPushText:
+      txa
+      sta MAIN.FILESTR.SNULL_ADDR
+
+      lda #<MAIN.FILESTR.SNULL_ADDR
+      sta MAIN.MIDFILES.SENDPUSHLCDTEXT.STR
+      lda #>MAIN.FILESTR.SNULL_ADDR
+      sta MAIN.MIDFILES.SENDPUSHLCDTEXT.STR+1
 
       jsr sendPushLCDText
 

@@ -10,6 +10,7 @@
   jmp driver.send
   jmp driver.flush
   jmp driver.stop
+  jmp driver.Receive
 
 DESC	dta c'MIDIBox Driver 2.0a by GSD',$9B
 
@@ -177,12 +178,6 @@ flush_timeout:
 
 flush_done:
 
-waitFrame:
-    bit VCOUNT
-    bmi *-3
-    bit VCOUNT
-    bpl *-3
-
     pla:tax
 
     rts
@@ -202,6 +197,13 @@ waitFrame:
     jsr Flush.All
 
 noFlush:
+
+waitFrame:
+    bit VCOUNT
+    bmi *-3
+    bit VCOUNT
+    bpl *-3
+
 ;restore old vector
     lda OVSEROUT
     sta VSEROUT
@@ -237,6 +239,15 @@ exitUnInit:
 
     RTS
 
+  .endl
+
+;--------------------------------------------------
+;
+
+  .local Receive
+; not implemented
+    clc
+    rts
   .endl
 
 ;--------------------------------------------------

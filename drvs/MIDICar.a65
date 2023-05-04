@@ -10,6 +10,7 @@
   jmp driver.send
   jmp driver.flush
   jmp driver.stop
+  jmp driver.receive
 
 DESC	dta c'MIDICar Driver 2.1a by GSD',$9B
 
@@ -101,13 +102,14 @@ All:
 
     ldy FIFO_Tail
 flushLoop:
-    cpy FIFO_Head
-    beq endFlush
 
 waitOnMC:
     lda MCBaseState:$d500 // MC6850.MC6850_CNTRReg
     and #MC6850.TDRE
     beq waitOnMc
+
+    cpy FIFO_Head
+    beq endFlush
 
     lda FIFO_BUF,y
     sta MCBaseBuf:$d500   // MC6850.MC6850_BUFFER
@@ -116,12 +118,6 @@ waitOnMC:
     jmp flushLoop
 
 endFlush:
-
-waitFrame:
-    bit VCOUNT
-    bmi *-3
-    bit VCOUNT
-    bpl *-3
 
     sty FIFO_Tail
 
@@ -142,20 +138,36 @@ waitFrame:
     jsr Flush.All
 
 noFlush:
+
+waitFrame:
+    bit VCOUNT
+    bmi *-3
+    bit VCOUNT
+    bpl *-3
+
     lda #0
     sta isMCInit
-
-    lda #MC6850.MasterReset
-    jsr setMCState
-
-; Reset FIFO
-    LDA #$00
-    sta fifo_head
-    sta fifo_tail
+    jmp start
 
 exitUnInit:
     RTS
 
+  .endl
+
+;--------------------------------------------------
+;
+
+  .local receive
+    lda MCBaseState:$d500
+    and #1
+    bne getReceivedByte
+    clc
+    rts
+
+  getReceivedByte:
+    lda MCBaseBuf:$d501
+    sec
+    rts
   .endl
 
 ;--------------------------------------------------
@@ -231,6 +243,8 @@ setMCPort:
     stx Send.MCBaseState+1
     sty Flush.MCBaseState
     stx Flush.MCBaseState+1
+    sty Receive.MCBaseState
+    stx Receive.MCBaseState+1
 
     iny
 
@@ -238,7 +252,10 @@ setMCPort:
     stx Send.MCBaseBuf+1
     sty Flush.MCBaseBuf
     stx Flush.MCBaseBuf+1
+    sty Receive.MCBaseBuf
+    stx Receive.MCBaseBuf+1
 
+    jsr Start
     rts
 
 ;--------------------------------------------------

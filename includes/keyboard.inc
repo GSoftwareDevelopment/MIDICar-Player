@@ -91,7 +91,7 @@ begin
   inc(timeShowMode); if timeShowMode>2 then timeShowMode:=0;
   if timeShowMode=0 then
   begin
-    scradr:=screen_time+14; putSpaces(6);
+    scradr:=screen_time+54; putSpaces(6);
   end;
 end;
 

@@ -33,9 +33,9 @@ key_table:
   dta a(none)                    ; k_5     = 29
   dta a(none)                    ; k_2     = 30
   dta a(none)                    ; k_1     = 31
-  dta a(none)                    ; k_COMMA = 32
+  dta a(MAIN.ControlSetting)     ; k_COMMA = 32
   dta a(MAIN.toggleFile)         ; k_SPACE = 33
-  dta a(none)                    ; k_DOT   = 34
+  dta a(MAIN.ControlSetting)     ; k_DOT   = 34
   dta a(none)                    ; k_N     = 35
   dta a(none)                    ; 36 - NOT USED
   dta a(MAIN.toggleMeters)       ; k_M     = 37
@@ -43,7 +43,7 @@ key_table:
   dta a(MAIN.toggleScreenColors) ; k_INVERS= 39
   dta a(none)                    ; k_R     = 40
   dta a(none)                    ; 41 - NOT USED
-  dta a(none)                    ; k_E     = 42
+  dta a(MAIN.ControlSetting)     ; k_E     = 42
   dta a(none)                    ; k_Y     = 43
   dta a(none)                    ; k_TAB   = 44
   dta a(MAIN.toggleTimeShowMode) ; k_T     = 45
