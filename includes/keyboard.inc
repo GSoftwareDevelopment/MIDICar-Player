@@ -1,5 +1,6 @@
 procedure toggleFile; Keep;
 begin
+  if screenStatus and ss_minMode<>0 then exit;
   gotoNEntry(lstCurrent);
   getEntry(outStr);
   getEntrySets(p_bank);
@@ -18,6 +19,7 @@ var
   tmp:SmallInt absolute $88;
 
 begin
+  if screenStatus and ss_minMode<>0 then exit;
   if screenStatus and ss_isRefresh=0 then drawListSelection;
   v:=0;
   if (keyb=k_UP) then
@@ -73,6 +75,24 @@ begin
   if screenStatus and ss_isRefresh=0 then drawListSelection;
 end;
 
+procedure fileAction; Keep;
+begin
+  // if (screenStatus and ss_minMode<>0) then exit;
+  lstCurrent:=lstShift+lstY;
+  if stateInputLine=ils_pending then choiceListFile;
+  if stateInputLine<>ils_done then exit;
+
+  stateInputLine:=ils_pending;
+  if (p_bank=fl_device) or
+     (p_bank=fl_directory) or
+     (p_bank=fl_parentDir) then
+  begin
+    if resultInputLine then IOResult:=getDirectory;
+  end;
+  if IOResult and %11111100<>0 then statusError(IOResult);
+  if p_bank=fl_midifile then statusPlaying;
+end;
+
 procedure toggleLoopMode; Keep;
 begin
   v:=(playerStatus+1) and ps_loop;
@@ -84,6 +104,15 @@ procedure toggleMeters; Keep;
 begin
   clearUVMeters;
   screenStatus:=screenStatus xor ss_view;
+end;
+
+procedure toggleMinMode; Keep;
+begin
+  screenStatus:=screenStatus xor ss_minMode;
+  if screenStatus and ss_minMode=0 then
+    SDLST:=DLIST_ADDR
+  else
+    SDLST:=DLIST_MIN_ADDR;
 end;
 
 procedure toggleTimeShowMode; Keep;
@@ -109,23 +138,6 @@ begin
   else
     dpoke(DLIST_ADDR+25,HELPSCR_ADDR);
   keyb:=255;
-end;
-
-procedure fileAction; Keep;
-begin
-  lstCurrent:=lstShift+lstY;
-  if stateInputLine=ils_pending then choiceListFile;
-  if stateInputLine<>ils_done then exit;
-
-  stateInputLine:=ils_pending;
-  if (p_bank=fl_device) or
-     (p_bank=fl_directory) or
-     (p_bank=fl_parentDir) then
-  begin
-    if resultInputLine then IOResult:=getDirectory;
-  end;
-  if IOResult and %11111100<>0 then statusError(IOResult);
-  if p_bank=fl_midifile then statusPlaying;
 end;
 
 procedure playerControl; Keep;

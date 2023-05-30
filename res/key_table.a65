@@ -14,7 +14,7 @@ key_table:
   dta a(none)                    ; k_P     = 10
   dta a(none)                    ; k_U     = 11
   dta a(MAIN.fileAction)         ; k_RETURN= 12
-  dta a(none)                    ; k_I     = 13
+  dta a(MAIN.toggleMinMode)      ; k_I     = 13
   dta a(MAIN.moveFileSelection)  ; k_UP    = 14
   dta a(MAIN.moveFileSelection)  ; k_DOWN  = 15
   dta a(MAIN.playerControl)      ; k_V     = 16

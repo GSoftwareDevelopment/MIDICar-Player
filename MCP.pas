@@ -77,7 +77,12 @@ begin
   if (_v and dp_name=0) then // if file name is not specified...
     _bank:=fl_device // set entry type as Device
   else
+  begin
     _bank:=fl_midifile; // set entry type as MIDIFila
+    outStr:=fn;
+    SDLST:=DLIST_MIN_ADDR;
+    screenStatus:=screenStatus or ss_minMode;
+  end;
 
   // create new entry
   gotoNEntry(0); addToList(outStr);
@@ -90,7 +95,7 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    plugin_remoteControl;
+    // plugin_remoteControl;
 
     if byte(_tm-otm)>=refreshRate then
     begin

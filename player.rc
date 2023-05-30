@@ -1,5 +1,6 @@
 SCREEN_HEAD rcdata 'res/graph.obj'
 
+DLIST_MIN_ADDR rcasm 'res/dlist_min.asm'
 DLIST_ADDR rcasm 'res/dlist.asm'
 
 CHARS_ADDR rcdata 'res/font_blk2-uvh.fnt'

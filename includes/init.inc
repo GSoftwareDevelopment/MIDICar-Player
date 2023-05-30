@@ -30,7 +30,7 @@ begin
   DMACTL:=34; waitFrame;
   otm:=_tm;
   playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
-  screenStatus:=screenStatus and (not ss_isOSD);
+  screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
   inc(refreshRate);
 
   // thi:=255;

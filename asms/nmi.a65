@@ -1,7 +1,9 @@
 RTCLOK = $12
 ATRACT = 77
+SDLST  = $230;
 KBCODE = $d209
 SKSTAT = $d20f
+DLPTR  = $d402
 NMIRES = $d40f
 
 SRTIMR = $022b
@@ -20,6 +22,11 @@ COLPM0 = $d012
     STA NMIRES
     lda #0
     sta ATRACT
+
+    lda SDLST
+    sta DLPTR
+    lda SDLST+1
+    sta DLPTR+1
 
     inc RTCLOK+2
 end_rtclk:

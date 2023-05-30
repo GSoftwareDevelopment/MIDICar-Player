@@ -1,7 +1,7 @@
 const
 {$i memory.inc}
 
-  VERSION= 'v1.5.8'~;
+  VERSION= 'v1.5.8a'~;
 // base memory (under 64KB) available
   FREE_MEM = ($8000-$4000)+($ff00-$d800);
 
@@ -10,7 +10,8 @@ const
   ss_isHelp    = %01000000;  // flag for help screen is shown
   ss_view      = %00100000;  // flag for volume meters is shown
   ss_colorSet  = %00010000;  // flag for color set mode
-  ss_isOSD     = %00001000;  // flog for OSD is shown
+  ss_isOSD     = %00001000;  // flag for OSD is shown
+  ss_minMode   = %00000100;  // flag for mini mode
 
 // player status
   ps_loop      = %00000011;
