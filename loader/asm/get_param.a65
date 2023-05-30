@@ -30,6 +30,8 @@ _param_loop:
 _checkEOL:
     cmp #$9b
     beq _end_command_line
+    cmp #$00
+    beq _end_command_line
 
 ; store character in current parameter
     sta oldchar
