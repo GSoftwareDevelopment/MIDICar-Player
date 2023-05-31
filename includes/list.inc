@@ -52,7 +52,10 @@ begin
 
   putSign:
     sta (screen.scradr),y
-    ldy #2    ; set screen offset
+    lda #0
+    iny
+    sta (screen.scradr),y
+    iny
   noSign:
     ldx #0    ; set string offset
 
