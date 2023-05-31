@@ -137,7 +137,7 @@ begin
       asm  icl 'asms/uvmeters_h.a65' end;
 
       if stateInputLine=ils_inprogress then
-        if _tm-ctm>10 then
+        if byte(_tm-ctm)>10 then
         begin
           ctm:=_tm;
           show_inputLine;
@@ -148,7 +148,15 @@ begin
     if (keyb<>255) or (hlpflg<>0) then
     begin
       if screenStatus and ss_isHelp<>0 then toggleHelpScreen;
-      if stateInputLine=ils_inprogress then do_inputLine;
+      if stateInputLine=ils_inprogress then
+      begin
+        do_inputLine;
+        if stateInputLine=ils_abort then
+        begin
+          screenStatus:=screenStatus or ss_isRefresh;
+          stateInputLine:=ils_pending;
+        end;
+      end;
 
       asm
         lda MAIN.KEYS.hlpflg
