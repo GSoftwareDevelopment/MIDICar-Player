@@ -20,6 +20,7 @@ begin
   statusStopped;
   putStatus(statusMsgs[6]);
   validPath;
+  joinStrings(curDev,curPath);
 
   clearList; _adr:=$ffff; _bank:=fl_device; addToList(outStr);
   if byte(curPath[0])>1 then
