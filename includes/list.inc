@@ -22,8 +22,8 @@ const
   listchars : array[0..4] of byte = (
     $5a,  // fl_midifile
     $5b,  // fl_playlist
-    $1c,  // fl_parentdir
-    $1e,  // fl_directory
+    $4c,  // fl_parentdir
+    $4f,  // fl_directory
     $1a   // fl_device
   );
 
@@ -34,62 +34,47 @@ const
 begin
   getEntrySets(p_bank);
   asm
-    lda MAIN.LIST.p_bank
-    sub #fl_midifile
-    bcc nullChar
-    tay
-    lda adr.listchars,y
-    jmp putChar
-
-  nullChar:
-    lda #0
-
-  putChar:
-    ldy #0
-    sta (screen.scradr),y
-
-    lda MAIN.FILESTR.OUTSTR_ADDR
-    cmp #LIST_VISIBLE_CHARS
-    bmi putString
-    beq putString
-
-// truncate String
     stx v     ; temporarly store X-Reg
 
-    sub #LIST_VISIBLE_CHARS-2
+    ldy #0
+
+    lda MAIN.LIST.p_bank
+    sub #fl_midifile
+    bcc nullSign
+    cmp #4
+    beq noSign
+    tax
+    lda adr.listchars,x
+    jmp putSign
+
+  nullSign:
+    lda #0
+
+  putSign:
+    sta (screen.scradr),y
+    ldy #2    ; set screen offset
+  noSign:
+    ldx #0    ; set string offset
+
+    lda MAIN.FILESTR.OUTSTR_ADDR  ; string length
+    cmp #LIST_VISIBLE_CHARS       ; if string length is...
+    bmi putString                 ; ...less or...
+    beq putString                 ; ...equal...
+                                  ; ...then, show whole string
+
+// truncate String
+    sub #LIST_VISIBLE_CHARS+1
     tax
 
-    lda #$60
-    ldy #2
+    lda #$60                      ; put ellipsis character
     sta (screen.scradr),y
+    iny                           ; increase screen offset
 
-@:
-    lda MAIN.FILESTR.OUTSTR_ADDR,x
-
-    asl
-    adc #$c0
-    spl:eor #$40
-    lsr
-    scc:eor #$80
-
-    iny
-    sta (screen.scradr),y
-    inx
-    cpy #LIST_VISIBLE_CHARS+2
-    bne @-
-
-    ldx v       ; restore X-Reg
-
-    rts
 
 // put string on screen
 putString:
-    stx v     ; temporarly store X-Reg
-    tax
-
-    ldy #2
 @:
-    lda MAIN.FILESTR.OUTSTR_ADDR-1,y
+    lda MAIN.FILESTR.OUTSTR_ADDR+1,x
 
     asl
     adc #$c0
@@ -99,8 +84,9 @@ putString:
 
     sta (screen.scradr),y
     iny
-    dex
-    bne @-
+    inx
+    cpx MAIN.FILESTR.OUTSTR_ADDR
+    bmi putString
 
     ldx v       ; restore X-Reg
 
@@ -160,7 +146,7 @@ begin
       if p_bank=fl_device then
       begin
         drawListSelection;
-        ilscradr:=listScrAdr[lstY]+2;
+        ilscradr:=listScrAdr[lstY];
         init_inputLine;
       end;
     end;
