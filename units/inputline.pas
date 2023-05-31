@@ -7,6 +7,7 @@ const
   ils_pending    = 0;
   ils_inprogress = 1;
   ils_done       = 2;
+  ils_abort      = 3;
 
 // input line variables
 var
@@ -36,7 +37,7 @@ var
 
 procedure show_inputLine; assembler;
 asm
-illen = 30
+illen = 32
 
   txa:pha
 
@@ -125,11 +126,18 @@ begin
     begin
       outStr:=Snull;
       keyb:=$ff;
+      stateInputLine:=ils_abort;
+      resultInputLine:=false;
+    end
+    else
+    begin
+      stateInputLine:=ils_done;
+      resultInputLine:=true;
     end;
     ilpos:=byte(outstr[0]);
-    stateInputLine:=ils_done*byte(keyb=K_RETURN);
+    // stateInputLine:=ils_done*byte(keyb=K_RETURN);
     show_inputLine;
-    resultInputLine:=(keyb=K_RETURN) and (ilpos>0);
+    // resultInputLine:=(keyb=K_RETURN) and (ilpos>0);
     exit;
   end;
   if (ilpos>0) and (keyb=k_delete) then
