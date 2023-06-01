@@ -45,52 +45,52 @@ implementation
 
 procedure getFileExt(fn:PString); Register; assembler;
 asm
-  icl 'asms/get_file_ext.a65'
+  icl 'asms/filestr/get_file_ext.a65'
 end;
 
 procedure reduceFileName(var inFN; outFN:PString); Register; Assembler;
 asm
-  icl 'asms/reduce_filename.a65'
+  icl 'asms/filestr/reduce_filename.a65'
 end;
 
 function isDeviceSpec(fn:PString):Boolean; Register; Assembler;
 asm
-  icl 'asms/isDeviceSpec.a65'
+  icl 'asms/filestr/isDeviceSpec.a65'
 end;
 
 function getDeviceSpec(fn:PString; var spec:String):Boolean; Register; Assembler; Keep;
 asm
-  icl 'asms/getDeviceSpec.a65'
+  icl 'asms/filestr/getDeviceSpec.a65'
 end;
 
 procedure joinStrings(s1:PString; s2:PString); Register; Assembler;
 asm
-  icl 'asms/joinStrings.a65'
+  icl 'asms/filestr/joinStrings.a65'
 end;
 
 procedure getLn(chn:byte; buf:PString); register; Assembler;
 asm
-  icl 'asms/get_line.a65'
+  icl 'asms/filestr/get_line.a65'
 end;
 
 function destructureFullPath(var inStr,devS,pathS,nameS:PString):byte; Register; Assembler;
 asm
-  icl 'asms/destructureFullPath.a65'
+  icl 'asms/filestr/destructureFullPath.a65'
 end;
 
 procedure pathDelimiter(var inStr:PString; delimiterCh:Char); Register; Assembler;
 asm
-  icl 'asms/path_delimiter.a65'
+  icl 'asms/filestr/path_delimiter.a65'
 end;
 
 procedure parentDir(var inStr:PString); Register; Assembler;
 asm
-  icl 'asms/parent_dir.a65'
+  icl 'asms/filestr/parent_dir.a65'
 end;
 
 procedure getCurrentPath(chn:byte; dev:PString; path:PString); register; assembler;
 asm
-  icl '../asms/getCurrentDirectory.a65'
+  icl '../asms/filestr/getCurrentDirectory.a65'
 end;
 
 procedure validPath;

@@ -18,32 +18,32 @@ implementation
 
 function getEntry(fn:PString):Boolean; register; assembler;
 asm
-  icl 'asms/list_getEntry.a65'
+  icl 'asms/list/getEntry.a65'
 end;
 
 procedure getEntrySets(var ptr); register; assembler;
 asm
-  icl 'asms/list_getEntrySets.a65'
+  icl 'asms/list/getEntrySets.a65'
 end;
 
 procedure setEntrySets(var ptr); register; assembler;
 asm
-  icl 'asms/list_setEntrySets.a65'
+  icl 'asms/list/setEntrySets.a65'
 end;
 
 function nextEntry:Boolean; assembler;
 asm
-  icl 'asms/list_nextEntry.a65'
+  icl 'asms/list/nextEntry.a65'
 end;
 
 procedure gotoNEntry(nEntry:SmallInt); assembler;
 asm
-  icl 'asms/list_gotoNEntry.a65'
+  icl 'asms/list/gotoNEntry.a65'
 end;
 
 procedure addToList(entry:PString); Register; Assembler;
 asm
-  icl 'asms/list_addToList.a65'
+  icl 'asms/list/addToList.a65'
 end;
 
 end.
