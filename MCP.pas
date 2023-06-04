@@ -61,6 +61,7 @@ var
 {$i 'status.inc'}
 {$i 'load.inc'}
 {$i 'list.inc'}
+{$i 'playlist.inc'}
 {$i 'getdirectory.inc'}
 {$i 'keyboard.inc'}
 {$i 'autostop_songchange.inc'}
@@ -73,19 +74,15 @@ begin
 
 // Loader init `outstr` and now its time to check for correct file specification
   validPath; // result in '_v' indicate what part of file spec is available
-  _adr:=$ffff;
   if (_v and dp_name=0) then // if file name is not specified...
-    _bank:=fl_device // set entry type as Device
+    createListEntry(fl_device,outStr) // create Device entry type
   else
   begin
-    _bank:=fl_midifile; // set entry type as MIDIFila
-    outStr:=fn;
-    SDLST:=DLIST_MIN_ADDR;
-    screenStatus:=screenStatus or ss_minMode;
+    fileTypeByExt;
+    createListEntry(p_type,fn);
+    if p_type=fl_midifile then toggleMinMode;
   end;
 
-  // create new entry
-  gotoNEntry(0); addToList(outStr);
   choiceListFile; resultInputLine:=true; keyb:=k_RETURN;
 
   setNMI;
@@ -148,15 +145,6 @@ begin
     if (keyb<>255) or (hlpflg<>0) then
     begin
       if screenStatus and ss_isHelp<>0 then toggleHelpScreen;
-      if stateInputLine=ils_inprogress then
-      begin
-        do_inputLine;
-        if stateInputLine=ils_abort then
-        begin
-          screenStatus:=screenStatus or ss_isRefresh;
-          stateInputLine:=ils_pending;
-        end;
-      end;
 
       asm
         lda MAIN.KEYS.hlpflg
@@ -169,7 +157,20 @@ begin
         tya
         and #%00111111
         sta MAIN.KEYS.keyb
+      end;
 
+      if stateInputLine=ils_inprogress then
+      begin
+        do_inputLine;
+        if stateInputLine=ils_abort then
+        begin
+          screenStatus:=screenStatus or ss_isRefresh;
+          stateInputLine:=ils_pending;
+        end;
+      end;
+
+      asm
+        lda MAIN.KEYS.keyb
         asl @
         tay
 

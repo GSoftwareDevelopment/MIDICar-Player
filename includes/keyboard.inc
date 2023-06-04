@@ -1,14 +1,18 @@
 procedure toggleFile; Keep;
+var tmp:word;
+
 begin
   if screenStatus and ss_minMode<>0 then exit;
-  gotoNEntry(lstCurrent);
-  getEntry(outStr);
-  getEntrySets(p_bank);
-  if (p_bank and $7f=(fl_midifile and $7f)) then
+  list_go2Entry(lstCurrent);
+  tmp:=word(listPtr);
+  list_getByte(p_type);
+  list_getText(outStr);
+  if (p_type and $7f=(fl_midifile and $7f)) then
   begin
     drawListSelection;
-    p_bank:=p_bank xor $80;
-    setEntrySets(p_bank);
+    p_type:=p_type xor $80;
+    listPtr:=pointer(tmp);
+    list_putByte(p_type);
     showEntry;
     drawListSelection;
   end;
@@ -83,14 +87,17 @@ begin
   if stateInputLine<>ils_done then exit;
 
   stateInputLine:=ils_pending;
-  if (p_bank=fl_device) or
-     (p_bank=fl_directory) or
-     (p_bank=fl_parentDir) then
+  if p_type=fl_playlist then
+    IOResult:=loadPlaylist;
+  if (p_type=fl_device) or
+     (p_type=fl_directory) or
+     (p_type=fl_parentDir) then
   begin
+    screenStatus:=screenStatus and (not ss_plsMode);
     if resultInputLine then IOResult:=getDirectory;
   end;
   if IOResult and %11111100<>0 then statusError(IOResult);
-  if p_bank=fl_midifile then statusPlaying;
+  if p_type=fl_midifile then statusPlaying;
 end;
 
 procedure toggleLoopMode; Keep;
@@ -154,19 +161,19 @@ begin
         cmp #ps_shuffle
         bne sequenceLoop
       end;
-        curPlay:=random(lstTotal);
+      curPlay:=random(lstTotal);
       asm
         jmp endChoice
       sequenceLoop:
       end;
-        inc(lstCurrent,v);
-        if (lstCurrent>=lstTotal) then lstCurrent:=0;
-        if (lstCurrent<0) then lstCurrent:=lstTotal;
+      inc(lstCurrent,v);
+      if (lstCurrent>=lstTotal) then lstCurrent:=0;
+      if (lstCurrent<0) then lstCurrent:=lstTotal;
       asm
       endChoice:
       end;
       choiceListFile;
-    until (p_bank=fl_midifile) and (IOResult and %11111100=0);
+    until (p_type=fl_midifile) and (IOResult and %11111100=0);
     stateInputLine:=stateInputLine xor 4;
     clearStatus;
     if IOResult and %11111100<>0 then statusError(IOResult);

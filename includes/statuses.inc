@@ -1,5 +1,5 @@
 const
-  statusMsgs : array[0..6] of String =
+  statusMsgs : array[0..8] of String =
   (
     #$4e+'Playing'*~+#$ce,
     #$4e+'No song'*~+#$ce,
@@ -7,7 +7,9 @@ const
     #$4e+'Stopped'*~+#$ce,
     #$4e+'  Loading '*~,
     #$4e+'Calculating length'*~+#$ce,
-    #$4e+'  Reading directory'*~+#$ce
+    #$4e+'  Reading directory'*~+#$ce,
+    #$4e+'  Reading description'*~+#$ce,
+    #$4e+'  Reading playlist'*~+#$ce
   );
 
   errorMsgs : array[0..4] of String =

@@ -1,6 +1,12 @@
+procedure createListEntry(t:byte; s:PString);
+begin
+  p_type:=t;
+  list_putByte(p_type); list_putText(s); inc(lstTotal);
+end;
+
 procedure clearList;
 begin
-  fileList:=pointer(LIST_ADDR);
+  listPtr:=pointer(LIST_ADDR);
   lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
   chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
@@ -9,7 +15,7 @@ begin
     putSpaces(32);
     inc(chn);
   end;
-  fillchar(fileList,$1000{$2700},$9B);
+  fillchar(listPtr,$4000,$9B);
 end;
 
 procedure drawListSelection;
@@ -27,18 +33,13 @@ const
     $1a   // fl_device
   );
 
-// var
-//   p_bank:byte;  //  \
-//   p_adr:word;   //  / It is important that this order remains intact
-
 begin
-  getEntrySets(p_bank);
   asm
     stx v     ; temporarly store X-Reg
 
     ldy #0
 
-    lda MAIN.LIST.p_bank
+    lda MAIN.LIST.p_type
     sub #fl_midifile
     bcc nullSign
     cmp #4
@@ -110,53 +111,73 @@ end;
 
 procedure showList;
 begin
-  gotoNEntry(lstShift); chn:=0;
+  IOResult:=0; list_go2Entry(lstShift); chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
     scradr:=listScrAdr[chn];
-    if not getEntry(outstr) then break;
+    list_getByte(p_type);
+    list_getText(outstr);
+    if IOResult=ERR_LIST_END then break;
+    if IOResult=0 then list_getText(outstr);
+    IOResult:=0;
     showEntry;
     inc(chn);
-    nextEntry;
   end;
+  IOResult:=0;
 end;
 
 procedure choiceListFile;
 begin
-  gotoNEntry(lstCurrent);
-  if getEntry(Snull) then
+  list_go2Entry(lstCurrent);
+  if IOResult=ERR_LIST_END then exit;
+
+  list_getByte(p_type);
+  list_getText(Snull);
+
+  if stateInputLine<3 then
   begin
-    getEntrySets(p_bank);
-    if stateInputLine<3 then
+    if (p_type=fl_parentdir) then
     begin
-      if (p_bank=fl_parentdir) then
-      begin
-        parentDir(curPath);
-        resultInputLine:=True;
-      end;
-      if (p_bank=fl_directory) then
-      begin
-        joinStrings(curPath,Snull);
-        PathDelimiter(outStr,'>');
-        curPath:=outStr;
-        resultInputLine:=True;
-      end;
+      parentDir(curPath);
+      resultInputLine:=True;
     end;
-    joinStrings(curDev,curPath);
-    if stateInputLine<3 then
+    if (p_type=fl_directory) then
     begin
-      stateInputLine:=ils_done;
-      if p_bank=fl_device then
+      joinStrings(curPath,Snull);
+      PathDelimiter(outStr,'>');
+      curPath:=outStr;
+      resultInputLine:=True;
+    end;
+  end;
+
+  joinStrings(curDev,curPath);
+
+  if stateInputLine<3 then
+  begin
+    stateInputLine:=ils_done;
+    if p_type=fl_device then
+    begin
+      if screenStatus and ss_plsMode<>0 then
+      begin
+        outStr:=Snull;
+        resultInputLine:=True;
+      end
+      else
       begin
         drawListSelection;
         ilscradr:=listScrAdr[lstY];
         init_inputLine;
       end;
     end;
-    if p_bank=fl_midifile then
-    begin
-      joinStrings(outStr,Snull);
-      IOResult:=loadSong;
-    end;
   end;
+
+  if (p_type=fl_playlist) or
+      (p_type=fl_midifile) then
+    if screenStatus and ss_plsMode=0 then
+      joinStrings(outStr,Snull)
+    else
+      outStr:=Snull;
+
+  if p_type=fl_midifile then
+    IOResult:=loadSong;
 end;
