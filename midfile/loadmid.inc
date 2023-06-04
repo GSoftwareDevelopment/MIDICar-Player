@@ -109,6 +109,7 @@ begin
     end else
       IOResult:=ERR_NOT_A_MIDI_FILE;
   end;
+  asm lda #$FE \ sta PORTB end;
   result:=IOResult;
   Cls(1);
 end;

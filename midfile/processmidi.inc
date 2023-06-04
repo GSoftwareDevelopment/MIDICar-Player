@@ -125,5 +125,5 @@ doProcessTrack:
   sta (curTrackPtr),y       // 6
 
   end;
-
+  asm lda #$FE \ sta PORTB end;
 end;

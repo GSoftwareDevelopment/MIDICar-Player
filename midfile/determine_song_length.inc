@@ -159,4 +159,5 @@ begin
     if _trackTime>_songTicks then _songTicks:=_trackTime;
     inc(curTrackPtr,sizeOf(TMIDTrack));
   end;
+  asm lda #$FE \ sta PORTB end;
 end;

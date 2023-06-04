@@ -1,5 +1,6 @@
 procedure init;
 begin
+  asm lda #$FE \ sta PORTB end;
   DMACTL:=0;
   waitFrame;
 
