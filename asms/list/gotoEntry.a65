@@ -1,20 +1,17 @@
-gotoNEntry:
-    txa:pha
-
+list_go2Entry:
     lda #<LIST_ADDR
-    sta fileList
+    sta listPtr
     lda #>LIST_ADDR
-    sta fileList+1
+    sta listPtr+1
 
     jmp checkNEntry
 
 loop:
-    jsr nextEntry
-    beq exitGotoNEntry
+    jsr list_nextEntry
+    bcs exitlist_go2Entry
 
     lda nEntry
-    sne
-    dec nEntry+1
+    sne:dec nEntry+1
     dec nEntry
 
 checkNEntry:
@@ -22,6 +19,4 @@ checkNEntry:
     ora nEntry+1
     bne loop
 
-exitGotoNEntry:
-
-    pla:tax
+exitlist_go2Entry:

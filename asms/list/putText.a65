@@ -1,0 +1,49 @@
+ptrreg = $88;
+
+  ldy #0
+  lda (ptrreg),y
+  sta fnlen
+
+  add listPtr
+  bcc continueAdd
+  lda listPtr+1
+  adc #0
+  cmp #$80        ; memory page that end of list
+  bne continueAdd
+
+  lda #ERR_LIST_IS_FULL
+  sta SYSTEM.IOResult
+
+  rts
+
+continueAdd:
+
+; store sets of entry
+  ldy #0
+
+  lda ptrreg
+  add #1
+  sta eptr
+  lda ptrreg+1
+  adc #0
+  sta eptr+1
+
+loop:
+  lda eptr:$C000,y
+  and #$7F
+  sta (listPtr),y
+  iny
+  cpy fnlen:#00
+  bmi loop
+
+storeEOFN:
+  dey
+  ora #$80
+  sta (listPtr),y
+  iny
+
+; increment list pointer
+  tya
+  add listPtr
+  sta listPtr
+  scc:inc listPtr+1

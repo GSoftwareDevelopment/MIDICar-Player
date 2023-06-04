@@ -1,0 +1,20 @@
+getSets:
+PTRREG = $88
+
+    ldy #0
+    lda (listPtr),y
+    sta (PTRREG),y
+    bpl incPtr
+    cmp #$9b
+    beq errEOL
+    lda #ERR_LIST_ENTRY_END
+    sta SYSTEM.IOResult
+    rts
+errEOL:
+    lda #ERR_LIST_END
+    sta SYSTEM.IOResult
+    rts
+
+incPtr:
+    inc listPtr
+    sne:inc listPtr+1

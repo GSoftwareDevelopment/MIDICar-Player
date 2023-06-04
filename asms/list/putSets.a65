@@ -1,0 +1,23 @@
+putSets:
+PTRREG = $88
+
+    ldy listPtr
+    iny
+    bne continuePut
+    ldy listPtr+1
+    iny
+    bpl continuePut     ; fastes way to check Y=$80 :P
+
+    lda #ERR_LIST_IS_FULL
+    sta SYSTEM.IOResult
+
+    rts
+
+continuePut:
+    ldy #0
+    lda (PTRREG),y
+    sta (listPtr),y
+
+    inc listPtr
+    sne:inc listPtr+1
+

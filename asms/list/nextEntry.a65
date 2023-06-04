@@ -1,9 +1,7 @@
-nextEntry:
-  ldy #3
+list_nextEntry:
+  ldy #0
 loop:
-  lda (fileList),y
-  ; cmp #$9B
-  ; beq endEntry
+  lda (listPtr),y
   bmi endEntry
   iny
   bne loop
@@ -14,16 +12,16 @@ endEntry:
   bne moveEntryPtr
 
 noMore:
-  lda #0
-  sta result
+  lda #ERR_LIST_END
+  sta SYSTEM.IOResult
+  sec
   rts
 
 moveEntryPtr:
   iny
   tya
-  add fileList
-  sta fileList
-  scc:inc fileList+1
+  add listPtr
+  sta listPtr
+  scc:inc listPtr+1
 
-  lda #1
-  sta result
+  clc

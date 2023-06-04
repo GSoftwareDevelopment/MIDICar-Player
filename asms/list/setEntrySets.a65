@@ -1,9 +1,0 @@
-setEntrySets:
-PTRREG = $88
-
-    ldy #2
-loop:
-    lda (PTRREG),y
-    sta (fileList),y
-    dey
-    bpl loop

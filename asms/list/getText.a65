@@ -1,0 +1,52 @@
+hlpptr = $88;
+
+getText:
+  lda listPtr
+  sub #1
+  sta entryptr
+  lda listPtr+1
+  sbc #0
+  sta entryptr+1
+
+  ldy #1
+loop:
+  lda entryptr:$C000,y
+  bmi endEntry
+  bne noZeroEnd
+  lda #$9B
+  sta (hlpptr),y
+  sec
+  bcs store
+noZeroEnd:
+  sta (hlpptr),y
+  iny
+  bne loop
+
+endEntry:
+  cmp #$9B
+  beq noEntry
+
+  and #$7f
+  sta (hlpptr),y
+  iny
+  lda #ERR_LIST_ENTRY_END
+  sta SYSTEM.IOResult
+  lda #$9B
+  sta (hlpptr),y
+  clc
+
+store:
+  dey
+  tya
+  ldy #0
+  sta (hlpptr),y    // store as string length
+
+  adc listPtr
+  sta listPtr
+  scc:inc listPtr+1
+
+  rts
+
+noEntry:
+  lda #ERR_LIST_END
+  sta SYSTEM.IOResult
