@@ -147,7 +147,7 @@ begin
   end;
   if ilpos<79 then
   begin
-    ilch:=keyscan2asc(keyb);
+    ilch:=keyscan2asc(keyb or keymod);
     if ilch<>0 then
     begin
       inc(ilpos);
