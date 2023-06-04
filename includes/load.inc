@@ -20,6 +20,11 @@ var
 begin
   statusStopped;
   validPath;
+  if (_v and (dp_dev+dp_path)<>(dp_dev+dp_path)) then
+  begin
+    joinStrings(curDev,curPath);
+    joinStrings(outStr,fn);
+  end;
 
   calcAvailableMem;
   _bank:=totalXMS; _adr:=$4000;
