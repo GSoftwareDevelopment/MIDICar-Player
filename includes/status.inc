@@ -148,7 +148,7 @@ begin
     ERR_UNSUPPORTED_FORMAT: putStatus(errorMsgs[1]);
     ERR_NOT_ENOUGHT_MEMORY: putStatus(errorMsgs[2]);
     ERR_NOT_A_MIDI_FILE:    putStatus(errorMsgs[3]);
-    ERR_FULL_LIST:          putStatus(errorMsgs[4]);
+    ERR_LIST_IS_FULL:          putStatus(errorMsgs[4]);
   else
     puttextinvert:=128;
     putStatus(errorMsgs[0]);
@@ -156,5 +156,6 @@ begin
     puttextinvert:=0;
   end;
   while keyb=255 do ;
+  IOResult:=0;
   clearStatus;
 end;
