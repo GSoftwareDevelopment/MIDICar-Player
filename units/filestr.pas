@@ -28,6 +28,7 @@ var
   fn:TFilename absolute FN_PATH_ADDR;       // 32 (+1)
   outstr:String[80] absolute OUTSTR_ADDR;   // 80 (+1)
   Snull:String[80] absolute SNULL_ADDR;     // 80 (+1)
+  fnExt:DWord absolute $4ec;
 
 procedure getFileExt(fn:PString); Register; assembler;
 procedure reduceFileName(var inFN; outFN:PString); Register; Assembler;

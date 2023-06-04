@@ -1,7 +1,7 @@
 const
 {$i memory.inc}
 
-  VERSION= 'v1.5.8a'~;
+  VERSION= 'v1.6alpha'~;
 // base memory (under 64KB) available
   FREE_MEM = ($8000-$4000)+($ff00-$d800);
 
@@ -12,6 +12,7 @@ const
   ss_colorSet  = %00010000;  // flag for color set mode
   ss_isOSD     = %00001000;  // flag for OSD is shown
   ss_minMode   = %00000100;  // flag for mini mode
+  ss_plsMode   = %00000010;  // flag for playlist mode
 
 // player status
   ps_loop      = %00000011;
@@ -27,12 +28,22 @@ const
   LIST_VISIBLE_ITEMS = 11;
 
 // file list flags
-  fl_device    = $ff;
-  fl_directory = $fe;
-  fl_parentdir = $fd;
-  fl_playlist  = $fc;
-  fl_midifile  = $fb;
-  fl_otherfile = $fa;
+  fl_device    = $7f; // $ff;
+  fl_directory = $7e; // $fe;
+  fl_parentdir = $7d; // $fd;
+  fl_playlist  = $7c; // $fc;
+  fl_midifile  = $7b; // $fb;
+  fl_otherfile = $7a; // $fa;
+
+// file extentions
+  fe_PLS = $504c5300;
+  fe_DIR = $c4c9d200;
+  fe_MID = $4d494400;
+  fe_ION = $494F4E00;
+
+// default search mask
+  dirMask = '*.*';
+  descriptionFile = 'DESCRIPT.ION';
 
 // colors sets
   COLORS_ADDR = $4E0;
@@ -40,4 +51,5 @@ const
 // MIDI Reset SysEx Message Address
   GM_RESET_ADDR = $3B00;
 
-  ERR_FULL_LIST = 99;
+// errors
+  ERR_FILE_NOT_FOUND = 170;
