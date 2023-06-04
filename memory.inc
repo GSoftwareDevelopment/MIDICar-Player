@@ -40,4 +40,4 @@ HELPSCR_ADDR    = $3000;              // $2d0 ( 720)
 START_INFO_ADDR = $3C00;              // $200 ( 512)
 TRACK_DATA_ADDR = $3E00;              // $200 ( 512)
 
-LIST_ADDR       = $c000;              //$1000 (4096)
+LIST_ADDR       = $4000;              //$1000 (4096)
