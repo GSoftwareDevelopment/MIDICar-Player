@@ -81,22 +81,24 @@ end;
 
 procedure fileAction; Keep;
 begin
-  // if (screenStatus and ss_minMode<>0) then exit;
   lstCurrent:=lstShift+lstY;
   if stateInputLine=ils_pending then choiceListFile;
   if stateInputLine<>ils_done then exit;
 
-  stateInputLine:=ils_pending;
-  if p_type=fl_playlist then
-    IOResult:=loadPlaylist;
-  if (p_type=fl_device) or
-     (p_type=fl_directory) or
-     (p_type=fl_parentDir) then
+  if (screenStatus and ss_minMode=0) then
   begin
-    screenStatus:=screenStatus and (not ss_plsMode);
-    if resultInputLine then IOResult:=getDirectory;
+    stateInputLine:=ils_pending;
+    if p_type=fl_playlist then
+      IOResult:=loadPlaylist;
+    if (p_type=fl_device) or
+      (p_type=fl_directory) or
+      (p_type=fl_parentDir) then
+    begin
+      screenStatus:=screenStatus and (not ss_plsMode);
+      if resultInputLine then IOResult:=getDirectory;
+    end;
+    if IOResult and %11111100<>0 then statusError(IOResult);
   end;
-  if IOResult and %11111100<>0 then statusError(IOResult);
   if p_type=fl_midifile then statusPlaying;
 end;
 
