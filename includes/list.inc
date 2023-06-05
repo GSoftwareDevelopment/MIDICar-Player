@@ -40,6 +40,10 @@ begin
     ldy #0
 
     lda MAIN.LIST.p_type
+    bpl noCurrentPlay
+    lda #$7B
+    bpl putSign
+  noCurrentPlay:
     sub #fl_midifile
     bcc nullSign
     cmp #4
@@ -110,18 +114,23 @@ putString:
 end;
 
 procedure showList;
+var
+  n:SmallInt;
+
 begin
-  IOResult:=0; list_go2Entry(lstShift); chn:=0;
+  IOResult:=0; list_go2Entry(lstShift); chn:=0; n:=lstShift;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
     scradr:=listScrAdr[chn];
     list_getByte(p_type);
+    if n<>0 then
+      if n=curPlay then p_type:=p_type or $80;
     list_getText(outstr);
     if IOResult=ERR_LIST_END then break;
     if IOResult=0 then list_getText(outstr);
     IOResult:=0;
     showEntry;
-    inc(chn);
+    inc(chn); inc(n);
   end;
   IOResult:=0;
 end;
@@ -155,18 +164,21 @@ begin
   if stateInputLine<3 then
   begin
     stateInputLine:=ils_done;
-    if p_type=fl_device then
+    if (screenStatus and ss_minMode=0) then
     begin
-      if screenStatus and ss_plsMode<>0 then
+      if p_type=fl_device then
       begin
-        outStr:=Snull;
-        resultInputLine:=True;
-      end
-      else
-      begin
-        drawListSelection;
-        ilscradr:=listScrAdr[lstY];
-        init_inputLine;
+        if screenStatus and ss_plsMode<>0 then
+        begin
+          outStr:=Snull;
+          resultInputLine:=True;
+        end
+        else
+        begin
+          drawListSelection;
+          ilscradr:=listScrAdr[lstY];
+          init_inputLine;
+        end;
       end;
     end;
   end;
