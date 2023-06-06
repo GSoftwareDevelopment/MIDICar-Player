@@ -32,11 +32,3 @@ dl_start
         dta foot_area + DL_LMS, A(SCREEN_FOOT)
 
         dta DL_JVB, A(dl_start)
-
-    single_sum 'HEAD:' SCREEN_HEAD HEAD_SIZE
-    single_sum 'FOOT:' SCREEN_FOOT FOOT_SIZE
-    single_sum 'WORK:' SCREEN_WORK WORK_SIZE
-    single_sum 'CHANNELS:' SCREEN_CHANNELS CHANNELS_SIZE
-    single_sum 'TIME:' SCREEN_TIME TIME_SIZE
-    single_sum 'TIMELINE:' SCREEN_TIMELINE TIMELINE_SIZE
-    single_sum 'STATUS:' SCREEN_STATUS STATUS_SIZE
