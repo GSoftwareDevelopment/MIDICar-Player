@@ -41,7 +41,9 @@ begin
     totalTracks:=0
   else
   begin
+    list_go2Entry(curPlay); list_putByte(fl_midifile);
     curPlay:=lstCurrent;
+    list_go2Entry(curPlay); list_putByte(fl_curPlay);
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
     if (playerStatus and ps_calcLen)<>0 then
     begin

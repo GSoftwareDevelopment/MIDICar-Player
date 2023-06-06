@@ -27,10 +27,10 @@ procedure showEntry;
 const
   listchars : array[0..4] of byte = (
     $5a,  // fl_midifile
+    $7b,  // fl_curPlay
     $5b,  // fl_playlist
     $4c,  // fl_parentdir
-    $4f,  // fl_directory
-    $1a   // fl_device
+    $4f   // fl_directory
   );
 
 begin
@@ -40,13 +40,9 @@ begin
     ldy #0
 
     lda MAIN.LIST.p_type
-    bpl noCurrentPlay
-    lda #$7B
-    bpl putSign
-  noCurrentPlay:
     sub #fl_midifile
     bcc nullSign
-    cmp #4
+    cmp #5
     beq noSign
     tax
     lda adr.listchars,x
@@ -114,23 +110,18 @@ putString:
 end;
 
 procedure showList;
-var
-  n:SmallInt;
-
 begin
-  IOResult:=0; list_go2Entry(lstShift); chn:=0; n:=lstShift;
+  IOResult:=0; list_go2Entry(lstShift); chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
     scradr:=listScrAdr[chn];
     list_getByte(p_type);
-    if n<>0 then
-      if n=curPlay then p_type:=p_type or $80;
     list_getText(outstr);
     if IOResult=ERR_LIST_END then break;
     if IOResult=0 then list_getText(outstr);
     IOResult:=0;
     showEntry;
-    inc(chn); inc(n);
+    inc(chn);
   end;
   IOResult:=0;
 end;
