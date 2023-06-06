@@ -15,7 +15,7 @@ PTRREG = $88
 
 continuePut:
     ldy #0
-    lda (PTRREG),y
+    lda _byte
     sta (listPtr),y
 
     inc listPtr

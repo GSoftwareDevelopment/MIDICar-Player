@@ -49,7 +49,7 @@ Put one byte in current location that `listPtr` points to.
 The pointer is incremented by 1 byte.
 Returns an error when it reaches the list limit.
 }
-procedure list_putByte(var ptr); register; assembler;
+procedure list_putByte(_byte:Byte); register; assembler;
 
 {
 Moves the `listPtr` pointer to the next record.
@@ -85,7 +85,7 @@ asm
   icl 'asms/list/getSets.a65'
 end;
 
-procedure list_putByte(var ptr); register; assembler;
+procedure list_putByte(_byte:byte); register; assembler;
 asm
   icl 'asms/list/putSets.a65'
 end;
