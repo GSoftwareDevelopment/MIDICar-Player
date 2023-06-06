@@ -1,5 +1,7 @@
 SCREEN_HEAD rcdata 'res/graph.obj'
 
+TAB_SCAN2ASC rcasm 'res/tab_scan2asc.asm'
+
 DLIST_MIN_ADDR rcasm 'res/dlist_min.asm'
 DLIST_ADDR rcasm 'res/dlist.asm'
 

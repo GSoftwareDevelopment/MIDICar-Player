@@ -32,8 +32,9 @@ const
   fl_directory = $7e; // $fe;
   fl_parentdir = $7d; // $fd;
   fl_playlist  = $7c; // $fc;
-  fl_midifile  = $7b; // $fb;
-  fl_otherfile = $7a; // $fa;
+  fl_curPlay   = $7b;
+  fl_midifile  = $7a; // $fb;
+  fl_otherfile = $79; // $fa;
 
 // file extentions
   fe_PLS = $504c5300;
@@ -53,3 +54,10 @@ const
 
 // errors
   ERR_FILE_NOT_FOUND = 170;
+
+TAB_PROGRESS_DATA:Array[0..3] of byte = (
+  %01000000,
+  %01010000,
+  %01010100,
+  %01010101
+);

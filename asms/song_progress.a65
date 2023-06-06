@@ -7,7 +7,6 @@
 
   lda #0
   sta oldv
-  jmp dontUpdate
 
 update:
   beq dontUpdate
@@ -28,7 +27,7 @@ update:
   ; sta scrptr+1
 
 @:
-  lda progress_data,y
+  lda adr.TAB_PROGRESS_DATA,y
   sta scrptr:screen_timeline
   dex
   bmi endUpdate
@@ -48,18 +47,5 @@ endUpdate:
   lda v
   sta oldv
 
-  jmp dontUpdate
-
-; data
-progress_data:
-  .byte %01000000
-  .byte %01010000
-  .byte %01010100
-  .byte %01010101
-
-; variables
-oldv  dta 0
-
-;
 dontUpdate:
   .endl
