@@ -11,7 +11,7 @@ const
 
 // input line variables
 var
-  ilch:Byte absolute $D6;
+  ilch:Byte absolute $D7;
   ilpos:Byte absolute $54;
   ilscradr:Word absolute $55;
 

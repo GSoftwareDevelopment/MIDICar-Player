@@ -20,7 +20,10 @@ var
   _tm:Byte absolute $14;
   otm:Byte absolute $13;
   ctm:Byte absolute $12;
-  chn:Byte absolute $D6;
+
+  OSDTm:Byte absolute $D4;
+  chn:Byte absolute $D5;
+  oldv:byte absolute $D6;
   v:shortint absolute $D7;
   _v:byte absolute $D7;
   playerStatus:Byte absolute $D8;
@@ -37,12 +40,12 @@ var
 
   listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
 
-  lstY:Byte;
-  lstShift:SmallInt;
-  lstCurrent:SmallInt;
-  lstTotal:SmallInt;
+  lstY:Byte absolute $5A;
+  lstShift:SmallInt absolute $5B;
+  lstCurrent:SmallInt absolute $55;
+  lstTotal:SmallInt absolute $5E;
 
-  curPlay:SmallInt;
+  curPlay:SmallInt absolute $64;
 
 // counter
 
@@ -52,8 +55,6 @@ var
   cntBCD:Longint absolute $8c;
 
 //
-
-  OSDTm:Byte;
 
 {$i 'myNMI.inc'}
 {$i 'NRPM.inc'}
