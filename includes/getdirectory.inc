@@ -1,9 +1,9 @@
-procedure fileTypeByExt;
+procedure fileTypeByExt(s:PString);
 var
   c0:byte absolute FN_PATH_ADDR;
 
 begin
-  getFileExt(fn);
+  getFileExt(s);
   if (fnExt=FE_DIR) then                          // directory (SpartaDOS 3.2; SpartaDOS X <4.47; BW-DOS 1.30)
   begin
     dec(c0,4);
@@ -102,7 +102,7 @@ begin
          (c18='>') then p_type:=fl_directory; // directory (DOS XE 1.0)
 
       reduceFileName(Snull,fn);
-      fileTypeByExt;
+      fileTypeByExt(fn);
 
       if (fnExt=FE_ION) then continue;                // skip DESCRIPT.ION file
 

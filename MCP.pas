@@ -62,6 +62,7 @@ var
 {$i 'status.inc'}
 {$i 'load.inc'}
 {$i 'list.inc'}
+procedure fileTypeByExt(s:PString); Forward;
 {$i 'playlist.inc'}
 {$i 'getdirectory.inc'}
 {$i 'keyboard.inc'}
@@ -79,7 +80,7 @@ begin
     createListEntry(fl_device,outStr) // create Device entry type
   else
   begin
-    fileTypeByExt;
+    fileTypeByExt(fn);
     createListEntry(p_type,fn);
     if p_type=fl_midifile then toggleMinMode;
   end;

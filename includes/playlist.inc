@@ -29,8 +29,10 @@ begin
         move(outStr[2],outStr[1],chn-1);
       end
       else
-        p_type:=fl_midifile;
+        p_type:=fl_otherfile;
+
       c0:=v-1;
+      fileTypeByExt(outStr);
       list_putByte(p_type);
       list_putNText(outStr);
 
