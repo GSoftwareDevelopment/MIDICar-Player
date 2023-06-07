@@ -53,7 +53,7 @@ begin
   clearStatus;
 end;
 
-function loadPlaylist:Byte;
+function loadPlaylist:Byte; Register;
 const
   CIO_CHN = 1;
 

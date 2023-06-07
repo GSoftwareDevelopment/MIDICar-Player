@@ -1,4 +1,4 @@
-procedure createListEntry(t:byte; s:PString);
+procedure createListEntry(t:byte; s:PString); Register;
 begin
   p_type:=t;
   list_putByte(p_type); list_putText(s); inc(lstTotal);

@@ -140,7 +140,7 @@ begin
   putASCText(fn);
 end;
 
-procedure statusError(err:byte);
+procedure statusError(err:byte); Register;
 begin
   keyb:=255;
   scradr:=SCREEN_STATUS+1;
@@ -148,7 +148,7 @@ begin
     ERR_UNSUPPORTED_FORMAT: putStatus(errorMsgs[1]);
     ERR_NOT_ENOUGHT_MEMORY: putStatus(errorMsgs[2]);
     ERR_NOT_A_MIDI_FILE:    putStatus(errorMsgs[3]);
-    ERR_LIST_IS_FULL:          putStatus(errorMsgs[4]);
+    ERR_LIST_IS_FULL:       putStatus(errorMsgs[4]);
   else
     puttextinvert:=128;
     putStatus(errorMsgs[0]);
