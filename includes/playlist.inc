@@ -18,36 +18,37 @@ begin
     begin
       IOResult:=ERR_FILE_NOT_FOUND; break;
     end;
+
     v:=1; while (outStr[v]<>',') and (v<c0) do inc(v);
-    if outStr[v]=',' then
+
+    if outStr[v]<>',' then continue;
+
+    chn:=c0;
+    if c1='>' then
     begin
-      chn:=c0;
-      if c1='>' then
-      begin
-        p_type:=fl_directory;
-        dec(v);
-        move(outStr[2],outStr[1],chn-1);
-      end
-      else
-        p_type:=fl_otherfile;
+      p_type:=fl_directory;
+      dec(v);
+      move(outStr[2],outStr[1],chn-1);
+    end
+    else
+      p_type:=fl_otherfile;
 
-      c0:=v-1;
-      fileTypeByExt(outStr);
-      list_putByte(p_type);
-      list_putNText(outStr);
+    c0:=v-1;
+    fileTypeByExt(outStr);
+    list_putByte(p_type);
+    list_putNText(outStr);
 
-      chn:=chn-(v+1);
-      move(outStr[v+1],outStr[1],chn);
-      if chn>30 then
-      begin
-        chn:=30;
-        outStr[30]:=#96;
-      end;
-      if outStr[chn]=#$9b then dec(chn);
-      c0:=chn;
-      list_putText(outStr);
-      inc(lstTotal);
+    chn:=chn-(v+1);
+    move(outStr[v+1],outStr[1],chn);
+    if chn>30 then
+    begin
+      chn:=30;
+      outStr[30]:=#96;
     end;
+    if outStr[chn]=#$9b then dec(chn);
+    c0:=chn;
+    list_putText(outStr);
+    inc(lstTotal);
   end;
   p_type:=fl_otherfile;
   result:=IOResult;
@@ -55,7 +56,7 @@ begin
   clearStatus;
 end;
 
-function loadPlaylist:Byte; Register;
+function loadPlaylist:Byte;
 const
   CIO_CHN = 1;
 
