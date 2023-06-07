@@ -7,8 +7,8 @@ KEY_TABLE_ADDR  = $2380;              // $080 ( 128)
 
 TAB_SCAN2ASC    = $2F00;              // $040 (  64)
 TAB_NRPM_ADDR   = $2F40;              // $036 (  54)
-DLIST_MIN_ADDR  = $2F7B;
-DLIST_ADDR      = $2FB3;              // $04C (  76)
+DLIST_MIN_ADDR  = $2F7C;
+DLIST_ADDR      = $2FB4;              // $04C (  76)
 
 // -------------------------------------------------
 

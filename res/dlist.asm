@@ -13,8 +13,6 @@ dl_start
         dta title_bar + DL_LMS, A(SCREEN_HEAD)
     :18 dta title_bar
 
-        dta DL_BLANK1
-
         dta work_area + DL_LMS, A(SCREEN_WORK), DL_BLANK1
     :11 dta work_area, DL_BLANK1
 

@@ -9,12 +9,10 @@ foot_area   = DL_MODE_40x24T2
 
 dl_start
     :2  dta DL_BLANK6
-    :6  dta DL_BLANK8, DL_BLANK1
+    :6  dta DL_BLANK8
 
         dta title_bar + DL_LMS, A(SCREEN_HEAD)
     :18 dta title_bar
-
-        dta DL_BLANK1
 
         dta work_area + DL_LMS, A(SCREEN_CHANNELS)
     :4  dta vis_area
