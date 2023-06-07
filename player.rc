@@ -5,6 +5,8 @@ TAB_SCAN2ASC rcasm 'res/tab_scan2asc.asm'
 DLIST_MIN_ADDR rcasm 'res/dlist_min.asm'
 DLIST_ADDR rcasm 'res/dlist.asm'
 
+TAB_NRPM_ADDR rcasm 'res/nrpm_registers.asm'
+
 CHARS_ADDR rcdata 'res/font_blk2-uvh.fnt'
 
 KEY_TABLE_ADDR rcasm 'res/key_table.a65'

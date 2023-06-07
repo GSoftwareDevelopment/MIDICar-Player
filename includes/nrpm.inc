@@ -66,66 +66,7 @@ const
 // Default settings of SAM2695 (DreamBlaster S2) Registers
 // 255 means that register is not specified in datasheet
 var
-  nrpn_regs:Array[0..$35] of byte = (
-    // $00 (LSB of NRPN#)
-    $60,    // eq low band              (  +6dB)
-    $40,    // eq med low band          (   0dB)
-    $40,    // eq med hid band          (   0dB)
-    $60,    // eq high band             (  +6dB)
-    255,
-    255,
-    255,
-    $7f,    // master volume            ( 100% )
-    $0c,    // eq low cutoff freq       ( 440Hz)
-    $1b,    // eq med low cutoff freq   ( 885Hz)
-    $72,    // eq med high cutoff freq  (3740Hz)
-    $40,    // eq high cutoff freq      (9375Hz)
-    255,
-    255,
-    255,
-    255,
-    // $10
-    255,
-    255,
-    255,
-    $00,    // clipping mode select                   ( soft )
-    255,
-    $40,    // General MIDI reverb send               (  50% )
-    $40,    // General MIDI chorus send               (  50% )
-    255,
-    $7f,    // post effects applied on GM             (   on )
-    $00,    // post effects applied on Mike           (  off )
-    $7f,    // post effects applied on Reverb/Chorus  (   on )
-    255,
-    255,
-    255,
-    255,
-    255,
-    // $20
-    $00,    // Spatial Effect volume    (   0% )
-    255,
-    $7f,    // General MIDI volume      ( 100% )
-    $40,    // General MIDI pan         ( midl )
-    $40,    // Mike volume              (  50% )
-    255,
-    $40,    // Mike pan                 ( midl )
-    255,
-    $7f,    // Mike Echo level          ( 100% )
-    $2b,    // Mike Echo time           ( 127ms)
-    $42,    // Mike Echo feedback       (  51% )
-    255,
-    $1d,    // Spatial Effect delay     (      )
-    $00,    // Spatial Effect input     (stereo)
-    255,
-    255,
-    // $30
-    $00,    // Slave1 Echo volume right (   0% )
-    $00,    // Slave1 Echo volume left  (   0% )
-    $00,    // Slave2 Echo volume right (   0% )
-    $00,    // Slave2 Echo volume left  (   0% )
-    $7f,    // Master Echo volume right ( 100% )
-    $7f     // Master Echo volume left  ( 100% )
-  );
+  nrpn_regs:Array[0..$35] of byte absolute TAB_NRPM_ADDR;
 
 procedure DBS2_sendControlEvent(nrpmLow:Byte); Register; Keep; assembler;
 asm
