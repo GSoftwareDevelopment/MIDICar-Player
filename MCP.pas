@@ -42,10 +42,10 @@ var
 
   lstY:Byte absolute $5A;
   lstShift:SmallInt absolute $5B;
-  lstCurrent:SmallInt absolute $55;
-  lstTotal:SmallInt absolute $5E;
+  lstCurrent:SmallInt absolute $70;
+  lstTotal:SmallInt absolute $74;
 
-  curPlay:SmallInt absolute $64;
+  curPlay:SmallInt absolute $72;
 
 // counter
 

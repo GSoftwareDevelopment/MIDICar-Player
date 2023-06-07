@@ -6,11 +6,12 @@
 | ---------- | ------------ | ------- | --------------- | ------------------------------------------------------------ | --------- |
 | `12`       |              | byte    | `tm`            |                                                              | main      |
 | `13`       |              | byte    | `otm`           |                                                              | main      |
+| `$58, $59` |              | pointer | `scradr`        | position on screen                                           | main      |
+| `$D2`      |              | byte    | `refreshRate`   |                                                              | main      |
 | `$D3`      |              | byte    | `totalXMS`      |                                                              | loader    |
-| `$D4, $D5` |              | pointer | `scradr`        | position on screen                                           | main      |
 | `$D8`      |              | byte    | `playerStatus`  |                                                              | main      |
 | `$D9`      |              | byte    | `screenStatus`  |                                                              | main      |
-| `$DA..$DB` |              | pointer | `pls`           | Playlist pointer                                             | main      |
+| `$DA..$DB` |              | pointer | `listPtr`       | Playlist pointer                                             | main      |
 | `$DC..$DD` |              | pointer | `curTrackPtr`   | pointer to current proceeded track                           | midfiles  |
 | `$DE`      |              | byte    | `cTrk`          | id of current proceeded track                                | midfiles  |
 | `$DF`      |              | byte    | `playingTracks` | number of tracks currently being processed<br />Zero means the song has ended. | midfiles  |
@@ -38,18 +39,29 @@
 
 | Address        |         | Type               | Name        | Description | source    |
 | -------------- | ------- | ------------------ | ----------- | ----------- | --------- |
-| `$D6`          |         | Byte               | chn         |             | main      |
+| `$14`          |         | Byte               | `_tm`       |             | main      |
+| `$13`          |         | Byte               | otm         |             | main      |
+| `$12`          |         | Byte               | ctm         |             | main      |
+| `$D4`          |         | Byte               | OSDTm       |             | main      |
+|                |         |                    |             |             |           |
+| `$D5`          |         | Byte               | chn         |             | main      |
+| `$D6`          |         | Byte               | oldV        |             | main      |
 | `$D7`          |         | ShortInt<br />Byte | v<br />_v   |             | main      |
 |                |         |                    |             |             |           |
+| `$5A`          |         | Byte               | lstY        |             |           |
+| `$5B`          |         | SmallInt           | lstShift    |             |           |
+| `$70`          |         | SmallInt           | lstCurrent  |             |           |
+| `$74`          |         | SmallInt           | lstTotal    |             |           |
+| `$72`          |         | SmallInt           | curPlay     |             |           |
 |                |         |                    |             |             |           |
-| `$D6`          |         | Byte               | ilch        |             | inputLine |
+| `$D7`          |         | Byte               | ilch        |             | inputLine |
 | `$54`          |         | Byte               | ilpos       |             | inputLine |
 | `$55`          |         | Word               | ilscradr    |             | inputLine |
 |                |         |                    |             |             |           |
 | `$88`          |         | Long               | counter     |             | main      |
 | `$8c`          |         | Long               | cntBCD      |             | main      |
 |                |         |                    |             |             |           |
-| `$0400..$047D` |         | MCP Variables      |             |             | MCP       |
+| `$0400..$04B6` |         | MCP Variables      |             |             | MCP       |
 |                |         |                    |             |             |           |
 | `$4e0..$4ef`   | 16      | array              | COLORS_ADDR |             | main      |
 | `$4f0..$4f7`   | 6 (+1)  | TDevString         | curDev      |             | main      |
@@ -68,37 +80,40 @@
 
 ## Data
 
-| Address            |            Size | Name             | Function                                                     | Source   |
-| ------------------ | --------------: | ---------------- | ------------------------------------------------------------ | -------- |
-| `$2380..$23FF`     |       128 ($80) | `KEY_TABLE_ADDR` | Keys jump table                                              | main     |
-| `$2400..$27FF`     |     1024 ($400) | `CHARS_ADDR`     | Char set definition                                          | main     |
-|                    |                 |                  |                                                              |          |
-| **`$2800..$2E03`** | **1780 ($6F4)** |                  | **Screen data**                                              | **main** |
-| `$2800..$2AF7`     |      760 ($2F8) | SCREEN_HEAD      | Screen header                                                |          |
-| `$2AF8..$2B1F`     |       40 ($028) | SCREEN_FOOT      | Screen footer                                                |          |
-| `$2B20..$2CFF`     |      720 ($2D0) | SCREEN_WORK      | Screen Work Area                                             |          |
-| `$2D00..$2D77`     |      120 ($078) | SCREEN_CHANNELS  | Screen Channels View                                         |          |
-| `$2D78..$2D83`     |       60 ($03C) | SCREEN_TIME      | Screen control & time                                        |          |
-| `$2D84..$2DAB`     |       40 ($028) | SCREEN_TIMELINE  | Screen song time line progress                               |          |
-| `$2DAC..$2DE7`     |       60 ($03C) | SCREEN_OSD       | Screen for OSD                                               | main     |
-| `$2ED8..$2E10`     |       40 ($028) | SCREEN_STATUS    | Screen status line                                           |          |
-|                    |                 |                  |                                                              |          |
-| `$2EA0..$2EDF`     |        64 ($40) | `UVMETER_ADDR`   | Channel indicator data                                       | main     |
-| `$2EE0..$2EFF`     |        32 ($20) | `SCREEN_ADRSES`  | listScrAdr                                                   | main     |
-|                    |                 |                  |                                                              |          |
-| `$2FB3..$2FFF`     |        76 ($4C) | `DLIST_ADDR`     | Display List                                                 | main     |
-|                    |                 |                  |                                                              |          |
-| `$3000..$32CF`     |      720 ($2D0) | `HELPSCR_ADDR`   | Screen for help                                              | main     |
-|                    |                 |                  |                                                              |          |
-| `$3C00`            |             512 |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles |
-| `$3E00`            |             512 |                  | Tracks information                                           | midfiles |
-|                    |                 |                  |                                                              |          |
-| `$80..$D3`         |                 | ZPAGE            | MADPascal ZP variables                                       | EXE      |
-| `$8000..$BFFF`     |                 | CODE             | MADPascal executable code                                    | EXE      |
-|                    |                 |                  |                                                              |          |
-| `$4000..$7FFF`     |                 |                  | Song data                                                    | midfiles |
-| `$C000..$CFFF`     |    4096 ($1000) | `LIST_ADDR`      |                                                              | main     |
-| `$D800..$FF00`     |                 |                  | Song data                                                    | midfiles |
+| Address            |            Size | Name             | Function                                                     | Source                 |
+| ------------------ | --------------: | ---------------- | ------------------------------------------------------------ | ---------------------- |
+| `$2380..$23FF`     |       128 ($80) | `KEY_TABLE_ADDR` | Keys jump table                                              | main                   |
+| `$2400..$27FF`     |     1024 ($400) | `CHARS_ADDR`     | Char set definition                                          | main                   |
+|                    |                 |                  |                                                              |                        |
+| **`$2800..$2E03`** | **1780 ($6F4)** |                  | **Screen data**                                              | **main**               |
+| `$2800..$2AF7`     |      760 ($2F8) | SCREEN_HEAD      | Screen header                                                |                        |
+| `$2AF8..$2B1F`     |       40 ($028) | SCREEN_FOOT      | Screen footer                                                |                        |
+| `$2B20..$2CFF`     |      720 ($2D0) | SCREEN_WORK      | Screen Work Area                                             |                        |
+| `$2D00..$2D77`     |      120 ($078) | SCREEN_CHANNELS  | Screen Channels View                                         |                        |
+| `$2D78..$2D83`     |       60 ($03C) | SCREEN_TIME      | Screen control & time                                        |                        |
+| `$2D84..$2DAB`     |       40 ($028) | SCREEN_TIMELINE  | Screen song time line progress                               |                        |
+| `$2DAC..$2DE7`     |       60 ($03C) | SCREEN_OSD       | Screen for OSD                                               | main                   |
+| `$2ED8..$2E10`     |       40 ($028) | SCREEN_STATUS    | Screen status line                                           |                        |
+|                    |                 |                  |                                                              |                        |
+| `$2EA0..$2EDF`     |        64 ($40) | `UVMETER_ADDR`   | Channel indicator data                                       | main                   |
+| `$2EE0..$2EFF`     |        32 ($20) | `SCREEN_ADRSES`  | listScrAdr                                                   | main                   |
+|                    |                 |                  |                                                              |                        |
+| `$2F00..$2F3F`     |        64 ($40) | `TAB_SCAN2ASC`   | keyboard code conversion table to ascii codes                | main (keyscan2asc.a65) |
+| `$2F40..$2F75`     |        54 ($35) | `NRPM_REGS`      | DreamBlaster s2 NRPM Registers                               | nrpm                   |
+| `$2F75..$2FB3`     |        62 ($3E) | `DLIST_MIN_ADDR` | Display List for MinMode                                     | main                   |
+| `$2FB4..$2FFF`     |        75 ($4B) | `DLIST_ADDR`     | Display List                                                 | main                   |
+|                    |                 |                  |                                                              |                        |
+| `$3000..$32CF`     |      720 ($2D0) | `HELPSCR_ADDR`   | Screen for help                                              | main                   |
+|                    |                 |                  |                                                              |                        |
+| `$3C00`            |             512 |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles               |
+| `$3E00`            |             512 |                  | Tracks information                                           | midfiles               |
+|                    |                 |                  |                                                              |                        |
+| `$80..$D3`         |                 | ZPAGE            | MADPascal ZP variables                                       | EXE                    |
+| `$8000..$BFFF`     |                 | CODE             | MADPascal executable code                                    | EXE                    |
+|                    |                 |                  |                                                              |                        |
+| `$4000..$7FFF`     |                 |                  | Song data                                                    | midfiles               |
+| `$C000..$CFFF`     |    4096 ($1000) | `LIST_ADDR`      |                                                              | main                   |
+| `$D800..$FF00`     |                 |                  | Song data                                                    | midfiles               |
 
 # Driver
 
