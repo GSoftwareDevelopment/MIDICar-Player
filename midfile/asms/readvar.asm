@@ -113,7 +113,7 @@ decodeC:
   and #%11    // 2
   beq noOrC   // 2**
   tay         // 2
-  lda OrC,y   // 4*
+  lda adr.TAB_OrC,y   // 4*
   ora B       // 3
   sta B       // 3
 
@@ -143,7 +143,7 @@ decodeD:
   and #%111   // 2
   beq noOrD   // 2**
   tay         // 2
-  lda OrD,y   // 4*
+  lda adr.TAB_OrD,y   // 4*
   ora C       // 3
   sta C       // 3
 
@@ -158,20 +158,4 @@ setC:
   sec
 
 endDecode:
-  rts
 
-OrC:
-  dta %00000000
-  dta %01000000
-  dta %10000000
-  dta %11000000
-
-OrD:
-  dta %00000000
-  dta %00100000
-  dta %01000000
-  dta %01100000
-  dta %10000000
-  dta %10100000
-  dta %11000000
-  dta %11100000

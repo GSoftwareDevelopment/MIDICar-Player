@@ -14,11 +14,9 @@ var
 
 procedure OSDOff; Keep;
 begin
-  if (screenStatus and ss_minMode=0) then
-    dpoke(DLIST_ADDR+59,SCREEN_TIME)
-  else
-    dpoke(DLIST_MIN_ADDR+45,SCREEN_TIME);
-  screenStatus:=screenStatus xor ss_isOSD;
+  dpoke(DLIST_ADDR+58,SCREEN_TIME);
+  dpoke(DLIST_MIN_ADDR+38,SCREEN_TIME);
+  clrBit(screenStatus,ss_isOSD);
   curControl:=0;
 end;
 
@@ -30,11 +28,9 @@ begin
     scradr:=SCREEN_OSD+1; PutINTText(ControlMsgs[curControl]);
     oldControl:=curControl;
   end;
-  if (screenStatus and ss_minMode=0) then
-    dpoke(DLIST_ADDR+59,SCREEN_OSD)
-  else
-    dpoke(DLIST_MIN_ADDR+45,SCREEN_OSD);
-  screenStatus:=screenStatus or ss_isOSD;
+  dpoke(DLIST_ADDR+58,SCREEN_OSD);
+  dpoke(DLIST_MIN_ADDR+38,SCREEN_OSD);
+  setBit(screenStatus,ss_isOSD);
   OSDTm:=0;
 end;
 

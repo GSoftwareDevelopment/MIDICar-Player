@@ -7,7 +7,7 @@ const
   ils_pending    = 0;
   ils_inprogress = 1;
   ils_done       = 2;
-  ils_abort      = 3;
+  ils_noProcess  = 128;
 
 // input line variables
 var
@@ -16,7 +16,7 @@ var
   ilscradr:Word absolute $55;
 
   resultInputLine:boolean = false;
-  stateInputLine:Byte = 0;
+  stateInputLine:Byte = ils_pending;
 
 procedure init_inputLine;
 procedure show_inputLine; assembler;
@@ -28,10 +28,12 @@ uses keys;
 const
   OUTSTR_ADDR = $55A;
   SNULL_ADDR  = $5AB;
+  ss_isRefresh = %10000000;  // flag for refresh list
 
 var
   _tm:Byte absolute $14;
   ctm:Byte absolute $12;
+  screenStatus:Byte absolute $D9;
   outstr:string[80] absolute OUTSTR_ADDR;
   SNull:string[80] absolute SNULL_ADDR;
 
@@ -126,7 +128,8 @@ begin
     begin
       outStr:=Snull;
       keyb:=$ff;
-      stateInputLine:=ils_abort;
+      screenStatus:=screenStatus or ss_isRefresh;
+      stateInputLine:=ils_pending;
       resultInputLine:=false;
     end
     else
@@ -135,9 +138,7 @@ begin
       resultInputLine:=true;
     end;
     ilpos:=byte(outstr[0]);
-    // stateInputLine:=ils_done*byte(keyb=K_RETURN);
     show_inputLine;
-    // resultInputLine:=(keyb=K_RETURN) and (ilpos>0);
     exit;
   end;
   if (ilpos>0) and (keyb=k_delete) then

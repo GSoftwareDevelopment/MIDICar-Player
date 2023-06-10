@@ -1,6 +1,7 @@
 procedure init;
 begin
-  asm lda #$FE \ sta PORTB end;
+  // asm lda #$FE \ sta PORTB end;
+  setBank(0);
   DMACTL:=0;
   waitFrame;
 
@@ -25,33 +26,26 @@ begin
   //   listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
   // end;
 
+  setColors;
   calcAvailableMem;
   clearList;
-  setColors;
   DMACTL:=34; waitFrame;
-  otm:=_tm;
+  setNMI;
+  initKeyboard;
+  resetTimer(otm); //otm:=_tm;
   playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
   screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
+  // clrBit(screenStatus,ss_isOsd+ss_minMode);
   inc(refreshRate);
-
-  // thi:=255;
-  // playDir:=1;
-  // timeShowMode:=1;
-  // SOUNDR:=0;
-  // hlpflg:=0;
-  // lstShift:=0; lstY:=0; lstCurrent:=0;
-  // stateInputLine:=0;
-  // resultInputLine:=false;
-
 end;
 
 procedure exit2DOS; keep;
 begin
   sendClearPushLCD;
-
+  doneKeyboard;
   unsetNMI;
   doneMIDI;
-  Cls(0); Opn(0,12,0,'E:'); // SOUNDR:=1;
+  Cls(0); Opn(0,12,0,'E:');
   asm
     :2 pla
 

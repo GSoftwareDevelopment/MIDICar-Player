@@ -52,6 +52,6 @@ begin
       _songTicks:=_songTicks div 160;
     end;
   end;
-  screenStatus:=screenStatus or ss_isRefresh;
+  setBit(screenStatus,ss_isRefresh);
   clearStatus;
 end;

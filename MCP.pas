@@ -12,6 +12,10 @@ Uses
   inputline;
 {$I-}
 
+var PORTB:byte absolute $D301;
+
+{$i 'macros.inc'}
+
 {$i 'const.inc'}
 
 {$r 'player.rc'}
@@ -76,7 +80,7 @@ begin
 
 // Loader init `outstr` and now its time to check for correct file specification
   validPath; // result in '_v' indicate what part of file spec is available
-  if (_v and dp_name=0) then // if file name is not specified...
+  if isBitClr(_v,dp_name) then // if file name is not specified...
     createListEntry(fl_device,outStr) // create Device entry type
   else
   begin
@@ -87,8 +91,6 @@ begin
 
   choiceListFile; resultInputLine:=true; keyb:=k_RETURN;
 
-  setNMI;
-
 // Player loop
   Repeat
     processMIDI;
@@ -96,24 +98,24 @@ begin
 
     // plugin_remoteControl;
 
-    if byte(_tm-otm)>=refreshRate then
+    if timer(otm,refreshRate) then
     begin
-      otm:=_tm;
+      resetTimer(otm);
 
-      if screenStatus and ss_isOSD<>0 then
+      if isBitSet(screenStatus,ss_isOSD) then
       begin
         if OSDTm>200 then OSDOff else inc(OSDTm,refreshRate);
       end;
 
-      if screenStatus and ss_isRefresh<>0 then
+      if isBitSet(screenStatus,ss_isRefresh) then
       begin
-        screenStatus:=screenStatus xor ss_isRefresh;
+        clrBit(screenStatus,ss_isRefresh);
         showList;
         drawListSelection;
       end;
 
       counter:=_totalTicks;
-      if (playerStatus and ps_calcLen<>0) and (_songTicks>0) then
+      if isBitSet(playerStatus,ps_calcLen) and (_songTicks>0) then
       begin
         _v:=(counter div _songTicks)-1;
         if _v<>255 then
@@ -135,41 +137,20 @@ begin
 
       asm  icl 'asms/uvmeters_h.a65' end;
 
-      if stateInputLine=ils_inprogress then
-        if byte(_tm-ctm)>10 then
+      if isBitSet(stateInputLine,ils_inprogress) then
+        if timer(ctm,10) then
         begin
-          ctm:=_tm;
+          resetTimer(ctm);
           show_inputLine;
         end;
 
     end;
 
-    if (keyb<>255) or (hlpflg<>0) then
+    if (keyb<>255) then
     begin
-      if screenStatus and ss_isHelp<>0 then toggleHelpScreen;
+      if isBitSet(screenStatus,ss_isHelp) then toggleHelpScreen;
 
-      asm
-        lda MAIN.KEYS.hlpflg
-        seq:sta MAIN.KEYS.keyb
-
-        lda MAIN.KEYS.keyb
-        tay
-        and #%11000000
-        sta MAIN.KEYS.keymod
-        tya
-        and #%00111111
-        sta MAIN.KEYS.keyb
-      end;
-
-      if stateInputLine=ils_inprogress then
-      begin
-        do_inputLine;
-        if stateInputLine=ils_abort then
-        begin
-          screenStatus:=screenStatus or ss_isRefresh;
-          stateInputLine:=ils_pending;
-        end;
-      end;
+      if stateInputLine=ils_inprogress then do_inputLine;
 
       asm
         lda MAIN.KEYS.keyb
@@ -187,7 +168,6 @@ begin
       end;
 
       keyb:=255;
-      hlpflg:=0;
     end;
 
   until false;

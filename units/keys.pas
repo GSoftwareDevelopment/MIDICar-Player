@@ -76,15 +76,76 @@ const
 var
   keyb:byte absolute $2fc;
   keymod:byte absolute $2fd;
-  hlpflg:byte absolute $2dc;
 
+procedure initKeyboard;
 function keyscan2asc(keyscan:Byte):Byte; Assembler;
+procedure doneKeyboard;
 
 implementation
+
+var
+  VKEYBD:Pointer absolute $208;
+  oldVKEYBD:Pointer;
+  NMIEN:Byte absolute $D40E;
+
+procedure keyConv; Assembler; Keep;
+asm
+  tay
+  and #%11000000
+  sta MAIN.KEYS.keymod
+  tya
+  and #%00111111
+  sta MAIN.KEYS.keyb
+end;
+
+procedure keyboardInt; Interrupt; Assembler; Keep;
+asm
+KBCODE = $D209
+KEYDEL = $02F1
+KRPDEL = $02D9
+OLDKBC = $02F2
+SRTIMER = $022B
+
+  tya:pha
+
+  lda KBCODE
+  cmp OLDKBC
+  bne store
+  ldy KEYDEL
+  bne rpt
+store:
+  sta OLDKBC
+  jsr keyConv ; this procedure change Y-reg!
+cont:
+  lda #$03
+  sta KEYDEL
+rpt:
+  lda KRPDEL
+  sta SRTIMER
+
+_exit:
+  pla:tay:pla
+end;
+
+procedure initKeyboard;
+begin
+  oldVKEYBD:=VKEYBD;
+  NMIEN:=$00;
+
+  VKEYBD:=@keyboardInt;
+  NMIEN:=$40;
+end;
 
 function keyscan2asc(keyscan:Byte):Byte; Assembler;
 asm
   icl 'asms/keyscan2asc.a65'
+end;
+
+procedure doneKeyboard;
+begin
+  NMIEN:=$00;
+  VKEYBD:=oldVKEYBD;
+  NMIEN:=$40;
 end;
 
 end.

@@ -1,0 +1,17 @@
+RTCLOK = $12
+JSYSVB = $E45F
+
+  lda RTCLOK+2
+  and #%11
+  bne skipTHI
+
+  ldx thi
+  bmi skipTHI
+  lda adr.thumblr,x
+  sta SCREEN_STATUS+1
+  dex
+  spl:ldx #3
+  stx thi
+
+skipTHI:
+  JMP OLD_VBLKI:0000

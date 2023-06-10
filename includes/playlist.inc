@@ -78,5 +78,5 @@ begin
   fn:='';
   clearStatus;
   thi:=255;
-  screenStatus:=screenStatus or ss_isRefresh or ss_plsMode;
+  setBit(screenStatus,ss_isRefresh+ss_plsMode);
 end;

@@ -22,6 +22,7 @@ var
   c1:char absolute SNULL_ADDR+1;
   c2:char absolute SNULL_ADDR+2;
   c18:char absolute SNULL_ADDR+18;
+  curPath0:byte absolute CURPATH_ADDR;
 
   procedure checkFileInList;
   var
@@ -66,16 +67,13 @@ begin
   joinStrings(curDev,curPath);
 
   createListEntry(fl_device,outStr);
-  if byte(curPath[0])>1 then
-  begin
+  if curPath0>1 then
     createListEntry(fl_parentDir,'..');
-    desFiles:=2;
-  end
-  else
-    desFiles:=1;
+
+  desFiles:=lstTotal;
 
   thi:=0;
-  if keymod=0 then
+  if isBitClr(keymod,kmod_Control) then
   begin
     putStatus(statusMsgs[7]);
     IOResult:=readDescriptionFile(descriptionFile);
@@ -123,6 +121,6 @@ begin
   fn:='';
   clearStatus;
   thi:=255;
-  screenStatus:=screenStatus or ss_isRefresh;
+  setBit(screenStatus,ss_isRefresh);
 end;
 

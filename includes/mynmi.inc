@@ -1,3 +1,6 @@
+const
+  thumblr:array[0..3] of byte = ($a9,$9c,$9d,$9e);
+
 var
   VVBLKI:Pointer absolute $222;
   NMIEN:Byte absolute $D40E;
@@ -10,35 +13,10 @@ procedure MyNMI; Interrupt; Assembler;
 asm
   icl 'asms/nmi.a65'
 end;
+
 procedure ImmediateVBLK; Interrupt; Assembler;
 asm
-RTCLOK = $12
-JSYSVB = $E45F
-
-  // pha
-  // txa:pha
-
-  lda RTCLOK+2
-  and #%11
-  bne skipTHI
-
-  ldx thi
-  bmi skipTHI
-  lda thumblr,x
-  sta SCREEN_STATUS+1
-  dex
-  spl:ldx #3
-  stx thi
-
-skipTHI:
-  // pla:tax
-  // pla
-
-  JMP OLD_VBLKI:0000
-  // jmp JSYSVB
-
-thumblr:
-    .byte $a9,$9c,$9d,$9e
+  icl 'asms/immediateVB.a65'
 end;
 
 procedure setNMI;

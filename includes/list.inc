@@ -134,7 +134,7 @@ begin
   list_getByte(p_type);
   list_getText(Snull);
 
-  if stateInputLine<3 then
+  if isBitClr(stateInputLine,ils_noProcess) then
   begin
     if (p_type=fl_parentdir) then
     begin
@@ -152,14 +152,14 @@ begin
 
   joinStrings(curDev,curPath);
 
-  if stateInputLine<3 then
+  if isBitClr(stateInputLine,ils_noProcess) then
   begin
     stateInputLine:=ils_done;
-    if (screenStatus and ss_minMode=0) then
+    if isBitClr(screenStatus,ss_minMode) then
     begin
       if p_type=fl_device then
       begin
-        if screenStatus and ss_plsMode<>0 then
+        if isBitSet(screenStatus,ss_plsMode) then
         begin
           outStr:=Snull;
           resultInputLine:=True;
@@ -174,13 +174,28 @@ begin
     end;
   end;
 
-  if (p_type=fl_playlist) or
-      (p_type=fl_midifile) then
-    if screenStatus and ss_plsMode=0 then
-      joinStrings(outStr,Snull)
-    else
-      outStr:=Snull;
+  if isBitClr(keymod,kmod_shift) then
+  begin
+    if (p_type=fl_playlist) or
+       (p_type=fl_midifile) then
+      if isBitClr(screenStatus,ss_plsMode) then
+        joinStrings(outStr,Snull)
+      else
+        outStr:=Snull;
 
-  if p_type=fl_midifile then
-    IOResult:=loadSong;
+    if (p_type=fl_midifile) then
+      IOResult:=loadSong;
+  end
+  else
+  begin
+    if (p_type=fl_parentdir) or
+       (p_type=fl_device) then exit;
+    if IOResult<>ERR_LIST_ENTRY_END then
+      list_getText(Snull);
+    outStr:=Snull;
+    IOResult:=0;
+    drawListSelection;
+    ilscradr:=listScrAdr[lstY];
+    init_inputLine;
+  end;
 end;

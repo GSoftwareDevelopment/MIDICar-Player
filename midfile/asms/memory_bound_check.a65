@@ -34,7 +34,7 @@ checkXMSBound         ; extender memory window $4000..$7fff
 
 switchXMSBank:
   dey             ; decrement current bank index
-  beq switch2Conv ; if zero, meand we back to conventional memory
+  beq switch2Conv ; if zero, means we back to conventional memory
 
   lda $100,y      ; get bank set
   sty _bank       ; store current bank index

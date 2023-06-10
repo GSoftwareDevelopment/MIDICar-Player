@@ -140,7 +140,7 @@ begin
   putASCText(fn);
 end;
 
-procedure statusError(err:byte); Register;
+procedure statusError(err:byte);
 begin
   keyb:=255;
   scradr:=SCREEN_STATUS+1;
@@ -155,7 +155,7 @@ begin
     putInt(err); poke(scradr,$ce);
     puttextinvert:=0;
   end;
-  while keyb=255 do ;
+  // while keyb=255 do ;
   IOResult:=0;
-  clearStatus;
+  // clearStatus;
 end;
