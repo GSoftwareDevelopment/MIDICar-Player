@@ -1,7 +1,6 @@
 procedure init;
 begin
-  // asm lda #$FE \ sta PORTB end;
-  setBank(0);
+  asm lda #$FE \ sta PORTB end;
   DMACTL:=0;
   waitFrame;
 
@@ -35,7 +34,6 @@ begin
   resetTimer(otm); //otm:=_tm;
   playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
   screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
-  // clrBit(screenStatus,ss_isOsd+ss_minMode);
   inc(refreshRate);
 end;
 
