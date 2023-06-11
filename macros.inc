@@ -5,7 +5,6 @@
 {$define setBit(val,bit):=val:=val or bit}
 {$define clrBit(val,bit):=val:=val and not bit}
 {$define tglBit(val,bit):=val:=val xor bit}
-{$define setBank(bank):=PORTB:=peek($100+bank) }
 
 {$define timer(tm,e):=(byte(_tm-tm)>=e)}
 {$define resetTimer(tm):=tm:=_tm}
