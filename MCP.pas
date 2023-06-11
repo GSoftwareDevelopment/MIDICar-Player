@@ -12,8 +12,6 @@ Uses
   inputline;
 {$I-}
 
-var PORTB:byte absolute $D301;
-
 {$i 'macros.inc'}
 
 {$i 'const.inc'}
@@ -60,7 +58,7 @@ var
 
 //
 
-{$i 'myNMI.inc'}
+{$i 'interrupt.inc'}
 {$i 'NRPM.inc'}
 {$i 'osd.inc'}
 {$i 'status.inc'}
