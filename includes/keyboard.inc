@@ -14,7 +14,6 @@ begin
       list_getText(outStr);
     drawListSelection;
     tglBit(p_type,$40);
-    // p_type:=p_type xor $40;
     listPtr:=pointer(tmp);
     list_putByte(p_type);
     showEntry;
@@ -165,23 +164,14 @@ begin
     setBit(stateInputLine,ils_noProcess);
     lstCurrent:=curPlay;
     repeat
-      if keyb=k_B then v:=1 else v:=-1;
-      asm
-        lda playerStatus
-        and ps_loop
-        cmp #ps_shuffle
-        bne sequenceLoop
-      end;
-      curPlay:=random(lstTotal);
-      asm
-        jmp endChoice
-      sequenceLoop:
-      end;
-      inc(lstCurrent,v);
-      if (lstCurrent>=lstTotal) then lstCurrent:=0;
-      if (lstCurrent<0) then lstCurrent:=lstTotal;
-      asm
-      endChoice:
+      if (playerStatus and ps_loop=ps_shuffle) then
+        lstCurrent:=random(lstTotal)
+      else
+      begin
+        if keyb=k_B then v:=1 else v:=-1;
+        inc(lstCurrent,v);
+        if (lstCurrent>=lstTotal) then lstCurrent:=0;
+        if (lstCurrent<0) then lstCurrent:=lstTotal;
       end;
       choiceListFile;
     until (p_type=fl_midifile) and (IOResult and %11111100=0);
