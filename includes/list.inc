@@ -18,11 +18,6 @@ begin
   fillchar(listPtr,$4000,$9B);
 end;
 
-procedure drawListSelection;
-begin
-  scradr:=listScrAdr[lstY]; invers(32);
-end;
-
 procedure showEntry;
 const
   listchars : array[0..4] of byte = (
@@ -166,7 +161,6 @@ begin
         end
         else
         begin
-          drawListSelection;
           ilscradr:=listScrAdr[lstY];
           init_inputLine;
         end;
@@ -194,7 +188,6 @@ begin
       list_getText(Snull);
     outStr:=Snull;
     IOResult:=0;
-    drawListSelection;
     ilscradr:=listScrAdr[lstY];
     init_inputLine;
   end;

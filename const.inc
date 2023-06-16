@@ -3,7 +3,7 @@ const
 
   VERSION= 'v1.6a'~;
 // base memory (under 64KB) available
-  FREE_MEM = ($8000-$4000)+($ff00-$d800);
+  BASEMEM_FREE = 0; // ($8000-$4000)+($ff00-$d800);
 
 // screen status
   ss_isRefresh = %10000000;  // flag for refresh list

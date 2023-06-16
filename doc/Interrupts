@@ -1,0 +1,29 @@
+
+
+		$0200 (DLIV) - $9d8d/$9da5 myDLI() <--------------------+
+		$0222 (VVBLKI) - $9e51 immediateVBLK() <-------------+  |
+				$C0E2 (SYSVBL) - old vector $0222 (VVBLKI)   |  |
+                                                             ^  ^
+		$0216 (VIMIRQ) - $9d74 MyIRQ() <------------------+  |  |
+				DLI - $0200 (DLIV) ->---------------------|--|--+
+				VBI - $0222 (VVBLKI) ->-------------------|--+  |
+				IRQ - $c030 old vector $0216 (VIMIRQ)     |  |  |
+                                                   	      ^  |  |
+	----> without ROM                                     |  ^  ^
+		$FFFA - $9dbe MyNMI() <----------------+          |  |  |
+				DLI - $0200 (DLIV) ->----------|----------|--|--+
+				VBI - MyNMI().VBL              |          |  |  |
+		                               		   |          ^  |  |
+		$FFFE - $895b MADPASCAL romoff         |          |  ^  ^
+				NMI - $FFFA ($9DBE) ->---------+          |  |  |
+				DLI - $0200 (DLIV) ->---------------------|--|--+
+				IRQ - $FFFE                               |  |  |
+					$0216 (VIMIRQ) - MyIRQ() ->-----------+  |  |
+                                                          |  ^  ^
+	----> with ROM                                        ^  |  |
+		$FFFA - $c018 SYSTEM NMI                          |  |  |
+				DLI - $0200 (DLIV) ->---------------------|--|--+
+				VBI - $0222 (VVBLKI) ->-------------------|--+
+		$FFFE - $c02C SYSTEM IRQ                          |
+					$0216 (VIMIRQ) - MyIRQ() ->-----------+
+		

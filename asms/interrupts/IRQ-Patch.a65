@@ -1,0 +1,12 @@
+NMIRES = $d40f
+
+  bit NMIRES
+  spl:jmp (DLIV) ;$200
+  svs:jmp old_vimirq:$ffff ;stare vimirq
+  pha
+  txa
+  pha
+  tya
+  pha
+  sta NMIRES ;$D40F
+  jmp (VVBLKI) ;$222

@@ -65,15 +65,9 @@ begin
 {$IFDEF USE_SUPPORT_VARS}
       if (tickDiv and $8000)<>0 then
       begin
-        fps:=(v shr 8) and $7F;
-        case fps of
-          $E8 : fps:=24;
-          $E7 : fps:=25;
-          $E3 : fps:=29;
-          $E2 : fps:=30;
-        end;
-        fsd:=v and $ff;
-      end
+        fps:=(hi(tickDiv) xor 255)+1;
+        fsd:=lo(tickDiv);
+      end;
 {$ENDIF}
     end
     else if chunkTag=TAG_MTRK then

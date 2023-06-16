@@ -1,5 +1,6 @@
 RTCLOK = $12
 ATRACT = 77
+DLIV   = $200;
 SDLST  = $230;
 KBCODE = $d209
 SKSTAT = $d20f
@@ -14,10 +15,15 @@ CH     = $02fc
 PCOLR0 = $02c0
 COLPM0 = $d012
 
+    bit NMIRES
+    bpl VBL
+    jmp (DLIV)
+
+VBL:
 // systemowa procedure obsługi RTClock ($C0E2)
     cld
     sta rega
-    ; stx regx
+    stx regx
     sty regy
     STA NMIRES
     lda #0
@@ -32,15 +38,6 @@ COLPM0 = $d012
 end_rtclk:
 
 skipTHI:
-// fragment systemowej procedury kopiowania rejestrów kolorów
-//    ldx #$08
-//colloop:
-//    lda PCOLR0,x
-//    sta COLPM0,x
-//    dex
-//    bpl colloop
-
-// systemowa procedura obsługi klawiatry ($C1A1)
     lda SKSTAT
     and #$04
     beq skip_keyDelay
@@ -71,6 +68,45 @@ skip_key:
 
 end_key:
 
+; change displaylist interrupt
+    lda lstY
+    cmp oldLstY
+    beq skipDLChange
+
+    sta oldLstY
+
+    tax
+    lda adr.Yscans,x
+    sta lstYScanLine
+
+    ldy #0
+    ldx #26
+loop:
+    lda DLIST_ADDR,x
+    cpy lstY
+    bne clearDL
+    ora #$80
+    bmi store
+clearDL:
+    and #$7f
+store:
+    sta DLIST_ADDR,x
+next:
+    inx
+    txa
+    and #1
+    bne loop
+    iny
+    cpy #LIST_VISIBLE_ITEMS
+    bne loop
+
+skipDLChange:
+
+    lda #<MAIN.MYDLI
+    sta DLIV
+    lda #>MAIN.MYDLI
+    sta DLIV+1
+
     lda rega:#0
-    ; ldx regx:#0
+    ldx regx:#0
     ldy regy:#0

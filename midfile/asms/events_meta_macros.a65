@@ -10,13 +10,13 @@
   .macro meta@setTempo
     jsr MAIN.MIDFILES.READ24
     lda _delta
-    sta ms_per_qnote
+    sta us_per_qnote
     lda _delta+1
-    sta ms_per_qnote+1
+    sta us_per_qnote+1
     lda _delta+2
-    sta ms_per_qnote+2
+    sta us_per_qnote+2
     lda _delta+3
-    sta ms_per_qnote+3
+    sta us_per_qnote+3
     jsr MAIN.MIDFILES.SetTempo
   .endm
 

@@ -23,7 +23,7 @@ eMeta2:
     jmp loopTrackProcess
 
 eMeta3:
-.ifdef USE_SUPPORT_VARS
+.ifdef MAIN.@DEFINES.USE_SUPPORT_VARS
     cmp #$58
     bne eMeta4
 

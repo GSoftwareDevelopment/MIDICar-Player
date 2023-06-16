@@ -1,0 +1,68 @@
+COLPF1 = $D017  ; (709)
+COLPF2 = $D018  ; (710)
+WSYNC  = $D40A
+NMIRES = $D40f
+DLIV   = $200
+tmpreg = $6B
+
+// changeColor:
+//   pha
+//   sta NMIRES
+
+//   lda #$b2
+//   sta WSYNC
+//   sta COLPF2
+
+//   lda #<restoreColor
+//   sta DLIV
+//   lda #>restoreColor
+//   sta DLIV+1
+
+//   pla
+//   rti
+
+// restoreColor:
+
+//   pha
+//   sta NMIRES
+
+//   lda 712
+//   sta WSYNC
+//   sta COLPF2
+
+//   lda #<changeColor
+//   sta DLIV
+//   lda #>changeColor
+//   sta DLIV+1
+
+//   pla
+//   rti
+
+changeColor:
+  pha:tya:pha
+
+  sta NMIRES
+
+  lda VCOUNT
+  cmp lstYscanLine
+  bcs restore
+
+change:
+  lda #$a2
+  ldy #$af
+  sta WSYNC
+  sty COLPF1
+  sta COLPF2
+
+  pla:tay:pla
+  rti
+
+restore:
+  lda 712
+  ldy 709
+  sta WSYNC
+  sty COLPF1
+  sta COLPF2
+
+  pla:tay:pla
+

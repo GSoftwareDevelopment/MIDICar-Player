@@ -17,6 +17,7 @@ var
   _delta:Longint          absolute $f6; {f6, f7, f8, f9}
   _tmp:Byte               absolute $f6; // must by the same address as _delta!!
 
+  _tickStep:Byte          absolute $e8;
   _songTicks:TDeltaVar    absolute $e9; {e9, ea, eb, ec}
 
 // the order of the registers MUST be the same as in the TMIDTrack record!!!
@@ -30,25 +31,25 @@ var
   MIDData:Pointer         ;
   MIDTracks:TByteArray    ;
   format:byte             ;
-  totalTracks:byte        ;
-  tickDiv:Word            ;
-  ms_per_qnote:longint    ;
+  totalTracks:byte        = 0;
+  tickDiv:Word            = 384;
+  us_per_qnote:longint    = 500000;
 // The following variables are informational only
 // they are not used in the file playback process
 {$IFDEF USE_SUPPORT_VARS}
   fps:Byte                ;
   fsd:Byte                ;
-  tactNum:Byte            ;
-  tactDenum:Byte          ;
-  ticks_per_qnote:Byte    ;
-  ticks_per_32nd:Byte     ;
-  BPM:Word                ;
+  tactNum:Byte            = 4;
+  tactDenum:Byte          = 4;
+  ticks_per_qnote:Byte    = 24;
+  ticks_per_32nd:Byte     = 8;
+  BPM:Word                = 120;
 {$ENDIF}
   chnVolume:Array[0..15] of byte;
   oldTimerVec:Pointer     ;
 
   loadProcess:TLoadingProcess;
-  tempoShift:Longint      ;
+  tempoShift:Longint      = 0;
 
 //
 function LoadMID:shortint;
@@ -157,7 +158,7 @@ end;
 procedure doneMIDI;
 begin
   _timerStatus:=_timerStatus or f_counter;
-  _totalTicks:=0; _subCnt:=1;
+  _totalTicks:=0; _subCnt:=0;
   setIntVec(iTim1,oldTimerVec);
   resetMIDI;
   asm
@@ -173,18 +174,10 @@ end;
 initialization
   oldTimerVec:=nil;
   loadProcess:=@nullLoadPrcs;
-  totalTracks:=0;
   cTrk:=0;
   _songTicks:=0;
   _totalTicks:=0;
-  tickDiv:=384;
-  ms_per_qnote:=500000;
+  _tickStep:=3;
   _timerStatus:=f_counter;
-{$IFDEF USE_SUPPORT_VARS}
-  tactNum:=4;
-  tactDenum:=4;
-  ticks_per_qnote:=24;
-  ticks_per_32nd:=8;
-{$ENDIF}
   getIntVec(iTim1,oldTimerVec);
 end.

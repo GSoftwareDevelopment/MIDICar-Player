@@ -12,12 +12,11 @@ begin
   begin
     if IOResult<>ERR_LIST_ENTRY_END then
       list_getText(outStr);
-    drawListSelection;
     tglBit(p_type,$40);
     listPtr:=pointer(tmp);
     list_putByte(p_type);
+    scradr:=listScrAdr[lstY];
     showEntry;
-    drawListSelection;
   end;
   IOResult:=0;
 end;
@@ -28,7 +27,6 @@ var
 
 begin
   if isBitSet(screenStatus,ss_minMode) then exit;
-  if isBitClr(screenStatus,ss_isRefresh) then drawListSelection;
   v:=0;
   if (keyb=k_UP) then
   begin
@@ -80,7 +78,6 @@ begin
     if tmp<>0 then setBit(screenStatus,ss_isRefresh);
   end;
   lstCurrent:=lstShift+lstY;
-  if isBitClr(screenStatus,ss_isRefresh) then drawListSelection;
 end;
 
 procedure fileAction; Keep;
@@ -148,12 +145,22 @@ begin
 end;
 
 procedure toggleHelpScreen;
+var
+  oLstY:byte;
+
 begin
   tglBit(screenStatus,ss_isHelp);
   if isBitClr(screenStatus,ss_isHelp) then
-    dpoke(DLIST_ADDR+24,SCREEN_WORK)
+  begin
+    dpoke(DLIST_ADDR+24,SCREEN_WORK);
+    lstY:=oLstY;
+  end
   else
+  begin
     dpoke(DLIST_ADDR+24,HELPSCR_ADDR);
+    oLstY:=lstY;
+    lstY:=255;
+  end;
   keyb:=255;
 end;
 

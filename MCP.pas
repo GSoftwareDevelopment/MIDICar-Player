@@ -2,6 +2,7 @@
 {$LIBRARYPATH './units/'}
 {$LIBRARYPATH './includes/'}
 {$DEFINE ROMOFF}
+{$DEFINE IRQPATCH}
 Uses
   MIDFiles,
   keys,
@@ -42,7 +43,9 @@ var
 
   listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
 
-  lstY:Byte absolute $5A;
+  lstYscanLine:Byte absolute $57;
+  lstY:Byte absolute $60;
+  oldLstY:Byte absolute $5a;
   lstShift:SmallInt absolute $5B;
   lstCurrent:SmallInt absolute $70;
   lstTotal:SmallInt absolute $74;
@@ -109,7 +112,6 @@ begin
       begin
         clrBit(screenStatus,ss_isRefresh);
         showList;
-        drawListSelection;
       end;
 
       counter:=_totalTicks;

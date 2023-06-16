@@ -10,3 +10,4 @@
   single_sum 'SEND' send
   single_sum 'FLUSH' flush
   single_sum 'STOP' stop
+  single_sum 'RECEIVE' receive

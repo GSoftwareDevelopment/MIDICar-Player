@@ -29,8 +29,9 @@ begin
   calcAvailableMem;
   clearList;
   DMACTL:=34; waitFrame;
-  setNMI;
+  oldLstY:=255;
   initKeyboard;
+  setNMI;
   resetTimer(otm); //otm:=_tm;
   playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
   screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
@@ -40,8 +41,8 @@ end;
 procedure exit2DOS; keep;
 begin
   sendClearPushLCD;
-  doneKeyboard;
   unsetNMI;
+  doneKeyboard;
   doneMIDI;
   Cls(0); Opn(0,12,0,'E:');
   asm

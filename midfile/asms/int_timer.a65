@@ -2,47 +2,25 @@
     bmi skip
 
 doSubTick:
-    and #f_ratio
-    cmp _subCnt
     beq doMainTick
+    cmp _subCnt
+    beq zeroSubTick
 
     inc _subCnt
-    bvs skip
+    pla:rti
 
-doMainTick:
-    lda #1
+zeroSubTick:
+    lda #0
     sta _subCnt
 
-    lda _timerStatus
-    ora #f_tick
-    sta _timerStatus
-
-    inc _totalTicks
-    bne skip
+doMainTick:
+    lda _totalTicks
+    add _tickStep
+    sta _totalTicks
+    bcc skip
     inc _totalTicks+1
     bne skip
     inc _totalTicks+2
-    // bne skip
-    // inc _totalTicks+3
 
 skip:
-
-//   sty regy
-
-//   ldy MIDI_FIFO.FIFO_Tail
-//   cpy MIDI_FIFO.FIFO_Head
-//   beq fifo_end
-
-//   lda MC6850.MC6850_CNTRREG
-//   and #MC6850.TDRE
-//   beq fifo_end
-
-//   lda MIDI_FIFO.FIFO_ADDR,y
-//   sta MC6850.MC6850_BUFFER
-
-//   inc MIDI_FIFO.FIFO_Tail
-
-// fifo_end:
-//   ldy regy:#$00
-
   pla

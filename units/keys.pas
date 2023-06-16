@@ -100,31 +100,7 @@ end;
 
 procedure keyboardInt; Interrupt; Assembler; Keep;
 asm
-KBCODE = $D209
-KEYDEL = $02F1
-KRPDEL = $02D9
-OLDKBC = $02F2
-SRTIMER = $022B
-
-  tya:pha
-
-  lda KBCODE
-  cmp OLDKBC
-  bne store
-  ldy KEYDEL
-  bne rpt
-store:
-  sta OLDKBC
-  jsr keyConv ; this procedure change Y-reg!
-cont:
-  lda #$03
-  sta KEYDEL
-rpt:
-  lda KRPDEL
-  sta SRTIMER
-
-_exit:
-  pla:tay:pla
+  icl 'asms/interrupts/IRQ-keyboard.a65'
 end;
 
 procedure initKeyboard;

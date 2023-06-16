@@ -7,7 +7,7 @@ end;
 
 procedure calcAvailableMem;
 begin
-  memAvailable:=(word(totalXMS)*16384)+FREE_MEM;
+  memAvailable:=(word(totalXMS)*16384)+BASEMEM_FREE;
 end;
 
 procedure clearUVMeters; Assembler;
