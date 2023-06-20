@@ -22,6 +22,10 @@ procedure clearWorkArea; assembler;
 
 implementation
 
+const
+  Pow10Tab:Array[0..3] of word = (10000,1000,100,10);
+  hexTab:Array[0..15] of char = '0123456789ABCDEF'~;
+
 procedure waitFrame; Inline; Assembler;
 asm
   lda $14

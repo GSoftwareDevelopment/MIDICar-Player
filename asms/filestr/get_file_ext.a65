@@ -1,5 +1,5 @@
 hlpptr = $88
-result = $4ec
+result = MAIN.FILESTR.fNEXT
 
   lda #0
   sta result
@@ -9,7 +9,7 @@ result = $4ec
 
   ldy #0
   lda (hlpptr),y
-  sta fnlen
+  tax ; sta fnlen
   beq endGetFileExt
   tay
 
@@ -23,9 +23,9 @@ dotSearch:
 
 endDotSearch:
   sty extst
-  lda fnlen
+  txa ; lda fnlen
   sec
-  sbc extst
+  sbc extst:#$00
   cmp #4
   bcs endGetFileExt
 
@@ -42,6 +42,3 @@ copyExt2Result:
 
 endGetFileExt:
   rts
-
-fnlen .byte 0
-extst .byte 0

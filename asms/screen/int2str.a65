@@ -1,3 +1,5 @@
+_cnt = $84
+
 EOL = 0
 
     lda scradr
@@ -15,11 +17,11 @@ ITSNEXT:
 ITSSLP:
     lda value
     sec
-    sbc Pow10Tab,Y
+    sbc ADR.Pow10Tab,Y
     sta value
     lda value+1
     iny
-    sbc Pow10Tab,Y
+    sbc ADR.Pow10Tab,Y
     bcc ITSADD
     sta value+1
     inx
@@ -29,7 +31,7 @@ ITSSLP:
 ITSADD:
     dey
     lda value
-    adc Pow10Tab,Y
+    adc ADR.Pow10Tab,Y
     sta value
     txa
     ora #$10
@@ -68,11 +70,3 @@ skipDigit:
 
 stop:
     rts
-
-_cnt
-    .by 0
-Pow10Tab
-    .wo 10000
-    .wo 1000
-    .wo 100
-    .wo 10

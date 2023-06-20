@@ -1,3 +1,5 @@
+_vofs = $84;
+
 // store `scradr` value as a operand of opcode
   txa:pha
 
@@ -34,7 +36,7 @@ HiNibble:
 
 put2screen:
   tax
-  lda hexTab,x
+  lda ADR.hexTab,x
 //  ora puttextinvert
   dey
   sta screen:$f000,y
@@ -53,8 +55,3 @@ calcEndAddr:
 stop:
   pla:tax
   rts
-
-_vofs
-  .by 0
-hexTab:
-  dta d'0123456789ABCDEF'
