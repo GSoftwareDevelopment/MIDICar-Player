@@ -1,8 +1,16 @@
-NMIRES = $d40f
+NMIST = $d40f
 
-  bit NMIRES
-  spl:jmp (DLIV) ;$200
-  svs:jmp old_vimirq:$ffff ;stare vimirq
+  bit NMIST
+  bpl _vbl
+  bit NMIST
+  bpl _vbl
+  jmp (VDSLST)
+
+_vbl
+  bvc _irq
+  bit NMIST
+  bvc _irq
+
   pha
   txa
   pha
@@ -10,3 +18,6 @@ NMIRES = $d40f
   pha
   sta NMIRES ;$D40F
   jmp (VVBLKI) ;$222
+
+_irq
+  jmp old_vimirq:$ffff ;stare vimirq

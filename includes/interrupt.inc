@@ -47,14 +47,22 @@ begin
   JSETVBV = $E45C
 
     txa:pha
+    inc PORTB
 
   .ifdef MAIN.@DEFINES.IRQPATCH
+    sei
     lda VIMIRQ
     sta oldVIMIRQ
     sta MyIRQ.OLD_VIMIRQ
     lda VIMIRQ+1
     sta oldVIMIRQ+1
     sta MyIRQ.OLD_VIMIRQ+1
+
+    lda #0
+    ldy #<MyIRQ
+    ldx #>MyIRQ
+    jsr JSETVBV
+    cli
   .endif
 
     lda VVBLKI
@@ -62,19 +70,11 @@ begin
     lda VVBLKI+1
     sta ImmediateVBLK.OLD_VBLKI+1
 
-    inc PORTB
 
     lda #6
     ldy #<ImmediateVBLK
     ldx #>ImmediateVBLK
     jsr JSETVBV
-
-  .ifdef MAIN.@DEFINES.IRQPATCH
-    lda #0
-    ldy #<MyIRQ
-    ldx #>MyIRQ
-    jsr JSETVBV
-  .endif
 
     dec PORTB
     pla:tax
@@ -90,12 +90,14 @@ begin
 {$IFDEF IRQPATCH}
   asm
   JSETVBV = $E45C
+    sei
     inc PORTB
     lda #0
     ldy oldVIMIRQ
     ldx oldVIMIRQ+1
     jsr JSETVBV
     dec PORTB
+    cli
   end;
 {$ENDIF}
   VVBLKI:=oldVVBLKI;
