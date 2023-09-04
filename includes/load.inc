@@ -28,8 +28,22 @@ begin
 
   calcAvailableMem;
   _bank:=totalXMS; _adr:=$4000;
+
+  asm
+    jsr $2003 // start driver
+  end;
+
   sendClearPushLCD;
-  sendPushLCDText(fn);
+  if IOResult<>ERR_LIST_ENTRY_END then
+  begin
+    list_getText(Snull);
+    sendPushLCDText(Snull);
+  end
+  else
+    sendPushLCDText(fn);
+  asm
+    sec \ jsr $200c // flush & stop driver
+  end;
 
   clearStatus;
   putStatus(statusMsgs[4]);
@@ -45,13 +59,8 @@ begin
     curPlay:=lstCurrent;
     list_go2Entry(curPlay); list_putByte(fl_curPlay);
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
-    if (playerStatus and ps_calcLen)<>0 then
-    begin
-      putStatus(statusMsgs[5]);
-      determineSongLength;
-      _songTicks:=_songTicks div 160;
-    end;
   end;
   setBit(screenStatus,ss_isRefresh);
   clearStatus;
+  clearControls;
 end;

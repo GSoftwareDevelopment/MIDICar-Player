@@ -28,8 +28,7 @@ var
   _eStatusRun:Byte        absolute _trkRegs+7;
 
 //
-  MIDData:Pointer         ;
-  MIDTracks:TByteArray    ;
+  MIDTracks:Pointer;
   format:byte             ;
   totalTracks:byte        = 0;
   tickDiv:Word            = 384;
@@ -59,9 +58,6 @@ procedure doneMIDI;
 procedure setTempo;
 procedure ProcessTrack; Assembler;
 procedure ProcessMIDI;
-procedure determineSongLength;
-procedure sendClearPushLCD; Keep;
-procedure sendPushLCDText(str:PString); register; Keep;
 
 implementation
 Uses
@@ -77,18 +73,18 @@ asm
   icl 'midfile/asms/memory_bound_check.a65'
 end;
 
-{$i 'sysex_push_text.inc'}
+{$i 'calctracklength.inc'}
 {$i 'loadmid.inc'}
 {$i 'settempo.inc'}
 {$i 'processtrack.inc'}
 {$i 'processmidi.inc'}
-{$i 'determine_song_length.inc'}
 
 procedure initMIDI;
 begin
   _totalTicks:=0;    // reset song ticks
   tempoShift:=0;
   _timerStatus:=1;
+
   cTrk:=totalTracks;
   PlayingTracks:=totalTracks;
 
@@ -127,7 +123,7 @@ GM_RESET_ADDR = $3B00;
   txa:pha
 
 // call driver - setup
-  jsr $2003
+  // jsr $2003
 
   ldx #0
   lda GM_RESET_ADDR-1,x

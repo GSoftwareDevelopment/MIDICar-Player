@@ -2,6 +2,7 @@
 _head   = $2000
 _sadr   = $2002
 _eadr   = $2004
+tmp     = $86
 
 ; check that the Driver has not alredy been loaded
     lda isLoaded

@@ -15,7 +15,7 @@ begin
   if cTrk=totalTracks then
   begin
     cTrk:=1;
-    curTrackPtr:=@MIDTracks;
+    curTrackPtr:=MIDTracks;
   end
   else
   begin

@@ -11,9 +11,6 @@ SRTIMR = $022b
 KEYDIS = $026d
 KEYREP = $02da
 KEYDEL = $02f1
-CH     = $02fc
-PCOLR0 = $02c0
-COLPM0 = $d012
 
     bit NMIRES
     bpl VBL
@@ -75,9 +72,9 @@ end_key:
 
     sta oldLstY
 
-    tax
-    lda adr.Yscans,x
-    sta lstYScanLine
+    ; tax
+    ; lda adr.Yscans,x
+    ; sta lstYScanLine
 
     ldy #0
     ldx #26

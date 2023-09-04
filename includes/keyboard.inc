@@ -180,10 +180,12 @@ begin
         if (lstCurrent>=lstTotal) then lstCurrent:=0;
         if (lstCurrent<0) then lstCurrent:=lstTotal;
       end;
+      IOResult:=0;
       choiceListFile;
     until (p_type=fl_midifile) and (IOResult and %11111100=0);
     clrBit(stateInputLine,ils_noProcess);
     clearStatus;
+    clearControls;
     if IOResult and %11111100<>0 then statusError(IOResult);
     if totalTracks<>0 then statusPlaying;
   end;

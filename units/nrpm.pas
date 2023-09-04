@@ -1,3 +1,9 @@
+unit NRPM;
+
+interface
+const
+  TAB_NRPM_ADDR   = $2F40;              // $036 (  54)
+
 const
   dbs2_nrpn:Array[0..8] of byte = (
       $b0, $63, $37, // (last byte in row) NRPM high reg numeber (always the same)
@@ -69,6 +75,10 @@ var
   nrpn_regs:Array[0..$35] of byte absolute TAB_NRPM_ADDR;
 
 procedure DBS2_sendControlEvent(nrpmLow:Byte); Register; Keep; assembler;
+
+implementation
+
+procedure DBS2_sendControlEvent(nrpmLow:Byte); Register; Keep; assembler;
 asm
 event = $FF
 
@@ -88,3 +98,5 @@ eventSendLoop:
   cpx #9
   bmi eventSendLoop
 end;
+
+end.

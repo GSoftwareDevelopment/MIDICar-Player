@@ -25,8 +25,9 @@
 | `$E1-$E2`  | (_trkRegs+1) | pointer | `_ptr`          | data pointer                                                 | midfiles  |
 | `$E1`      | (_trkRegs+1) | word    | `_adr`          | data address (word)                                          | midfiles  |
 | `$E3-$E6`  | (_trkRegs+3) | longint | `_trackTime`    | the time at which the track will be played                   | midfiles  |
-| `$E7`      | (_trkRegs+7) | byte    | `_event`        | last MIDI event                                              | midfiles  |
+| `$E7`      | (_trkRegs+7) | byte    | `_eStatusRun`   |                                                              | midfiles  |
 |            |              |         |                 |                                                              |           |
+| `$E8`      |              | byte    | `_tickStep`     |                                                              | midfiles  |
 | `$E9`      |              | long    | `_songTicks`    | Song size in ticks                                           | midfiles  |
 |            |              |         |                 |                                                              |           |
 | `$FF`      |              | byte    | `MC_Byte`       | data for and from MC6850                                     | mc6850    |
@@ -61,22 +62,23 @@
 | `$88`          |         | Long               | counter     |             | main      |
 | `$8c`          |         | Long               | cntBCD      |             | main      |
 |                |         |                    |             |             |           |
-| `$0400..$04B6` |         | MCP Variables      |             |             | MCP       |
+| `$0400..$048A` |         | MCP Variables      |             |             | MCP       |
 |                |         |                    |             |             |           |
+| `$4DC..$4DF`   | 4       | DWord              | fnExt       |             | filestr   |
 | `$4e0..$4ef`   | 16      | array              | COLORS_ADDR |             | main      |
-| `$4f0..$4f7`   | 6 (+1)  | TDevString         | curDev      |             | main      |
-| `$4f8..$538`   | 64 (+1) | TPath              | curPath     |             | main      |
-| `$539..$559`   | 32 (+1) | TFilename          | fn          |             | main      |
+| `$4f0..$4f7`   | 6 (+1)  | TDevString         | curDev      |             | filestr   |
+| `$4f8..$538`   | 64 (+1) | TPath              | curPath     |             | filestr   |
+| `$539..$559`   | 32 (+1) | TFilename          | fn          |             | filestr   |
 |                |         |                    |             |             |           |
 
 ## Buffers
 
-| Start        | Size | Name   | Function      | Source |
-| ------------ | ---- | ------ | ------------- | ------ |
-| `$55A..$5AA` | 80   | outstr |               | main   |
-| `$5AB..$5FB` | 80   | snull  |               | main   |
-| `$600..$6FF` | 256  |        | MIDI-Out FIFO | driver |
-|              |      |        |               |        |
+| Start        | Size | Name   | Function      | Source  |
+| ------------ | ---- | ------ | ------------- | ------- |
+| `$55A..$5AA` | 80   | outstr |               | filestr |
+| `$5AB..$5FB` | 80   | snull  |               | filestr |
+| `$600..$6FF` | 256  |        | MIDI-Out FIFO | driver  |
+|              |      |        |               |         |
 
 ## Data
 
@@ -105,15 +107,16 @@
 |                    |                 |                  |                                                              |                        |
 | `$3000..$32CF`     |      720 ($2D0) | `HELPSCR_ADDR`   | Screen for help                                              | main                   |
 |                    |                 |                  |                                                              |                        |
+| `$3B00..$3BFF`     |      256 ($100) | SYSEX_MSG        | MIDI Reset System Exclusive Message                          | midfiles               |
 | `$3C00`            |             512 |                  | Tracks data right after loading the file<br />fast return to the beginning of the track | midfiles               |
 | `$3E00`            |             512 |                  | Tracks information                                           | midfiles               |
 |                    |                 |                  |                                                              |                        |
 | `$80..$D3`         |                 | ZPAGE            | MADPascal ZP variables                                       | EXE                    |
 | `$8000..$BFFF`     |                 | CODE             | MADPascal executable code                                    | EXE                    |
 |                    |                 |                  |                                                              |                        |
-| `$4000..$7FFF`     |                 |                  | Song data                                                    | midfiles               |
-| `$C000..$CFFF`     |    4096 ($1000) | `LIST_ADDR`      |                                                              | main                   |
-| `$D800..$FF00`     |                 |                  | Song data                                                    | midfiles               |
+| `$4000..$7FFF`     |                 | `LIST_ADDR`      | List buffer<br />(in base memory)                            | main                   |
+|                    |                 |                  |                                                              |                        |
+|                    |                 |                  |                                                              |                        |
 
 # Driver
 

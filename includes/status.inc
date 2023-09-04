@@ -16,14 +16,6 @@ asm
 end;
 
 procedure statusLoop;
-const
-  sloop:Array[0..3] of string[2] = ( {?}
-    #$00+#$00,  // sloop_playone
-    #$7e+#$7f,  // sloop_repeatone
-    #$5c+#$5d,  // sloop_repeatall
-    #$5e+#$5f   // sloop_shuffle
-  );
-
 begin
   scradr:=SCREEN_TIME+46;
   v:=playerStatus and ps_loop;
@@ -35,7 +27,7 @@ begin
   scradr:=SCREEN_TIME+40;
   if totalTracks>0 then
   begin
-    putINTText(#$3b+#0+#$fc+#0+#$fd);
+    putINTText(controls[1]); // play sign
     putStatus(statusMsgs[0]);
     if (playerStatus and ps_isStopped)<>0 then
     begin
@@ -47,7 +39,7 @@ begin
   end
   else
   begin
-    putINTText(#$fb+#0+#$fc+#0+#$fd);
+    putINTText(controls[0]); // play pause stop
     putStatus(statusMsgs[1]);
   end;
 end;
@@ -55,7 +47,7 @@ end;
 procedure statusPause;
 begin
   if (playerStatus and ps_isStopped)<>0 then exit;
-  scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$3c+#0+#$fd);
+  scradr:=SCREEN_TIME+40; putINTText(controls[2]);
   putStatus(statusMsgs[2]);
   _timerStatus:=_timerStatus or f_counter;
 end;
@@ -66,12 +58,17 @@ begin
   if (totalTracks=0) or
      ((playerStatus and ps_isStopped)<>0) then exit;
   playerStatus:=playerStatus or ps_isStopped;
-  scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$fc+#0+#$3d);
+  scradr:=SCREEN_TIME+40; putINTText(controls[3]);
   putStatus(statusMsgs[3]);
   doneMIDI;
   move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
   chn:=0;
   clearUVMeters;
+end;
+
+function getver():pstring;
+begin
+  result:={$I %DATE%};
 end;
 
 procedure updateMem;
@@ -81,7 +78,7 @@ var
 begin
   memAKB:=memAvailable div 1024;
   scradr:=SCREEN_FOOT; HLine;
-  scradr:=SCREEN_FOOT; putINTText(VERSION);
+  scradr:=SCREEN_FOOT; putINTText(VERSION); putASCText(getver());
   inc(scradr);
   asm
     ldy #0
@@ -111,12 +108,17 @@ begin
   putInt(memAKB); putINTText('KB'~);
 end;
 
+procedure clearControls;
+begin
+  fillchar(pointer(SCREEN_TIME+40),20,0);
+  scradr:=SCREEN_TIME+40; putINTText(controls[0]);
+  statusLoop;
+end;
+
 procedure clearStatus;
 begin
   fillchar(pointer(SCREEN_TIME+40),60,0);
   fillchar(pointer(SCREEN_STATUS),40,0);
-  scradr:=SCREEN_TIME+40; putINTText(#$fb+#0+#$fc+#0+#$fd);
-  statusLoop;
   updateMem;
   asm
     lda main.filestr.adr.fn

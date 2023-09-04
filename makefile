@@ -20,6 +20,10 @@ CFLAGS = -x -l -t
 all: prepare compile link
 	@echo "\nSzah mat"
 
+drivers:
+	cd drvs
+	${MAKE} ${MFLAGS} all
+	
 prepare:
 	@for i in $(SUBDIRS); do \
 	echo "make all in $$i..."; \

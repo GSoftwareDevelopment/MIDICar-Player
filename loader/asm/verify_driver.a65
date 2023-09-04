@@ -11,6 +11,14 @@ driverTestLoop:
     cmp #$4c        ; $4c=jmp
     beq next
 
+    lda isLoaded
+    bne wrong_driver
+
+    m@print (MSG_ERRNO+5)
+    clc
+    rts
+
+wrong_driver:
     m@print MSG_NODRIVER
 
     clc

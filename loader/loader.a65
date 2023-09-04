@@ -17,13 +17,13 @@ AEXTMEM         = $D3
 playerStatus    = $D8
 screenStatus    = $D9
 
+isSDX           = $80   ; SDX detected
 isLoaded        = $81   ; driver is loaded
-tmp             = $80
-isSDX           = $82   ; SDX detected
+driverBaseAddr  = $82
+cmdlnVec        = $84
 colors_tab      = $4E0
 SysEx_MSG       = $3B00
 outstr          = $55A  ; MCP full file spec input
-driverBaseAddr  = $82
 
 ; MCBASE  = $D8
 
@@ -114,7 +114,6 @@ getParameters:
     icl 'asm/check_param.a65'
 
 endOfCMD:
-
 ; ---------------
 ; validate driver
 

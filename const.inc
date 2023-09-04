@@ -1,7 +1,7 @@
 const
 {$i memory.inc}
 
-  VERSION= 'v1.6a'~;
+  VERSION= 'dev'~;
 // base memory (under 64KB) available
   BASEMEM_FREE = 0; // ($8000-$4000)+($ff00-$d800);
 
@@ -9,8 +9,8 @@ const
   ss_isRefresh = %10000000;  // flag for refresh list
   ss_isHelp    = %01000000;  // flag for help screen is shown
   ss_view      = %00100000;  // flag for volume meters is shown
-  ss_colorSet  = %00010000;  // flag for color set mode
-  ss_isOSD     = %00001000;  // flag for OSD is shown
+  ss_isOSD     = %00010000;  // flag for OSD is shown
+  ss_colorSet  = %00001000;  // flag for color set mode
   ss_minMode   = %00000100;  // flag for mini mode
   ss_plsMode   = %00000010;  // flag for playlist mode
 

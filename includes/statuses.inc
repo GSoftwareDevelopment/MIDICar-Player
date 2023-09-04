@@ -1,4 +1,20 @@
 const
+  controls:Array[0..3] of String[5] =
+  (
+    #$fb+#0+#$fc+#0+#$fd,   // all controls
+    #$fb+#0+#0+#0+#0,       // play
+    #0+#0+#$fc+#0+#0,       // pause
+    #$0+#0+#$0+#0+#$fd      // stop
+  );
+
+  sloop:Array[0..3] of String[2] =
+  (
+    #$c0+#$c0,  // sloop_playone
+    #$fe+#$ff,  // sloop_repeatone
+    #$dc+#$dd,  // sloop_repeatall
+    #$de+#$df   // sloop_shuffle
+  );
+
   statusMsgs : array[0..8] of String =
   (
     #$4e+'Playing'*~+#$ce,
@@ -6,7 +22,7 @@ const
     #$4e+' Pause '*~+#$ce,
     #$4e+'Stopped'*~+#$ce,
     #$4e+'  Loading '*~,
-    #$4e+'Calculating length'*~+#$ce,
+    '',
     #$4e+'  Reading directory'*~+#$ce,
     #$4e+'  Reading description'*~+#$ce,
     #$4e+'  Reading playlist'*~+#$ce

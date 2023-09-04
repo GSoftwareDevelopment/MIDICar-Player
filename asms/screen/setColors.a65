@@ -7,17 +7,14 @@ colptr = $88
 
   lda screenStatus
   and #ss_colorSet
-  beq skip
-  lda colptr
-  add #5
+  ora colptr
   sta colptr
-  scc:inc colptr+1
 
 skip:
-  ldy #4
+  ldy #7
 copyColors:
   lda (colptr),y
-  sta $D016,y
-  sta 708,y
+  sta $D013,y
+  sta 705,y
   dey
   bpl copyColors

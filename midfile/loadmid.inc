@@ -8,7 +8,7 @@ var
   trackCount:byte absolute $de;
   chunkTag:TTag;
   loadSize:Word absolute $d6;
-  Len:Longint absolute $e9;
+  Len:Longint; // absolute $e9;
   trkData:PMIDTrack;
   RBuf:TByteArray absolute $4000;
 
@@ -26,10 +26,11 @@ var
       memBoundCheck;
       if IOResult<>1 then exit;
 
-      if hi(_adr)>=$d8 then loadSize:=$ff00
+// Since, ONLY extended memory is used, there is no need to check ranges
+      { if hi(_adr)>=$d8 then loadSize:=$ff00
       else if hi(_adr)>=$c0 then loadSize:=$d000
       else if hi(_adr)>=$a8 then loadSize:=$c000
-      else if hi(_adr)>=$40 then loadSize:=$8000;
+      else } if hi(_adr)>=$40 then loadSize:=$8000;
       dec(loadSize,_adr);
       if loadSize>len then loadSize:=len;
     until loadSize<>0;
@@ -44,9 +45,19 @@ begin
     exit;
   end;
 
-  trkData:=@MIDTracks;
+  us_per_qnote:=500000;
+{$IFDEF USE_SUPPORT_VARS}
+  tactNum:=4;
+  tactDenum:=4;
+  ticks_per_qnote:=24;
+  ticks_per_32nd:=8;
+  BPM:=120;
+{$ENDIF}
+
+  trkData:=MIDTracks;
   trackCount:=0;
   totalTracks:=255;
+  _songTicks:=0;
 
   while (IOResult=1) and (trackCount<totalTracks) do
   begin
@@ -69,12 +80,14 @@ begin
         fsd:=lo(tickDiv);
       end;
 {$ENDIF}
+      loadProcess(0);
     end
     else if chunkTag=TAG_MTRK then
     begin
       inc(trackCount);
 
       trkData^.trackTime:=0;
+      trkData^._eStatusRun:=0;
       trkData^.bank:=_bank;
       trkData^.ptr:=pointer(_adr);
 
@@ -83,15 +96,15 @@ begin
       while Len>0 do
       begin
         checkLoadSize;
-        if IOResult<>1 then break;
         loadProcess(trackCount);
-
-        if hi(_adr)>=$c0 then
+        if IOResult<>1 then break;
+// Since, ONLY extended memory is used, there is no need to check ranges
+{        if hi(_adr)>=$c0 then
         begin
           _bget(@RBuf);
           move(RBuf,_ptr,loadSize);
         end
-        else
+        else}
           _bget(_ptr);
 
         if IOResult<>1 then break;
@@ -99,10 +112,19 @@ begin
         inc(_adr,loadSize);
         Dec(Len,loadSize);
       end;
+
+      _bank:=trkData^.bank;
+      _ptr:=trkData^.ptr;
+      _trackTime:=0;
+      _eStatusRun:=0;
+      calcTrackLength;
+      if _trackTime>_songTicks then _songTicks:=_trackTime;
+
       inc(trkData,1);
     end else
       IOResult:=ERR_NOT_A_MIDI_FILE;
   end;
+  _songTicks:=_songTicks div 160;
   asm lda #$FE \ sta PORTB end;
   result:=IOResult;
   Cls(1);

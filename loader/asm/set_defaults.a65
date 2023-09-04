@@ -28,7 +28,7 @@
     sta playerStatus
 
 ; colors
-    ldy #9
+    ldy #15
 @:
     lda defaultColors,Y
     sta colors_tab,Y
@@ -59,11 +59,12 @@ defaultFileSpec:
 
 defaultColors:
 ; primary
-    dta $A8,$0A,$00,$02,$00
+;       705,706,707,708,709,710,711,712
+    dta $00,$F8,$FF,$28,$98,$A0,$A8,$A0
 ; secondary
-    dta $A8,$00,$0A,$08,$0A
+    dta $00,$0F,$00,$A8,$88,$00,$A8,$00
 
 defaultSysExMsg:
-    dta 6, $f0, $7e, $7f, $09, $01, $f7
+    dta 7, $FF, $f0, $7e, $7f, $09, $01, $f7
 
     .endl

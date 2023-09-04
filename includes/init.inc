@@ -1,8 +1,7 @@
 procedure init;
 begin
   asm lda #$FE \ sta PORTB end;
-  DMACTL:=0;
-  waitFrame;
+  waitFrame; DMACTL:=0;
 
   CHBASE:=hi(CHARS_ADDR)+2; // $32;
   SDLST:=DLIST_ADDR;
@@ -28,7 +27,6 @@ begin
   setColors;
   calcAvailableMem;
   clearList;
-  DMACTL:=34; waitFrame;
   oldLstY:=255;
   initKeyboard;
   setNMI;
@@ -36,10 +34,17 @@ begin
   playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
   screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
   inc(refreshRate);
+  waitFrame; DMACTL:=34;
 end;
 
 procedure exit2DOS; keep;
 begin
+  if ((playerStatus and ps_isStopped)<>0) then
+  begin
+    asm
+      jsr $2003
+    end;
+  end;
   sendClearPushLCD;
   unsetNMI;
   doneKeyboard;

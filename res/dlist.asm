@@ -8,10 +8,12 @@ prgs_area   = DL_MODE_160x96G4
 foot_area   = DL_MODE_40x24T2
 
 dl_start
-    :2  dta DL_BLANK6
+        dta DL_BLANK6
+        dta DL_DLI + DL_BLANK6
 
         dta title_bar + DL_LMS, A(SCREEN_HEAD)
-    :18 dta title_bar
+    :17 dta title_bar
+        dta title_bar + DL_DLI
 
         dta work_area + DL_LMS, A(SCREEN_WORK), DL_BLANK1
     :11 dta work_area, DL_BLANK1
@@ -25,7 +27,7 @@ dl_start
         dta stat_area
 
         dta prgs_area + DL_LMS, A(SCREEN_TIMELINE)
-        dta DL_BLANK1
+        dta DL_BLANK1 + DL_DLI
         dta work_area + DL_LMS, A(SCREEN_STATUS)
 
         dta DL_BLANK1

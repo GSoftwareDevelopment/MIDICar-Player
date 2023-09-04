@@ -48,14 +48,14 @@ case_endEvent:
 
   .macro m@read doAfterFetchData doAfterBoundCheck
   ldy #0
-  lda (_PTR),y
+  lda (MAIN.MIDFILES._PTR),y
 
   :doAfterFetchData
 
-  inc _adr
+  inc MAIN.MIDFILES._adr
   bne skipMemBoundCheck
-  inc _adr+1
-  jsr memBoundCheck+5
+  inc MAIN.MIDFILES._adr+1
+  jsr MAIN.MIDFILES.memBoundCheck+5
 
   :doAfterBoundCheck
 

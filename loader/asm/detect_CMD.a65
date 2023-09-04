@@ -1,4 +1,5 @@
     .local detect_CMD
+_IOCB = $340
 
 detect_DOS:
     lda boot?           ; sprawdzamy, czy DOS w ogóle jest w pamięci
@@ -23,6 +24,57 @@ DOSbeforeROM:
     ldy #$03
     lda (dosvec),y
     cmp #$4c
+    bne @+
+
+SDXCmdLn:
+    lda dosvec
+    sta cmdlnVec
+    lda dosvec+1
+    sta cmdlnVec+1
+
+    ldy #$0a            ; BUFOFF
+    lda (sdx.comtab),y
+    add #$3F            ; LBUF
+    sta get_param.lbufpos
+
+    jmp ok
+
+@:
+; test channel #0
+    lda _IOCB+2
+    cmp #5
+    bne fail
+    lda _IOCB+3
+    bmi fail
+    lda _IOCB+9
+    bne fail
+    ldx _IOCB+8
+    beq fail
+
+    lda _IOCB+4
+    sta cmdlnVec
+    lda _IOCB+5
+    sta cmdlnVec+1
+
+    ldy #0
+skipFile:
+    lda (cmdlnVec),y
+    cmp #' '
+    beq @+
+    iny
+    bne skipFile
+    beq fail
+
+@:
+    cmp #$9B
+    beq fail
+    sty get_param.lbufpos
+
+ok:
+    lda #0
+    rts
+fail:
+    lda #$ff
     rts
 
     .endl

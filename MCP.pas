@@ -10,7 +10,9 @@ Uses
   filestr,
   screen,
   list,
-  inputline;
+  inputline,
+  nrpm,
+  remote;
 {$I-}
 
 {$i 'macros.inc'}
@@ -56,24 +58,23 @@ var
 
   timeShowMode:Byte = 1;
 
-  counter:Longint absolute $88;
-  cntBCD:Longint absolute $8c;
+  counter:Longint; // absolute $76;
+  cntBCD:Longint; // absolute $7a;
 
 //
 
 {$i 'interrupt.inc'}
-{$i 'NRPM.inc'}
 {$i 'osd.inc'}
+{$i 's2_control.inc'}
 {$i 'status.inc'}
+{$i 'autostop_songchange.inc'}
 {$i 'load.inc'}
 {$i 'list.inc'}
 procedure fileTypeByExt(s:PString); Forward;
 {$i 'playlist.inc'}
 {$i 'getdirectory.inc'}
 {$i 'keyboard.inc'}
-{$i 'autostop_songchange.inc'}
 {$i 'init.inc'}
-{$i 'remote_control.inc'}
 
 begin
   asm lda PORTB \ pha end;
@@ -97,7 +98,7 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    // plugin_remoteControl;
+    remoteControl;  // plugin
 
     if timer(otm,refreshRate) then
     begin
@@ -129,13 +130,11 @@ begin
         putHex(counter,6)
       else if timeShowMode=2 then
       begin
-        asm
-          icl 'asms/24bin_6bcd.a65'
-        end;
+        asm icl 'asms/24bin_6bcd.a65' end;
         putHex(cntBCD,6);
       end;
 
-      asm  icl 'asms/uvmeters_h.a65' end;
+      asm icl 'asms/uvmeters_h.a65' end;
 
       if isBitSet(stateInputLine,ils_inprogress) then
         if timer(ctm,10) then

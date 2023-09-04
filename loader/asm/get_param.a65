@@ -1,10 +1,6 @@
     .local get_param
 
-    ldy #$0a            ; BUFOFF
-    lda (sdx.comtab),y
-    add #$3F            ; LBUF
-    tay
-    ; ldy lbufpos:#$3F    ; LBUF (sdx.COMTAB+$3F)
+    ldy lbufpos:#0
 
     lda #' '
     sta oldchar
@@ -15,7 +11,7 @@
 ; start of param loop
 
 _param_loop:
-    lda (sdx.comtab),y
+    lda (cmdlnVec),y
     iny
 
 ; check for space - its means enf of parameter
@@ -66,14 +62,8 @@ _get_param
     sta parbuf,x
 
 ; store LBUF position
-    tya
-    sub #$3F        ; LBUF
-    ldy #$0a        ; BUFOFF
-    sta (sdx.comtab),y
-
-; set C flag to indicate that is parameter
+    sty lbufpos
     sec
-
     rts
 
     .endl

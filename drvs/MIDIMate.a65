@@ -181,6 +181,7 @@ flush_done:
     beq exitUnInit
 
     bcc noFlush
+    jsr Flush
     jsr Flush.All
 
 noFlush:

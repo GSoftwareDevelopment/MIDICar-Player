@@ -10,10 +10,10 @@ type
 
   PMIDTrack = ^TMIDTrack;
   TMIDTrack = record
-    bank:Byte;
-    ptr:Pointer;
-    trackTime:TDeltaVar;
-    _eStatusRun:Byte;
+    bank:Byte;              // 00
+    ptr:Pointer;            // 00 00
+    trackTime:TDeltaVar;    // 00 00 00 00
+    _eStatusRun:Byte;       // 00
   end;
 
   TLoadingProcess = procedure(v:byte);

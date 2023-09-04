@@ -178,6 +178,17 @@ isMCInit    dta b(0)
 
 ;--------------------------------------------------
 ; initialize driver (detect & setup)
+; Before initialisation, knowing the MIDICar base address,
+; set cells $82 and $83 (LSB/MSB) to this address.
+; If you wish to autodetect, enter the value $0064 (100 dec) into cells $82 and $83
+;
+; Autodetection may not be performed, due to a MIDICar (rev1.0.5) layout error.
+; The MC6850 chip is not subject to the RESET signal and therefore,
+; it is not pre-initialised.
+; To remedy this, it is useful to write a value of 3 to the MIDICar
+; status address (index zero of the base address).
+; This will reset the MC6850 chip. After this action,
+; autodetection will be possible.
 
   .local init
 
@@ -223,6 +234,10 @@ MCNotFound:
     lda #<MIDICAR_NOT_FOUND
     ldy #>MIDICAR_NOT_FOUND
     jsr PRINT
+
+    lda #$02
+    ldy #0
+    sta (MCBASE),y
 
     clc
 

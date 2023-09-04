@@ -13,7 +13,8 @@ begin
   while IOResult=1 do
   begin
     getLn(CIO_CHN,outStr);
-    if c0=0 then continue;
+    if (outStr[c0]=#155) then dec(c0);
+    if c0<1 then continue;
     if c1='*' then
     begin
       IOResult:=ERR_FILE_NOT_FOUND; break;
@@ -21,14 +22,12 @@ begin
 
     v:=1; while (outStr[v]<>',') and (v<c0) do inc(v);
 
-    if outStr[v]<>',' then continue;
-
     chn:=c0;
     if c1='>' then
     begin
       p_type:=fl_directory;
-      dec(v);
-      move(outStr[2],outStr[1],chn-1);
+      dec(v); dec(chn);
+      move(outStr[2],outStr[1],chn);
     end
     else
       p_type:=fl_otherfile;
@@ -36,17 +35,22 @@ begin
     c0:=v-1;
     fileTypeByExt(outStr);
     list_putByte(p_type);
-    list_putNText(outStr);
 
-    chn:=chn-(v+1);
-    move(outStr[v+1],outStr[1],chn);
-    if chn>30 then
+    if outStr[v]=',' then
     begin
-      chn:=30;
-      outStr[30]:=#96;
+      chn:=chn-v;
+      if (chn<>0) then
+      begin
+        list_putNText(outStr);
+        move(outStr[v+1],outStr[1],chn);
+        if chn>30 then
+        begin
+          chn:=30;
+          outStr[30]:=#96;
+        end;
+        c0:=chn;
+      end;
     end;
-    if outStr[chn]=#$9b then dec(chn);
-    c0:=chn;
     list_putText(outStr);
     inc(lstTotal);
   end;

@@ -1,24 +1,3 @@
-procedure createListEntry(t:byte; s:PString); Register;
-begin
-  p_type:=t;
-  list_putByte(p_type); list_putText(s); inc(lstTotal);
-end;
-
-procedure clearList;
-begin
-  listPtr:=pointer(LIST_ADDR);
-  lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
-  chn:=0;
-  while (chn<LIST_VISIBLE_ITEMS) do
-  begin
-    scradr:=listScrAdr[chn];
-    putSpaces(32);
-    inc(chn);
-  end;
-  fillchar(listPtr,$4000,$9B);
-end;
-
-procedure showEntry;
 const
   listchars : array[0..4] of byte = (
     $5a,  // fl_midifile
@@ -28,6 +7,21 @@ const
     $4f   // fl_directory
   );
 
+procedure createListEntry(t:byte; s:PString); Register;
+begin
+  p_type:=t;
+  list_putByte(p_type); list_putText(s); inc(lstTotal);
+end;
+
+procedure clearList;
+begin
+  lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
+  fillchar(pointer(SCREEN_WORK+40),LIST_VISIBLE_ITEMS*40,0);
+  listPtr:=pointer(LIST_ADDR);
+  fillchar(listPtr,$4000,$9B);
+end;
+
+procedure showEntry;
 begin
   asm
     stx v     ; temporarly store X-Reg

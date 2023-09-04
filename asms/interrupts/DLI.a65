@@ -1,68 +1,134 @@
 COLPF1 = $D017  ; (709)
 COLPF2 = $D018  ; (710)
+COLPF4 = $D01a  ; (712)
 WSYNC  = $D40A
 NMIRES = $D40f
 DLIV   = $200
 tmpreg = $6B
 
-// changeColor:
-//   pha
-//   sta NMIRES
-
-//   lda #$b2
-//   sta WSYNC
-//   sta COLPF2
-
-//   lda #<restoreColor
-//   sta DLIV
-//   lda #>restoreColor
-//   sta DLIV+1
-
-//   pla
-//   rti
-
-// restoreColor:
-
-//   pha
-//   sta NMIRES
-
-//   lda 712
-//   sta WSYNC
-//   sta COLPF2
-
-//   lda #<changeColor
-//   sta DLIV
-//   lda #>changeColor
-//   sta DLIV+1
-
-//   pla
-//   rti
-
-changeColor:
+setTitleColor:
+  sta NMIRES
   pha:tya:pha
 
-  sta NMIRES
-
-  lda VCOUNT
-  cmp lstYscanLine
-  bcs restore
-
-change:
-  lda #$a2
-  ldy #$af
+  ldy #$0f
   sta WSYNC
   sty COLPF1
-  sta COLPF2
+
+  lda #<setSelectorColor
+  sta DLIV
+  lda #>setSelectorColor
+  sta DLIV+1
 
   pla:tay:pla
   rti
 
-restore:
+setSelectorColor:
+  sta NMIRES
+  pha:tya:pha
+
+  ldy 709
+  ; sta WSYNC
+  sty COLPF1
+
+  lda screenStatus
+  and #ss_minMode+ss_isHelp
+  bne noSetCursorColor
+  lda #<setCursorColor
+  ldy #>setCursorColor
+  sta DLIV
+  sty DLIV+1
+
+  pla:tay:pla
+  rti
+noSetCursorColor:
+  lda #<setFooterColor
+  ldy #>setFooterColor
+  sta DLIV
+  sty DLIV+1
+
+  pla:tay:pla
+  rti
+
+
+setCursorColor:
+  sta NMIRES
+  pha:tya:pha
+
+  lda 706
+  ldy 707
+  sta WSYNC
+  sty COLPF1
+  sta COLPF2
+
+  lda #<restoreColor
+  sta DLIV
+  lda #>restoreColor
+  sta DLIV+1
+
+  pla:tay:pla
+  rti
+
+restoreColor:
+
+  sta NMIRES
+  pha:tya:pha
+
   lda 712
   ldy 709
   sta WSYNC
   sty COLPF1
   sta COLPF2
 
+  lda #<setFooterColor
+  sta DLIV
+  lda #>setFooterColor
+  sta DLIV+1
+
   pla:tay:pla
+  rti
+
+setFooterColor:
+  sta NMIRES
+  pha:tya:pha
+
+  ldy #$0f
+  sta WSYNC
+  sty COLPF1
+
+  lda #<setTitleColor
+  sta DLIV
+  lda #>setTitleColor
+  sta DLIV+1
+
+  pla:tay:pla
+  rti
+
+; changeColor:
+;   pha:tya:pha
+
+;   sta NMIRES
+
+;   lda VCOUNT
+;   cmp lstYscanLine
+;   beq change
+;   bcs restore
+
+; change:
+;   lda 706
+;   ldy 707
+;   sta WSYNC
+;   sty COLPF1
+;   sta COLPF2
+
+;   pla:tay:pla
+;   rti
+
+; restore:
+;   lda 712
+;   ldy 709
+;   sta WSYNC
+;   sty COLPF1
+;   sta COLPF2
+
+;   pla:tay:pla
 

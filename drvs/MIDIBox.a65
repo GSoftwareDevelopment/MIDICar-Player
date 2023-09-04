@@ -45,6 +45,15 @@ DESC	dta c'MIDIBox Driver 2.0a by GSD',$9B
     lda #>IOutMIDISer
     sta VSEROUT+1
 
+; turn on MOTOR - power up MIDIMate
+    lda pactl
+    and #$f7
+    sta pactl
+; set COMMAND LINE active
+    lda pbctl
+    and #$f7
+    sta pbctl
+
 ; set serial transmission speed - ~31669 baud=1773447/(2*(0x15+7))
 ; altirra says (under debbug) it is 31960.2 baud = ?how?
     LDA #$15
@@ -194,6 +203,7 @@ flush_done:
     beq exitUnInit
 
     bcc noFlush
+    jsr Flush
     jsr Flush.All
 
 noFlush:
@@ -209,6 +219,15 @@ waitFrame:
     sta VSEROUT
     lda OVSEROUT+1
     sta VSEROUT+1
+
+; turn off MOTOR - power down MIDIMate
+    lda pactl
+    ora #$08
+    sta pactl
+; clear COMMAND LINE
+    lda pbctl
+    ora #$08
+    sta pbctl
 
 ; Clear interrupts
 ; (5) serial input data ready

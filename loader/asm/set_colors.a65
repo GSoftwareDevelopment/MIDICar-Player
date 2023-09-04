@@ -1,6 +1,6 @@
     .local set_colors
 
-    lda #10
+    lda #14
     sta read_hex_data.dataLength
     lda #<colors_tab
     sta read_hex_data.destAddr
