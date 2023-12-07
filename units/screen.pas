@@ -3,10 +3,10 @@ unit screen;
 interface
 
 var
-  puttextinvert:Byte absolute $4F;
   DMACTL:Byte absolute $d400;
   SDLST:Word absolute $230;
   CHBASE:Byte absolute $2f4;
+  puttextinvert:Byte absolute $57;
   scradr:Word absolute $58;
 
 procedure waitFrame; Inline; Assembler;

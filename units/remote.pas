@@ -5,9 +5,10 @@ interface
 procedure sendClearPushLCD; Keep;
 procedure sendPushLCDText(str:PString); register; Keep;
 procedure remoteControl;
+procedure updateSongTitle;
 
 implementation
-uses keys;
+uses keys,list;
 
 const
   ps_isStopped = %10000000;
@@ -136,6 +137,33 @@ begin
 
     // sec       ; flush buffer & uninitialize driver
     // jsr $200c
+  end;
+end;
+
+procedure updateSongTitle;
+const
+  FN_PATH_ADDR = $539;
+  SNULL_ADDR   = $5AB;
+
+var
+  Snull:String[80] absolute SNULL_ADDR;
+  fn:String[32] absolute FN_PATH_ADDR;
+
+begin
+  asm
+    jsr $2003 // start driver
+  end;
+
+  sendClearPushLCD;
+  if IOResult<>ERR_LIST_ENTRY_END then
+  begin
+    list_getText(Snull);
+    sendPushLCDText(Snull);
+  end
+  else
+    sendPushLCDText(fn);
+  asm
+    sec \ jsr $200c // flush & stop driver
   end;
 end;
 

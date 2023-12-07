@@ -1,0 +1,7 @@
+make[1]: Wejście do katalogu '/mnt/data/Projekty/MIDI/MIDIcar/loader'
+mads loader.a65 -x -l:.././asm/loader.lst -t:.././asm/loader.lab -o:.././bin/loader.bin
+Writing listing file...
+Writing object file...
+1300 lines of source assembled in 3 pass
+1489 bytes written to the object file
+make[1]: Opuszczenie katalogu '/mnt/data/Projekty/MIDI/MIDIcar/loader'

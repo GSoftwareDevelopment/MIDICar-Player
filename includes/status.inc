@@ -5,9 +5,19 @@ begin
   scradr:=SCREEN_STATUS; PutINTText(msg);
 end;
 
-procedure calcAvailableMem;
-begin
-  memAvailable:=(word(totalXMS)*16384)+BASEMEM_FREE;
+procedure calcAvailableMem; Assembler;
+asm // totalXMS * 16384
+  ldy totalXMS
+  lda #0
+  sta memAvailable+3
+  sty memAvailable+2
+  sta memAvailable+1
+  sta memAvailable+0
+  clc
+  ror memAvailable+2
+  ror memAvailable+1
+  ror memAvailable+2
+  ror memAvailable+1
 end;
 
 procedure clearUVMeters; Assembler;
@@ -76,11 +86,10 @@ var
   memAKB:Word absolute $8c; {?}
 
 begin
-  memAKB:=memAvailable div 1024;
   scradr:=SCREEN_FOOT; HLine;
   scradr:=SCREEN_FOOT; putINTText(VERSION); putASCText(getver());
   inc(scradr);
-  asm
+  asm // put MIDI Driver Name
     ldy #0
 
   loop:
@@ -100,6 +109,19 @@ begin
   stopLoop:
   end;
 
+  asm // memAvailable div 1024
+    ldy memAvailable+1
+    sty memAKB+0
+    lda memAvailable+2
+    sta memAKB+1
+    tya
+    clc
+    ror memAKB+1  // 8192
+    ror memAKB+0
+    clc
+    ror memAKB+1  // 8192
+    ror memAKB+0
+  end;
   scradr:=SCREEN_FOOT+33;
   if memAKB<10000 then scradr:=SCREEN_FOOT+34;
   if memAKB<1000 then scradr:=SCREEN_FOOT+35;
@@ -108,21 +130,80 @@ begin
   putInt(memAKB); putINTText('KB'~);
 end;
 
+procedure updateTimeMode;
+begin
+  scradr:=screen_time+52; putSpaces(8);
+  if timeShowMode>=3 then
+  begin
+    scradr:=screen_time+57; poke(scradr,$0d);
+  end;
+end;
+
 procedure clearControls;
 begin
-  fillchar(pointer(SCREEN_TIME+40),20,0);
+//  fillchar(pointer(SCREEN_TIME+40),20,0);
   scradr:=SCREEN_TIME+40; putINTText(controls[0]);
   statusLoop;
+  updateTimeMode;
 end;
 
 procedure clearStatus;
+var
+  memAKB:Word absolute $8c; {?}
+
 begin
   fillchar(pointer(SCREEN_TIME+40),60,0);
   fillchar(pointer(SCREEN_STATUS),40,0);
   updateMem;
+
+  if byte(fn[0])=0 then exit;
+  asm // fileSize div 1024
+    ldy MAIN.MIDFILES.fileSize+1
+    sty memAKB+0
+    lda MAIN.MIDFILES.fileSize+2
+    sta memAKB+1
+    tya
+    clc
+    ror memAKB+1  // 8192
+    ror memAKB+0
+    clc
+    ror memAKB+1  // 8192
+    ror memAKB+0
+  end;
+  if memAKB>0 then
+  begin
+    scradr:=SCREEN_STATUS+33;
+    if memAKB<10000 then scradr:=SCREEN_STATUS+34;
+    if memAKB<1000 then scradr:=SCREEN_STATUS+35;
+    if memAKB<100 then scradr:=SCREEN_STATUS+36;
+    if memAKB<10 then scradr:=SCREEN_STATUS+37;
+    asm
+      ldy MAIN.SCREEN.scradr
+      dey
+      tya
+      pha
+      lda MAIN.SCREEN.scradr+1
+      pha
+    end;
+    putInt(memAKB); putINTText('KB'~);
+  end
+  else
+  begin
+    asm
+      lda #<(SCREEN_STATUS+40)
+      pha
+      lda #>(SCREEN_STATUS+40)
+      pha
+    end;
+  end;
+
   asm
+    pla
+    sta scraddrHi
+    pla
+    sta scraddrLo
+
     lda main.filestr.adr.fn
-    beq @exit
     cmp #16
     bmi skipTrim
     beq skipTrim
@@ -132,10 +213,10 @@ begin
   skipTrim:
 
     sta l
-    lda #<(SCREEN_STATUS+40)
+    lda scraddrLo:#<(SCREEN_STATUS+40)
     sub l:#00
     sta screen.scradr
-    lda #>(SCREEN_STATUS+40)
+    lda scraddrHi:#>(SCREEN_STATUS+40)
     sbc #0
     sta screen.scradr+1
   end;

@@ -50,31 +50,32 @@ DESC	dta c'MIDIMate Driver 2.0a by GSD',$9B
     and #$f7
     sta pactl
 ; set COMMAND LINE active
-    lda pbctl
-    and #$f7
-    sta pbctl
+    ; lda pbctl
+    ; and #$f7
+    ; sta pbctl
 
 ; set serial
     LDA #%00000111	; $07
-      ; -------x - keep keyboard debounce as is
-      ; ------x- - keep keyboard scanning as is
-      ; -----x-- - keep fast POT scan as is
-      ; ----0--- - clear POKEY two-tone mode
-      ; 0------- - clear force break; serial output to zero
+        ; -------x - keep keyboard debounce as is
+        ; ------x- - keep keyboard scanning as is
+        ; -----x-- - keep fast POT scan as is
+        ; ----0--- - clear POKEY two-tone mode
+        ; -000---- - external CLOCK IN/OUT
+        ; 0------- - clear force break; serial output to zero
     AND SSKCTL
     STA SSKCTL
     STA SKCTL
 
 ; set interrupts
     LDA #%11000111	; $C7
-      ; x-------  - keep Break IRQ
-      ; -x------  - keep Other key IRQ
-      ; -----xxx  - keep timer 1,2 & 4 IRQs
+        ; x-------  - keep Break IRQ
+        ; -x------  - keep Other key IRQ
+        ; -----xxx  - keep timer 1,2 & 4 IRQs
     AND POKMSK
     ORA #%00010000	; $10
-      ; --0-----  - disable serial input data ready
-      ; ---1----  - enabled serial output data ready
-      ; ----0---  - disable serial output transmission done
+        ; --0-----  - disable serial input data ready
+        ; ---1----  - enabled serial output data ready
+        ; ----0---  - disable serial output transmission done
     STA POKMSK
     STA IRQEN
 
@@ -203,9 +204,9 @@ waitFrame:
     ora #$08
     sta pactl
 ; clear COMMAND LINE
-    lda pbctl
-    ora #$08
-    sta pbctl
+    ; lda pbctl
+    ; ora #$08
+    ; sta pbctl
 
 ; Clear interrupts
 ; (5) serial input data ready

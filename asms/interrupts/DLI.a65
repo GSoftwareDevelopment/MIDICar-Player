@@ -7,7 +7,9 @@ DLIV   = $200
 tmpreg = $6B
 
 setTitleColor:
+.ifdef MAIN.@DEFINES.IRQPATCH
   sta NMIRES
+.endif
   pha:tya:pha
 
   ldy #$0f
@@ -23,7 +25,9 @@ setTitleColor:
   rti
 
 setSelectorColor:
+.ifdef MAIN.@DEFINES.IRQPATCH
   sta NMIRES
+.endif
   pha:tya:pha
 
   ldy 709
@@ -51,7 +55,9 @@ noSetCursorColor:
 
 
 setCursorColor:
+.ifdef MAIN.@DEFINES.IRQPATCH
   sta NMIRES
+.endif
   pha:tya:pha
 
   lda 706
@@ -69,8 +75,9 @@ setCursorColor:
   rti
 
 restoreColor:
-
+.ifdef MAIN.@DEFINES.IRQPATCH
   sta NMIRES
+.endif
   pha:tya:pha
 
   lda 712
@@ -88,7 +95,9 @@ restoreColor:
   rti
 
 setFooterColor:
+.ifdef MAIN.@DEFINES.IRQPATCH
   sta NMIRES
+.endif
   pha:tya:pha
 
   ldy #$0f

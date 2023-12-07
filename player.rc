@@ -1,18 +1,6 @@
-SCREEN_HEAD rcdata 'res/graph.obj'
-
-TAB_SCAN2ASC rcasm 'res/tab_scan2asc.asm'
-
-DLIST_MIN_ADDR rcasm 'res/dlist_min.asm'
-DLIST_ADDR rcasm 'res/dlist.asm'
-
-TAB_NRPM_ADDR rcasm 'res/nrpm_registers.asm'
-
-CHARS_ADDR rcdata 'res/font_blk2-uvh.fnt'
-
-KEY_TABLE_ADDR rcasm 'res/key_table.a65'
-
-UVMETER_ADDR rcdata 'res/uvmeter-h.obj'
-
-SCREEN_ADRSES rcdata 'res/screen_addresses.obj'
-
-HELPSCR_ADDR rcdata 'res/help.obj'
+CHARS_ADDR      rcdata 'res/font_blk2-uvh.fnt'
+UVMETER_ADDR    rcdata 'res/uvmeter-h.obj'
+DLIST_ADDR      rcdata 'res/dlist.obj'
+DLIST_MIN_ADDR  rcdata 'res/dlist_min.obj'
+SCREEN_HEAD     rcdata 'res/graph.obj'
+HELPSCR_ADDR    rcdata 'res/help.obj'

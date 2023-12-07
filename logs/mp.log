@@ -1,0 +1,8 @@
+Mad Pascal Compiler version 1.6.9 [2023/08/25] for 6502
+Compiling MCP.pas
+const.inc (39) Warning: Range check error while evaluating constants (3301560832
+ must be between -2147483648 and 2147483647)
+./includes/getdirectory.inc (7) Warning: Range check error while evaluating cons
+tants (3301560832 must be between -2147483648 and 2147483647)
+240 lines compiled, 2.93 sec, 16221 tokens, 1135 idents, 403 blocks, 6 types
+2 warning(s) issued

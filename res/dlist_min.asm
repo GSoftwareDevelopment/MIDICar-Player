@@ -1,5 +1,9 @@
     icl 'dlist.inc'
     icl '../memory.inc'
+
+    opt h-
+    org DLIST_MIN_ADDR
+
 title_bar   = DL_MODE_320x192G2
 work_area   = DL_MODE_40x24T2
 vis_area    = DL_MODE_20X24T5

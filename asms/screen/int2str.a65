@@ -2,6 +2,8 @@ _cnt = $84
 
 EOL = 0
 
+    txa:pha
+
     lda scradr
     sta screen1
     sta screen2
@@ -69,4 +71,5 @@ skipDigit:
     inc scradr+1
 
 stop:
+    pla:tax
     rts

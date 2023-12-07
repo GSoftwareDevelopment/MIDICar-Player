@@ -1,10 +1,10 @@
   .macro meta@endOfTrack
     dec PlayingTracks
     lda #$ff
-    sta _trackTime
-    sta _trackTime+1
-    sta _trackTime+2
-    sta _trackTime+3
+    sta _trackTick
+    sta _trackTick+1
+    sta _trackTick+2
+    sta _trackTick+3
   .endm
 
   .macro meta@setTempo

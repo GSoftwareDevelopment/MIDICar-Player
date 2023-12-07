@@ -1,3 +1,6 @@
+    opt h-
+    org 0
+
     // $00 (LSB of NRPN#)
     dta $60    // eq low band              (  +6dB)
     dta $40    // eq med low band          (   0dB)

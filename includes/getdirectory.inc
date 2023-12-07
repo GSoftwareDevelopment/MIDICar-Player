@@ -1,4 +1,4 @@
-procedure fileTypeByExt(s:PString);
+procedure fileTypeByExt(s:PString); // selector
 var
   c0:byte absolute FN_PATH_ADDR;
 
@@ -13,7 +13,7 @@ begin
   if fnExt=FE_PLS then p_type:=fl_playlist;       // playlist file
 end;
 
-function getDirectory:Byte;
+function getDirectory:Byte; // selector
 const
   CIO_CHN = 1;
 
@@ -72,6 +72,7 @@ begin
 
   desFiles:=lstTotal;
 
+  unsetNMI();
   thi:=0;
   if isBitClr(keymod,kmod_Control) then
   begin
@@ -118,9 +119,11 @@ begin
     result:=IOResult;
     cls(CIO_CHN);
   end;
+  setNMI();
   fn:='';
   clearStatus;
+  clearControls;
   thi:=255;
+  clrBit(screenStatus,ss_plsMode);
   setBit(screenStatus,ss_isRefresh);
 end;
-

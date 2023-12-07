@@ -91,7 +91,7 @@ end;
 
 procedure getCurrentPath(chn:byte; dev:PString; path:PString); register; assembler;
 asm
-  icl '../asms/filestr/getCurrentDirectory.a65'
+  icl 'asms/filestr/getCurrentDirectory.a65'
 end;
 
 procedure validPath;

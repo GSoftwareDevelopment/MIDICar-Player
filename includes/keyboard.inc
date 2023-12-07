@@ -1,4 +1,4 @@
-procedure toggleFile; Keep;
+procedure toggleFile; Keep; // selector
 var tmp:word;
 
 begin
@@ -21,7 +21,7 @@ begin
   IOResult:=0;
 end;
 
-procedure moveFileSelection; Keep;
+procedure moveFileSelection; Keep; // selector
 var
   tmp:SmallInt absolute $88;
 
@@ -54,9 +54,9 @@ begin
       else
         v:=1;                       // scroll one line down
   end;
-  lstCurrent:=lstShift+lstY+SmallInt(v);
   if v=0 then
   begin
+    lstCurrent:=lstShift+lstY+SmallInt(v);
     tmp:=lstTotal-1;
     if (lstCurrent<0) or (lstCurrent>tmp) then
     begin
@@ -80,27 +80,30 @@ begin
   lstCurrent:=lstShift+lstY;
 end;
 
-procedure fileAction; Keep;
+procedure fileAction; Keep; // selector
 begin
   lstCurrent:=lstShift+lstY;
-  if stateInputLine=ils_pending then choiceListFile;
-  if stateInputLine<>ils_done then exit;
+  if (stateInputLine and ils_mask_status)=ils_idle then choiceListFile;
+  if (stateInputLine and ils_mask_status)<>ils_done then exit;
 
   if p_type=fl_otherfile then
     IOResult:=ERR_NOT_A_MIDI_FILE;
 
   if isBitClr(screenStatus,ss_minMode) then
   begin
-    stateInputLine:=ils_pending;
-    if p_type=fl_playlist then
-      IOResult:=loadPlaylist;
-    if (p_type=fl_device) or
-       (p_type=fl_directory) or
-       (p_type=fl_parentDir) then
+    if isBitClr(stateInputLine,ils_noProcess) then
     begin
-      clrBit(screenStatus,ss_plsMode);
-      if resultInputLine then IOResult:=getDirectory;
+      if p_type=fl_playlist then IOResult:=loadPlaylist
+      else if p_type>fl_playlist then
+      begin
+        if resultInputLine then IOResult:=getDirectory;
+      end;
+    end
+    else
+    begin
+
     end;
+    stateInputLine:=ils_idle;
     if IOResult and %11111100<>0 then statusError(IOResult);
   end;
 
@@ -120,28 +123,13 @@ begin
   tglBit(screenStatus,ss_view);
 end;
 
-procedure toggleMinMode; Keep;
+procedure toggleMinMode; Keep; // selector
 begin
   tglBit(screenStatus,ss_minMode);
   if isBitClr(screenStatus,ss_minMode) then
     SDLST:=DLIST_ADDR
   else
     SDLST:=DLIST_MIN_ADDR;
-end;
-
-procedure toggleTimeShowMode; Keep;
-begin
-  inc(timeShowMode); if timeShowMode>2 then timeShowMode:=0;
-  if timeShowMode=0 then
-  begin
-    scradr:=screen_time+54; putSpaces(6);
-  end;
-end;
-
-procedure toggleScreenColors; Keep;
-begin
-  tglBit(screenStatus,ss_colorSet);
-  setColors;
 end;
 
 procedure toggleHelpScreen;
@@ -164,7 +152,19 @@ begin
   keyb:=255;
 end;
 
-procedure playerControl; Keep;
+procedure toggleTimeShowMode; Keep;
+begin
+  inc(timeShowMode); if timeShowMode>3 then timeShowMode:=0;
+  updateTimeMode;
+end;
+
+procedure toggleScreenColors; Keep;
+begin
+  tglBit(screenStatus,ss_colorSet);
+  setColors;
+end;
+
+procedure playerCtrlSongChange; Keep; // selector
 begin
   if (keyb=k_Z) or (keyb=k_B) then // previous & next song
   begin
@@ -189,7 +189,10 @@ begin
     if IOResult and %11111100<>0 then statusError(IOResult);
     if totalTracks<>0 then statusPlaying;
   end;
+end;
 
+procedure playerCtrlMain; Keep;
+begin
   if keyb=k_X then // Play
   begin
     statusStopped;

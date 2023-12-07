@@ -1,15 +1,16 @@
+SCREEN_ADRSES   = $2360;              // $020 (  32)
+
 CHARS_ADDR      = $2400;              // $400 (1024)
-SCREEN_ADDR     = $2800;              // $6A4 (1700)
 
-UVMETER_ADDR    = $2EA0;              // $040 (  64)
-SCREEN_ADRSES   = UVMETER_ADDR+$40;   // $020 (  32)
-KEY_TABLE_ADDR  = $2380;              // $080 ( 128)
+UVMETER_ADDR    = $2800;              // $040 (  64)
 
-TAB_SCAN2ASC    = $2F00;              // $040 (  64)
-DLIST_MIN_ADDR  = $2F7C;
-DLIST_ADDR      = $2FB4;              // $04C (  76)
+DLIST_ADDR      = UVMETER_ADDR+$40;   // $04C (  76)
+DLIST_MIN_ADDR  = DLIST_ADDR+$4C;     // $037 (  55)
 
 // -------------------------------------------------
+
+SCREEN_ADDR     = $295C;              // $6A4 (1700)
+
 
 SCREEN_HEAD     = SCREEN_ADDR;
 HEAD_SIZE       = 19*40;              // $2f8 ( 760)

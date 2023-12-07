@@ -13,18 +13,18 @@ key_table:
   dta a(none)                    ; 9 - NOT USED
   dta a(none)                    ; k_P     = 10
   dta a(none)                    ; k_U     = 11
-  dta a(MAIN.fileAction)         ; k_RETURN= 12
-  dta a(MAIN.toggleMinMode)      ; k_I     = 13
-  dta a(MAIN.moveFileSelection)  ; k_UP    = 14
-  dta a(MAIN.moveFileSelection)  ; k_DOWN  = 15
-  dta a(MAIN.playerControl)      ; k_V     = 16
+  dta a(MAIN.fileAction)         ; k_RETURN= 12 // selector
+  dta a(MAIN.toggleMinMode)      ; k_I     = 13 // selector
+  dta a(MAIN.moveFileSelection)  ; k_UP    = 14 // selector
+  dta a(MAIN.moveFileSelection)  ; k_DOWN  = 15 // selector
+  dta a(MAIN.playerCtrlMain)     ; k_V     = 16
   dta a(MAIN.toggleHelpScreen)   ; k_HELP  = 17
-  dta a(MAIN.playerControl)      ; k_C     = 18
+  dta a(MAIN.playerCtrlMain)     ; k_C     = 18
   dta a(none)                    ; k_F3    = 19
   dta a(none)                    ; k_F4    = 20
-  dta a(MAIN.playerControl)      ; k_B     = 21
-  dta a(MAIN.playerControl)      ; k_X     = 22
-  dta a(MAIN.playerControl)      ; k_Z     = 23
+  dta a(MAIN.playerCtrlSongChange) ; k_B     = 21 // selector
+  dta a(MAIN.playerCtrlMain)     ; k_X     = 22
+  dta a(MAIN.playerCtrlSongChange) ; k_Z     = 23 // selector
   dta a(none)                    ; k_4     = 24
   dta a(none)                    ; 25 - NOT USED
   dta a(none)                    ; k_3     = 26
@@ -34,7 +34,7 @@ key_table:
   dta a(none)                    ; k_2     = 30
   dta a(none)                    ; k_1     = 31
   dta a(MAIN.ControlSetting)     ; k_COMMA = 32
-  dta a(MAIN.toggleFile)         ; k_SPACE = 33
+  dta a(MAIN.toggleFile)         ; k_SPACE = 33 // selector
   dta a(MAIN.ControlSetting)     ; k_DOT   = 34
   dta a(none)                    ; k_N     = 35
   dta a(none)                    ; 36 - NOT USED

@@ -4,13 +4,13 @@
 {$DEFINE ROMOFF}
 {$DEFINE IRQPATCH}
 Uses
-  MIDFiles,
   keys,
   CIO,
   filestr,
   screen,
   list,
   inputline,
+  MIDFiles,
   nrpm,
   remote;
 {$I-}
@@ -47,19 +47,20 @@ var
 
   lstYscanLine:Byte absolute $57;
   lstY:Byte absolute $60;
-  oldLstY:Byte absolute $5a;
+  lstOldY:Byte absolute $5a;
   lstShift:SmallInt absolute $5B;
   lstCurrent:SmallInt absolute $70;
-  lstTotal:SmallInt absolute $74;
+  lstTotal:SmallInt absolute $72;
 
-  curPlay:SmallInt absolute $72;
+  curPlay:SmallInt absolute $74;
 
 // counter
 
-  timeShowMode:Byte = 1;
+  timeShowMode:Byte = 3;
 
   counter:Longint; // absolute $76;
   cntBCD:Longint; // absolute $7a;
+  seconds:Word;
 
 //
 
@@ -76,11 +77,58 @@ procedure fileTypeByExt(s:PString); Forward;
 {$i 'keyboard.inc'}
 {$i 'init.inc'}
 
+procedure registerKey; Assembler; Keep;
+asm
+  pha
+  tya
+  asl @
+  tay
+  pla
+  sta MAIN.KEYS.KEY_TABLE_ADDR,y
+  txa
+  sta MAIN.KEYS.KEY_TABLE_ADDR+1,y
+end;
+
+procedure registerKeyboard; assembler;
+asm
+  .macro m@regKey key procVec
+    ldy #MAIN.KEYS.:key
+    lda #<MAIN.:procVec
+    ldx #>MAIN.:procVec
+    jsr registerKey
+  .endm
+
+  m@regKey k_L toggleLoopMode
+  m@regKey k_I toggleMinMode
+  m@regKey k_SPACE toggleFile
+  m@regKey k_M toggleMeters
+  m@regKey k_INVERS toggleScreenColors
+  m@regKey k_T toggleTimeShowMode
+  m@regKey k_HELP toggleHelpScreen
+  m@regKey k_H toggleHelpScreen
+  m@regKey k_RETURN fileAction
+  m@regKey k_UP moveFileSelection
+  m@regKey k_DOWN moveFileSelection
+  m@regKey k_V playerCtrlMain
+  m@regKey k_C playerCtrlMain
+  m@regKey k_X playerCtrlMain
+  m@regKey k_B playerCtrlSongChange
+  m@regKey k_Z playerCtrlSongChange
+  m@regKey k_COMMA ControlSetting
+  m@regKey k_DOT ControlSetting
+  m@regKey k_E ControlSetting
+  m@regKey k_DELETE tempoControl
+  m@regKey k_CLEAR tempoControl
+  m@regKey k_INSERT tempoControl
+  m@regKey k_ESC EXIT2dos
+end;
+
 begin
   asm lda PORTB \ pha end;
   init;
+  registerKeyboard;
 
-// Loader init `outstr` and now its time to check for correct file specification
+// '`outstr` is initialise by Loader and now its time to check for correct file specification
   validPath; // result in '_v' indicate what part of file spec is available
   if isBitClr(_v,dp_name) then // if file name is not specified...
     createListEntry(fl_device,outStr) // create Device entry type
@@ -98,7 +146,7 @@ begin
     processMIDI;
     AutoStopAndSongChange;
 
-    remoteControl;  // plugin
+    // remoteControl;  // plugin
 
     if timer(otm,refreshRate) then
     begin
@@ -115,10 +163,10 @@ begin
         showList;
       end;
 
-      counter:=_totalTicks;
-      if isBitSet(playerStatus,ps_calcLen) and (_songTicks>0) then
+      counter:=_timerTick;
+      if isBitSet(playerStatus,ps_calcLen) and (_totalSongTicks>0) then
       begin
-        _v:=(counter div _songTicks)-1;
+        _v:=(counter div _totalSongTicks)-1;
         if _v<>255 then
         asm
           icl 'asms/song_progress.a65'
@@ -127,11 +175,24 @@ begin
 
       scradr:=screen_time+54;
       if timeShowMode=1 then
-        putHex(counter,6)
-      else if timeShowMode=2 then
+      begin
+        putHex(counter,6);
+      end else if timeShowMode=2 then
       begin
         asm icl 'asms/24bin_6bcd.a65' end;
         putHex(cntBCD,6);
+      end else if timeShowMode=3 then
+      begin
+        calculateCurrentTime;
+        seconds:=round(timeInSec);
+        scradr:=screen_time+58;
+        v:=seconds mod 60;
+        asm icl 'asms/8bin_2bcd.a65' end;
+        putHex(cntBCD,2);
+        scradr:=screen_time+55;
+        v:=seconds div 60;
+        asm icl 'asms/8bin_2bcd.a65' end;
+        putHex(cntBCD,2);
       end;
 
       asm icl 'asms/uvmeters_h.a65' end;
@@ -149,17 +210,17 @@ begin
     begin
       if isBitSet(screenStatus,ss_isHelp) then toggleHelpScreen;
 
-      if stateInputLine=ils_inprogress then do_inputLine;
+      if (stateInputLine and ils_mask_status)=ils_inprogress then do_inputLine;
 
       asm
         lda MAIN.KEYS.keyb
         asl @
         tay
 
-        lda KEY_TABLE_ADDR+1,y
+        lda MAIN.KEYS.KEY_TABLE_ADDR+1,y
         beq key_not_defined
         sta jump_addr+1
-        lda KEY_TABLE_ADDR,y
+        lda MAIN.KEYS.KEY_TABLE_ADDR,y
         sta jump_addr
 
         jsr jump_addr:$ffff

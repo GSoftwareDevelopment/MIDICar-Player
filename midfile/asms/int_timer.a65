@@ -14,13 +14,13 @@ zeroSubTick:
     sta _subCnt
 
 doMainTick:
-    lda _totalTicks
+    lda _timerTick
     add _tickStep
-    sta _totalTicks
+    sta _timerTick
     bcc skip
-    inc _totalTicks+1
+    inc _timerTick+1
     bne skip
-    inc _totalTicks+2
+    inc _timerTick+2
 
 skip:
   pla

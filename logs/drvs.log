@@ -1,0 +1,38 @@
+make[1]: Wejście do katalogu '/mnt/data/Projekty/MIDI/MIDIcar/drvs'
+
+compile driver MIDIBox...
+INIT: $214F..$2174 ($0025)
+START: $202D..$2091 ($0064)
+SEND: $2091..$20BD ($002C)
+FLUSH: $20BD..$20D9 ($001C)
+STOP: $20D9..$2125 ($004C)
+RECEIVE: $2125..$2127 ($0002)
+Writing listing file...
+Writing object file...
+466 lines of source assembled in 3 pass
+378 bytes written to the object file
+
+compile driver MIDIMate...
+INIT: $2131..$2156 ($0025)
+START: $202E..$2079 ($004B)
+SEND: $2079..$20A5 ($002C)
+FLUSH: $20A5..$20C1 ($001C)
+STOP: $20C1..$2107 ($0046)
+RECEIVE: $2107..$2109 ($0002)
+Writing listing file...
+Writing object file...
+439 lines of source assembled in 3 pass
+348 bytes written to the object file
+
+compile driver MIDICar...
+INIT: $20BF..$2237 ($0178)
+START: $2031..$204C ($001B)
+SEND: $204C..$2075 ($0029)
+FLUSH: $2075..$2093 ($001E)
+STOP: $2093..$20B0 ($001D)
+RECEIVE: $20B0..$20BE ($000E)
+Writing listing file...
+Writing object file...
+597 lines of source assembled in 3 pass
+573 bytes written to the object file
+make[1]: Opuszczenie katalogu '/mnt/data/Projekty/MIDI/MIDIcar/drvs'

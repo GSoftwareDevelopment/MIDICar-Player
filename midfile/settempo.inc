@@ -1,13 +1,15 @@
-procedure setTempo;
+procedure calculateCurrentTime;
+begin
+  timeInSec:=timeBeforeSetTempo+(_timerTick-ticksBeforeSetTempo)*ms_per_tick;
+end;
+
+function calcTempo:byte;
 var
   freq:single;
-  fdiv:Byte;
   ratio:Single;
   _ratio:Byte;
 
 begin
-  _timerStatus:=_timerStatus xor $80;
-
 // Calculation of the master counter frequency
   _tickStep:=ticks_per_qnote div ticks_per_32nd;
   freq:=tickDiv/_tickStep;
@@ -22,41 +24,47 @@ This yields apparently lower frequencies for the main counter.
 }
   ratio:=250.6706/freq; // 250.6706 Smallest possible _frequency_ for TIMER1 with 8-bit resolution
   _ratio:=trunc(ratio);
-  if _ratio>15 then _ratio:=15;
+  if _ratio>mf_ratio then _ratio:=mf_ratio;
 
   // store timer ratio in status
-  _timerStatus:=(_timerStatus and f_flags) or _ratio;
+  _timerStatus:=(_timerStatus and mf_flags) or _ratio;
   _subCnt:=0;
   // calc frequency divider for timer
-  fdiv:=round(63921/(freq*(1+_ratio)));
+  result:=round(63921/(freq*(1+_ratio)));
+end;
 
+procedure calcTime;
+begin
+  ticksBeforeSetTempo:=_timerTick;
+  timeBeforeSetTempo:=timeInSec;
 {$IFDEF USE_SUPPORT_VARS}
   // calc tempo (Beats Per Minutes)
-  BPM:=60000000 div us_per_qnote;
+  BPM:=60000000/us_per_qnote;
+  ms_per_tick:=(60000/(BPM*tickDiv))/1000;
+  // we get the current second of the song (for the current tempo!)
+  // when `totalSec:=round(_timerTick*ms_per_tick);`
 {$ENDIF}
+end;
 
+procedure setTempo;
+var
+  fdiv:Byte;
+
+begin
+  _timerStatus:=_timerStatus xor $80;
+  fdiv:=calcTempo;
+  calcTime;
   asm
     sei  // disable IRQ
   // reset POKEY
     lda #$00
-    // ldy #$03
-    // sta AUDCTL
     sta AUDC1
-    // sty SKCTL
   // setup TIMER1
-    // sta AUDCTL
     mva FDIV AUDF1
-  // initialize IRQ for TIMER1
-    // lda irqens
-    // ora #$01
-    // sta irqens
-    // sta irqen
   // start timer strobe
     sta stimer
 
     cli  // enable IRQ
   end;
-
   _timerStatus:=_timerStatus xor $80;
-
 end;

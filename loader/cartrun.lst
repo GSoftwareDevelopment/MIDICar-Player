@@ -1,0 +1,757 @@
+mads 2.1.6
+  1228 					opt l+
+   111 = 0000				?EXTDETECT = 0
+   112 = 0000				?VBXDETECT = 0
+   113
+   114 				.endl
+   115
+   116 				; ------------------------------------------------------------
+   117
+   118 					org CODEORIGIN
+   119
+   120 4000				STATICDATA
+Macro: STATICDATA [Source: cartrun.asm]
+     1 FFFF> 4000-6CB3> 10 64 + .by  $10 $64 $65 $63 $6F $6D $70 $72  $65 $73 $73 $69 $6E $67 $2E $2E  $2E $00 $04 $56 $41 $52 $53 $00
+     2 4018 04 50 52 4F 47 00 + .by  $04 $50 $52 $4F $47 $00 $04 $44  $41 $54 $41 $00
+Source: cartrun.asm
+   121
+   122 				; ------------------------------------------------------------
+   123
+   124 4024			RTLIB
+   125 4024				icl 'rtl6502_a8.asm'
+Source: rtl6502_a8.asm
+    84 					opt l+
+   126
+   127 				.print 'ZPAGE: ',zpage,'..',zpend-1
+   127 				ZPAGE: $0080..$00D3
+   128
+   129 				.print 'RTBUF: ',@buf,'..',@buf+255
+   129 				RTBUF: $0400..$04FF
+   130
+   131 				.print 'RTLIB: ',RTLIB,'..',*-1
+   131 				RTLIB: $4024..$4080
+   132
+   133 				; ------------------------------------------------------------
+   134
+   135 4081			START
+   136 4081 BA				tsx
+   137 4082 8E BD 42			stx MAIN.@halt+1
+   138
+   139 = 000B			VLEN	= VARDATASIZE-VARINITSIZE
+   140 = 6CB4			VADR	= DATAORIGIN+VARINITSIZE
+   141
+   142 					ift VADR > $BFFF
+   143 					ert 'Invalid memory address range ',VADR
+   144 					eli (VLEN > 0) && (VLEN <= 256)
+   145 4085 A2 F5			ldx #256-VLEN
+   146 4087 A9 00			lda #$00
+   147 4089 9D BF 6B E8 D0 FA		sta:rne VADR+VLEN-256,x+
+   148 					eli VLEN>256
+   149 					m@init
+   150 					eif
+   151
+   152 				.ifdef psptr
+   153 					mwa #PROGRAMSTACK psptr
+   154 				.fi
+   155
+   156 					.ifdef MAIN.@DEFINES.ROMOFF
+   157 408F				icl 'atari\romoff.asm'
+Source: romoff.asm
+     1
+     2 				// http://atariki.krap.pl/index.php/Programowanie:_U%C5%BCycie_OS-a_przy_wy%C5%82%C4%85czonym_ROM-ie
+     3
+     4 408F			.local	rominit
+     5
+     6 408F 78			        sei
+     7 4090 A9 00		        lda #%00000000
+     8 4092 8D 0E D4		        sta NMIEN       ;$D40E
+     9 4095 A9 FE		        lda #%11111110
+    10 4097 8D 01 D3		        sta PORTB       ;$D301
+    11
+    12 				; Wprowadzona zmiana pozwala wyłączyć z poziomu kodu Pascala, kopiowanie czcionek z pamięci ROM do RAM przy wyłączonym ROMie
+    13 				; Proces ten (niefortunnie) powoduje nadpisanie danych w obszarze $E000..$E3FF, gdy w zasobach umieścimi dane, które
+    14 				; w ten obszar są wczytywane. Za pomocą definicji '{$DEFINE NOROMFONT}` można wyłączyć przerzut danych czcionek z ROM do RAMu,
+    15 				; co pozwala zachować, wczytywane zasoby.
+    16
+    17 				.ifndef MAIN.@DEFINES.NOROMFONT
+    18 409A A2 03			ldx #3
+    19 409C A0 00			ldy #0
+    20 409E EE 01 D3		mv	inc portb
+    21 40A1 B9 00 E0		afnt0	lda $e000,y
+    22 40A4 CE 01 D3			dec portb
+    23 40A7 99 00 E0		afnt1	sta $e000,y
+    24 40AA C8				iny
+    25 40AB D0 F1			bne mv
+    26 40AD EE A3 40			inc afnt0+2
+    27 40B0 EE A9 40			inc afnt1+2
+    28 40B3 CA				dex
+    29 40B4 10 E8			bpl mv
+    30 				.endif
+    31
+    32 40B6 A2 D3		        ldx #<nmiint
+    33 40B8 A0 40		        ldy #>nmiint
+    34 40BA 8E FA FF		        stx NMIVEC      ;$FFFA
+    35 40BD 8C FB FF		        sty NMIVEC+1
+    36
+    37 40C0 A2 DD		        ldx #<irqint
+    38 40C2 A0 40		        ldy #>irqint
+    39 40C4 8E FE FF		        stx IRQVEC      ;$FFFE
+    40 40C7 8C FF FF		        sty IRQVEC+1
+    41
+    42 40CA A9 40		        lda #%01000000
+    43 40CC 8D 0E D4		        sta NMIEN       ;$D40E
+    44 40CF 58			        cli
+    45
+    46 40D0 4C FE 40			jmp skp
+    47
+    48
+    49
+    50 40D3 2C 0F D4		nmiint  bit NMIST        ;$D40F
+    51 40D6 10 03		        spl
+    52 40D8 6C 00 02		        jmp (VDSLST)     ;$0200
+    53
+    54 40DB 38			        sec
+    55 40DC 24			        .byte $24        ;BIT $18
+    56
+    57 40DD 18			irqint  clc
+    58
+    59 				        ;wlaczenie OS ROM
+    60
+    61 40DE EE 01 D3		        inc PORTB       ;$D301
+    62
+    63 40E1 48			        pha
+    64 40E2 8A			        txa
+    65 40E3 48			        pha
+    66 40E4 BA			        tsx
+    67
+    68 				        ;odlozenie na stos danych dla powrotu z przerwania (RTI)
+    69
+    70 40E5 A9 40		        lda #>iret      ;adres procedury iret
+    71 40E7 48			        pha
+    72 40E8 A9 F7		        lda #<iret
+    73 40EA 48			        pha
+    74 40EB BD 03 01		        lda $103,x      ;skopiowanie wartosci rejestru stanu procesora
+    75 40EE 48			        pha
+    76
+    77 				        ;skok przez odpowiedni wektor przerwania
+    78
+    79 40EF 90 03		        scc
+    80 40F1 6C FA FF		        jmp (NMIVEC)    ;$FFFA
+    81 40F4 6C FE FF		        jmp (IRQVEC)    ;$FFFE
+    82
+    83 40F7 68			iret	pla
+    84 40F8 AA				tax
+    85 40F9 68				pla
+    86
+    87 				        ;wylaczenie OS ROM
+    88
+    89 40FA CE 01 D3		        dec PORTB       ;$D301
+    90 40FD 40			        rti
+    91
+    92 40FE			skp
+    93
+    94 				.endl
+    95
+   158 					.fi
+   159
+   160 40FE A2 0F			ldx #$0F					; DOS II+/D ParamStr
+   161 4100 BD 40 03 9D C5 42 + 	mva:rpl $340,x MAIN.IOCB@COPY,x-
+   162
+   163 4109 E8				inx						; X = 0
+   164 410A 86 80			stx bp						; BP = 0
+   165
+   166 410C 8E 08 D2			stx audctl					; reset POKEY
+   167 410F 8E 18 D2			stx audctl+$10
+   168 4112 A9 03			lda #3
+   169 4114 8D 0F D2			sta skctl
+   170 4117 8D 1F D2			sta skctl+$10
+   171
+   172 411A CA				dex						; X = 255
+   173
+   174 411B				UNITINITIALIZATION
+Macro: UNITINITIALIZATION [Source: cartrun.asm]
+   175
+   176 411B			.local	MAIN						; PROCEDURE
+   177
+   178 411B 4C 46 42			jmp l_002B
+   179
+   180 				; ------------------------------------------------------------
+   181
+   182 411E			.local	SYSTEM						; UNIT
+   183
+   184 				; ------------------------------------------------------------
+   185
+   186 = 0101			__PORTB_BANKS	= $0101
+   187 = 0648			M_PI_2	= $0648
+   188 = 0192			D_PI_2	= $0192
+   189 = 0004			D_PI_180	= $04
+   190 = 0000			MGTIA	= $00
+   191 = 0080			MVBXE	= $80
+   192 = 0000			VBXE_XDLADR	= $00
+   193 = 00E0			VBXE_BCBTMP	= $E0
+   194 = 0100			VBXE_BCBADR	= $0100
+   195 = 1000			VBXE_MAPADR	= $1000
+   196 = 1000			VBXE_CHBASE	= $1000
+   197 = 5000			VBXE_OVRADR	= $5000
+   198 = B000			VBXE_WINDOW	= $B000
+   199 = 0000			IDLI	= $00
+   200 = 0001			IVBL	= $01
+   201 = 0001			IVBLD	= $01
+   202 = 0002			IVBLI	= $02
+   203 = 0003			ITIM1	= $03
+   204 = 0004			ITIM2	= $04
+   205 = 0005			ITIM4	= $05
+   206 = 00FE			CH_DELCHR	= $FE
+   207 = 009B			CH_ENTER	= $9B
+   208 = 001B			CH_ESC	= $1B
+   209 = 001C			CH_CURS_UP	= $1C
+   210 = 001D			CH_CURS_DOWN	= $1D
+   211 = 001E			CH_CURS_LEFT	= $1E
+   212 = 001F			CH_CURS_RIGHT	= $1F
+   213 = 007F			CH_TAB	= $7F
+   214 = 009B			CH_EOL	= $9B
+   215 = 007D			CH_CLR	= $7D
+   216 = 00FD			CH_BELL	= $FD
+   217 = 007E			CH_DEL	= $7E
+   218 = 009C			CH_DELLINE	= $9C
+   219 = 009D			CH_INSLINE	= $9D
+   220 = 0000			PAL_PMCOLOR0	= $00
+   221 = 0001			PAL_PMCOLOR1	= $01
+   222 = 0002			PAL_PMCOLOR2	= $02
+   223 = 0003			PAL_PMCOLOR3	= $03
+   224 = 0004			PAL_COLOR0	= $04
+   225 = 0005			PAL_COLOR1	= $05
+   226 = 0006			PAL_COLOR2	= $06
+   227 = 0007			PAL_COLOR3	= $07
+   228 = 0008			PAL_COLBAK	= $08
+   229 = 0000			COLOR_BLACK	= $00
+   230 = 000E			COLOR_WHITE	= $0E
+   231 = 0032			COLOR_RED	= $32
+   232 = 0096			COLOR_CYAN	= $96
+   233 = 0068			COLOR_VIOLET	= $68
+   234 = 00C4			COLOR_GREEN	= $C4
+   235 = 0074			COLOR_BLUE	= $74
+   236 = 00EE			COLOR_YELLOW	= $EE
+   237 = 0028			COLOR_ORANGE	= $28
+   238 = 00E4			COLOR_BROWN	= $E4
+   239 = 003C			COLOR_LIGHTRED	= $3C
+   240 = 0004			COLOR_GRAY1	= $04
+   241 = 0006			COLOR_GRAY2	= $06
+   242 = 000A			COLOR_GRAY3	= $0A
+   243 = 00CC			COLOR_LIGHTGREEN	= $CC
+   244 = 007C			COLOR_LIGHTBLUE	= $7C
+   245 = 0004			FMOPENREAD	= $04
+   246 = 0008			FMOPENWRITE	= $08
+   247 = 0009			FMOPENAPPEND	= $09
+   248 = 000C			FMOPENREADWRITE	= $0C
+   249 = 6CAE			SCREENWIDTH	= DATAORIGIN+$0000
+   250 = 6CB0			SCREENHEIGHT	= DATAORIGIN+$0002
+   251 = 6CB2			DATESEPARATOR	= DATAORIGIN+$0004
+   252 = D20A			RND	= $D20A
+   253 = 02C0			adr.PALETTE	= $02C0
+   254 411E			.var PALETTE	= adr.PALETTE .word
+   255 = D012			adr.HPALETTE	= $D012
+   256 411E			.var HPALETTE	= adr.HPALETTE .word
+   257 = 6CB3			FILEMODE	= DATAORIGIN+$0005
+   258 = 6CB4			GRAPHMODE	= DATAORIGIN+$0006
+   259 = 6CB5			IORESULT	= DATAORIGIN+$0007
+   260 = 6CB6			EOLN	= DATAORIGIN+$0008
+   261 = 6CB7			RNDSEED	= DATAORIGIN+$0009
+   262
+   263 = 411E C0 02		PALETTE
+   263 = 4120 12 D0		HPALETTE
+   263 				.endl							; UNIT SYSTEM
+   264
+   265 				; ------------------------------------------------------------
+   266
+   267 4122			.local	ATARI						; UNIT
+   268
+   269 				; ------------------------------------------------------------
+   270
+   271 = 0010			IRQENS	= $10
+   272 = 0012			RTCLOK	= $12
+   273 = 0012			RTCLOK1	= $12
+   274 = 0013			RTCLOK2	= $13
+   275 = 0014			RTCLOK3	= $14
+   276 = 004D			ATRACT	= $4D
+   277 = 0052			LMARGIN	= $52
+   278 = 0053			RMARGIN	= $53
+   279 = 0054			ROWCRS	= $54
+   280 = 0055			COLCRS	= $55
+   281 = 0057			DINDEX	= $57
+   282 = 0058			SAVMSC	= $58
+   283 = 0062			PALNTS	= $62
+   284 = 006A			RAMTOP	= $6A
+   285 = 0200			VDSLST	= $0200
+   286 = 0230			SDLSTL	= $0230
+   287 = 0290			TXTROW	= $0290
+   288 = 0291			TXTCOL	= $0291
+   289 = 0293			TINDEX	= $0293
+   290 = 0294			TXTMSC	= $0294
+   291 = 022F			SDMCTL	= $022F
+   292 = 026F			GPRIOR	= $026F
+   293 = 02F0			CRSINH	= $02F0
+   294 = 02F3			CHACT	= $02F3
+   295 = 02F4			CHBAS	= $02F4
+   296 = 02FC			CH	= $02FC
+   297 = 02FD			FILDAT	= $02FD
+   298 = 02C0			PCOLR0	= $02C0
+   299 = 02C1			PCOLR1	= $02C1
+   300 = 02C2			PCOLR2	= $02C2
+   301 = 02C3			PCOLR3	= $02C3
+   302 = 02C4			COLOR0	= $02C4
+   303 = 02C5			COLOR1	= $02C5
+   304 = 02C6			COLOR2	= $02C6
+   305 = 02C7			COLOR3	= $02C7
+   306 = 02C8			COLOR4	= $02C8
+   307 = 02C8			COLBAKS	= $02C8
+   308 = D000			HPOSP0	= $D000
+   309 = D001			HPOSP1	= $D001
+   310 = D002			HPOSP2	= $D002
+   311 = D003			HPOSP3	= $D003
+   312 = D004			HPOSM0	= $D004
+   313 = D005			HPOSM1	= $D005
+   314 = D006			HPOSM2	= $D006
+   315 = D007			HPOSM3	= $D007
+   316 = D008			SIZEP0	= $D008
+   317 = D009			SIZEP1	= $D009
+   318 = D00A			SIZEP2	= $D00A
+   319 = D00B			SIZEP3	= $D00B
+   320 = D00C			SIZEM	= $D00C
+   321 = D00D			GRAFP0	= $D00D
+   322 = D00E			GRAFP1	= $D00E
+   323 = D00F			GRAFP2	= $D00F
+   324 = D010			GRAFP3	= $D010
+   325 = D011			GRAFM	= $D011
+   326 = D004			P0PF	= $D004
+   327 = D014			PAL	= $D014
+   328 = D013			TRIG3	= $D013
+   329 = D012			COLPM0	= $D012
+   330 = D013			COLPM1	= $D013
+   331 = D014			COLPM2	= $D014
+   332 = D015			COLPM3	= $D015
+   333 = D016			COLPF0	= $D016
+   334 = D017			COLPF1	= $D017
+   335 = D018			COLPF2	= $D018
+   336 = D019			COLPF3	= $D019
+   337 = D01A			COLBK	= $D01A
+   338 = D01B			PRIOR	= $D01B
+   339 = D01D			GRACTL	= $D01D
+   340 = D01E			HITCLR	= $D01E
+   341 = D01F			CONSOL	= $D01F
+   342 = D200			AUDF1	= $D200
+   343 = D201			AUDC1	= $D201
+   344 = D202			AUDF2	= $D202
+   345 = D203			AUDC2	= $D203
+   346 = D204			AUDF3	= $D204
+   347 = D205			AUDC3	= $D205
+   348 = D206			AUDF4	= $D206
+   349 = D207			AUDC4	= $D207
+   350 = D208			AUDCTL	= $D208
+   351 = D209			KBCODE	= $D209
+   352 = D20E			IRQEN	= $D20E
+   353 = D20F			SKSTAT	= $D20F
+   354 = D300			PORTA	= $D300
+   355 = D301			PORTB	= $D301
+   356 = D302			PACTL	= $D302
+   357 = D400			DMACTL	= $D400
+   358 = D401			CHACTL	= $D401
+   359 = D402			DLISTL	= $D402
+   360 = D404			HSCROL	= $D404
+   361 = D405			VSCROL	= $D405
+   362 = D407			PMBASE	= $D407
+   363 = D409			CHBASE	= $D409
+   364 = D40A			WSYNC	= $D40A
+   365 = D40B			VCOUNT	= $D40B
+   366 = D40C			PENH	= $D40C
+   367 = D40D			PENV	= $D40D
+   368 = D40E			NMIEN	= $D40E
+   369 = FFFA			NMIVEC	= $FFFA
+   370 = FFFC			RESETVEC	= $FFFC
+   371 = FFFE			IRQVEC	= $FFFE
+   372
+   373 				.endl							; UNIT ATARI
+   374
+   375 				; ------------------------------------------------------------
+   376
+   377 4122			.local	ZX5						; UNIT
+   378
+   379 4122			.local	UNZX5_00A5					; PROCEDURE | ASSEMBLER | OVERLOAD
+   380
+   381 				; -------------------  ASM Block 00000061  -------------------
+   382
+   383 = 0084			ZX5_OUTPUT      equ :EAX+0
+   384 = 0086			copysrc         equ :EAX+2
+   385 = 0088			offset          equ :EAX+4
+   386 = 008A			offset2         equ :EAX+6
+   387 = 008C			offset3         equ :EAX+8
+   388 = 008E			len             equ :EAX+$A
+   389 = 0090			pnb             equ :EAX+$C
+   390
+   391 4122 8E 44 42		unZX5		stx @sp
+   392
+   393 4125 AD B9 6C 8D 38 42 + 		mwa inputPointer ZX5_INPUT
+   394 4131 AD BB 6C 85 84 AD + 		mwa outputPointer ZX5_OUTPUT
+   395
+   396 413B A9 FF				lda   #$ff
+   397 413D 85 88				sta   offset
+   398 413F 85 89				sta   offset+1
+   399 4141 A0 00				ldy   #$00
+   400 4143 84 8E				sty   len
+   401 4145 84 8F				sty   len+1
+   402 4147 A9 80				lda   #$80
+   403
+   404 4149			dzx5s_literals
+   405 4149 20 22 42				jsr   dzx5s_elias
+   406 414C 48					pha
+   407 414D 20 37 42		cop0		jsr   _GET_BYTE
+   408 4150 A0 00				ldy   #$00
+   409 4152 91 84				sta   (ZX5_OUTPUT),y
+   410 4154 E6 84 D0 02 E6 85			inw   ZX5_OUTPUT
+   411 415A A5 8E				lda   len
+   412 415C D0 02				bne   @+
+   413 415E C6 8F				dec   len+1
+   414 4160 C6 8E		@		dec   len
+   415 4162 D0 E9				bne   cop0
+   416 4164 A5 8F				lda   len+1
+   417 4166 D0 E5				bne   cop0
+   418 4168 68					pla
+   419 4169 0A					asl   @
+   420 416A B0 43				bcs   dzx5s_other_offset
+   421
+   422 416C			dzx5s_last_offset
+   423 416C 20 22 42				jsr   dzx5s_elias
+   424 416F 48			dzx5s_copy	pha
+   425 4170 A5 84				lda   ZX5_OUTPUT
+   426 4172 18					clc
+   427 4173 65 88				adc   offset
+   428 4175 85 86				sta   copysrc
+   429 4177 A5 85				lda   ZX5_OUTPUT+1
+   430 4179 65 89				adc   offset+1
+   431 417B 85 87				sta   copysrc+1
+   432 417D A0 00				ldy   #$00
+   433 417F A6 8F				ldx   len+1
+   434 4181 F0 0E				beq   Remainder
+   435 4183 B1 86		Page		lda   (copysrc),y
+   436 4185 91 84				sta   (ZX5_OUTPUT),y
+   437 4187 C8					iny
+   438 4188 D0 F9				bne   Page
+   439 418A E6 87				inc   copysrc+1
+   440 418C E6 85				inc   ZX5_OUTPUT+1
+   441 418E CA					dex
+   442 418F D0 F2				bne   Page
+   443 4191 A6 8E		Remainder	ldx   len
+   444 4193 F0 12				beq   copyDone
+   445 4195 B1 86		copyByte	lda   (copysrc),y
+   446 4197 91 84				sta   (ZX5_OUTPUT),y
+   447 4199 C8					iny
+   448 419A CA					dex
+   449 419B D0 F8				bne   copyByte
+   450 419D 98					tya
+   451 419E 18					clc
+   452 419F 65 84				adc   ZX5_OUTPUT
+   453 41A1 85 84				sta   ZX5_OUTPUT
+   454 41A3 90 02				bcc   copyDone
+   455 41A5 E6 85				inc   ZX5_OUTPUT+1
+   456 41A7 86 8F		copyDone	stx   len+1
+   457 41A9 86 8E				stx   len
+   458 41AB 68					pla
+   459 41AC 0A					asl   @
+   460 41AD 90 9A				bcc   dzx5s_literals
+   461
+   462 41AF			dzx5s_other_offset
+   463 41AF 0A					asl   @
+   464 41B0 D0 05				bne   dzx5s_other_offset_skip
+   465 41B2 20 37 42				jsr   _GET_BYTE
+   466 41B5 38					sec	; można usunąć jeśli dekompresja z pamięci a nie pliku
+   467 41B6 2A					rol   @
+   468 41B7			dzx5s_other_offset_skip
+   469 41B7 90 43				bcc   dzx5s_prev_offset
+   470
+   471 41B9			dzx5s_new_offset
+   472 41B9 85 90				sta   pnb
+   473 41BB 0A					asl   @
+   474 41BC A6 8A				ldx   offset2
+   475 41BE 86 8C				stx   offset3
+   476 41C0 A6 8B				ldx   offset2+1
+   477 41C2 86 8D				stx   offset3+1
+   478 41C4 A6 88				ldx   offset
+   479 41C6 86 8A				stx   offset2
+   480 41C8 A6 89				ldx   offset+1
+   481 41CA 86 8B				stx   offset2+1
+   482 41CC A2 FE				ldx   #$fe
+   483 41CE 86 8E				stx   len
+   484 41D0 20 24 42				jsr   dzx5s_elias_loop
+   485 41D3 48					pha
+   486 41D4 A6 8E				ldx   len
+   487 41D6 E8					inx
+   488 41D7 86 89				stx   offset+1
+   489 41D9 D0 04				bne   @+
+   490 41DB 68					pla
+   491
+   492 41DC 4C 43 42				jmp to_exit	; koniec
+   493
+   494 41DF 20 37 42		@		jsr   _GET_BYTE
+   495 41E2 85 88				sta   offset
+   496 41E4 A2 00				ldx   #$00
+   497 41E6 86 8F				stx   len+1
+   498 41E8 E8					inx
+   499 41E9 86 8E				stx   len
+   500 41EB 68					pla
+   501 41EC C6 90				dec   pnb
+   502 41EE 30 03				bmi   @+
+   503 41F0 20 2F 42				jsr   dzx5s_elias_backtrack
+   504 41F3 E6 8E D0 02 E6 8F	@		inw   len
+   505 41F9 4C 6F 41				jmp   dzx5s_copy
+   506
+   507 41FC			dzx5s_prev_offset
+   508 41FC 0A					asl   @
+   509 41FD 90 10				bcc   dzx5s_second_offset
+   510 41FF A4 8A				ldy   offset2
+   511 4201 A6 8C				ldx   offset3
+   512 4203 84 8C				sty   offset3
+   513 4205 86 8A				stx   offset2
+   514 4207 A4 8B				ldy   offset2+1
+   515 4209 A6 8D				ldx   offset3+1
+   516 420B 84 8D				sty   offset3+1
+   517 420D 86 8B				stx   offset2+1
+   518
+   519 420F			dzx5s_second_offset
+   520 420F A4 8A				ldy   offset2
+   521 4211 A6 88				ldx   offset
+   522 4213 84 88				sty   offset
+   523 4215 86 8A				stx   offset2
+   524 4217 A4 8B				ldy   offset2+1
+   525 4219 A6 89				ldx   offset+1
+   526 421B 84 89				sty   offset+1
+   527 421D 86 8B				stx   offset2+1
+   528 421F 4C 6C 41				jmp   dzx5s_last_offset
+   529
+   530 4222 E6 8E		dzx5s_elias	inc   len
+   531 4224			dzx5s_elias_loop
+   532 4224 0A					asl   @
+   533 4225 D0 05				bne   dzx5s_elias_skip
+   534 4227 20 37 42				jsr   _GET_BYTE
+   535 422A 38					sec	; można usunąć jeśli dekompresja z pamięci a nie pliku
+   536 422B 2A					rol   @
+   537 422C			dzx5s_elias_skip
+   538 422C 90 01				bcc   dzx5s_elias_backtrack
+   539 422E 60					rts
+   540
+   541 422F			dzx5s_elias_backtrack
+   542 422F 0A					asl   @
+   543 4230 26 8E				rol   len
+   544 4232 26 8F				rol   len+1
+   545 4234 4C 24 42				jmp   dzx5s_elias_loop
+   546
+   547 4237 AD FF FF		_GET_BYTE	lda    $ffff
+   548 = 4238			ZX5_INPUT	equ    *-2
+   549 423A EE 38 42 D0 03 EE + 		inw    ZX5_INPUT
+   550 4242 60					rts
+   551
+   552 4243 A2 00		to_exit		ldx #0
+   553 = 4244			@sp		equ *-1
+   554
+   555 				; ------------------------------------------------------------
+   556
+   557 = 6CB9			INPUTPOINTER	= DATAORIGIN+$000B
+   558 = 6CBB			OUTPUTPOINTER	= DATAORIGIN+$000D
+   559
+   560 = 6CB9			@VarData	= INPUTPOINTER
+   561 = 0004			@VarDataSize	= 4
+   562
+   563 4245			@exit
+   564 					.ifdef @new
+   565 					lda <@VarData
+   566 					sta :ztmp
+   567 					lda >@VarData
+   568 					ldy #@VarDataSize-1
+   569 					jmp @FreeMem
+   570 					els
+   571 4245 60				rts						; ret
+   572 					eif
+   573 				.endl
+   574
+   575 				; ------------------------------------------------------------
+   576
+   577 				.endl							; UNIT ZX5
+   578 4246			l_002B
+   579
+   580 				; optimize FAIL ('@print', cartrun.pas), line = 9
+   581
+   582 					@printSTRING #CODEORIGIN+$0000
+   582 				 LDY> CODEORIGIN+$0000\ LDA< CODEORIGIN+$0000\ JSR @PRINTSTRING
+   582 4246 A0 40		 LDY> CODEORIGIN+$0000
+   582 4248 A9 00		 LDA< CODEORIGIN+$0000
+   582 424A 20 3A 40		 JSR @PRINTSTRING
+   583 424D 20 24 40			@printEOL
+   584
+   585 				; GetResourceHandle
+   586 4250 A9 D5			lda <MAIN.@RESOURCE.VARS
+   587 4252 8D BD 6C			sta DPTR
+   588 4255 A9 42			lda >MAIN.@RESOURCE.VARS
+   589 4257 8D BE 6C			sta DPTR+1
+   590
+   591 				; optimize OK (cartrun.pas), line = 11
+   592
+   593 425A AD BD 6C			lda DPTR
+   594 425D 8D B9 6C			sta ZX5.UNZX5_00A5.INPUTPOINTER
+   595 4260 AD BE 6C			lda DPTR+1
+   596 4263 8D BA 6C			sta ZX5.UNZX5_00A5.INPUTPOINTER+1
+   597 4266 A9 00			lda #$00
+   598 4268 8D BB 6C			sta ZX5.UNZX5_00A5.OUTPUTPOINTER
+   599 426B A9 04			lda #$04
+   600 426D 8D BC 6C			sta ZX5.UNZX5_00A5.OUTPUTPOINTER+1
+   601 4270 20 22 41			jsr ZX5.UNZX5_00A5
+   602
+   603 				; GetResourceHandle
+   604 4273 A9 57			lda <MAIN.@RESOURCE.PROG
+   605 4275 8D BD 6C			sta DPTR
+   606 4278 A9 4E			lda >MAIN.@RESOURCE.PROG
+   607 427A 8D BE 6C			sta DPTR+1
+   608
+   609 				; optimize OK (cartrun.pas), line = 13
+   610
+   611 427D AD BD 6C			lda DPTR
+   612 4280 8D B9 6C			sta ZX5.UNZX5_00A5.INPUTPOINTER
+   613 4283 AD BE 6C			lda DPTR+1
+   614 4286 8D BA 6C			sta ZX5.UNZX5_00A5.INPUTPOINTER+1
+   615 4289 A9 00			lda #$00
+   616 428B 8D BB 6C			sta ZX5.UNZX5_00A5.OUTPUTPOINTER
+   617 428E A9 80			lda #$80
+   618 4290 8D BC 6C			sta ZX5.UNZX5_00A5.OUTPUTPOINTER+1
+   619 4293 20 22 41			jsr ZX5.UNZX5_00A5
+   620
+   621 				; GetResourceHandle
+   622 4296 A9 36			lda <MAIN.@RESOURCE.DATA
+   623 4298 8D BD 6C			sta DPTR
+   624 429B A9 43			lda >MAIN.@RESOURCE.DATA
+   625 429D 8D BE 6C			sta DPTR+1
+   626
+   627 				; optimize OK (cartrun.pas), line = 15
+   628
+   629 42A0 AD BD 6C			lda DPTR
+   630 42A3 8D B9 6C			sta ZX5.UNZX5_00A5.INPUTPOINTER
+   631 42A6 AD BE 6C			lda DPTR+1
+   632 42A9 8D BA 6C			sta ZX5.UNZX5_00A5.INPUTPOINTER+1
+   633 42AC A9 80			lda #$80
+   634 42AE 8D BB 6C			sta ZX5.UNZX5_00A5.OUTPUTPOINTER
+   635 42B1 A9 22			lda #$22
+   636 42B3 8D BC 6C			sta ZX5.UNZX5_00A5.OUTPUTPOINTER+1
+   637 42B6 20 22 41			jsr ZX5.UNZX5_00A5
+   638
+   639 				; -------------------  ASM Block 00000062  -------------------
+   640
+   641 42B9 4C 57 88		    jmp $8857
+   642 				  
+   643 				; ------------------------------------------------------------
+   644
+   645 = 6CBD			DPTR	= DATAORIGIN+$000F
+   646 42BC			@exit
+   647
+   648 42BC A2 00		@halt	ldx #$00
+   649 42BE 9A				txs
+   650 					.ifdef MAIN.@DEFINES.ROMOFF
+   651 42BF EE 01 D3			inc portb
+   652 					.fi
+   653
+   654 42C2 A0 01			ldy #$01
+   655
+   656 42C4 60				rts
+   657
+   658 				; ------------------------------------------------------------
+   659
+   660 42C5 00 00 00 00 00 00 + IOCB@COPY	:16 brk
+   661
+   662 				; ------------------------------------------------------------
+   663
+   664 42D5			.local	@DEFINES
+   665 42D5			ATARI
+   666 42D5			ROMOFF
+   667 				.endl
+   668
+   669 42D5			.local	@RESOURCE
+   670 42D5 06 28 00 18 00 2D + VARS	ins 'mcp-vars.zx5'
+   671 4336			VARS.end
+   672 4336 95 00 55 8E 6E A8 + DATA	ins 'mcp-data.zx5'
+   673 4E57			DATA.end
+   674 4E57 A1 00 07 02 44 3A + PROG	ins 'mcp-prog.zx5'
+   675 6CAE			PROG.end
+   676 				.endl
+   677
+   678 				.endl							; MAIN
+   679
+   680 				; ------------------------------------------------------------
+   681 				; ------------------------------------------------------------
+   682
+   683 				.macro	UNITINITIALIZATION
+   684 				
+   685 					.ifdef MAIN.SYSTEM.@UnitInit
+   686 					jsr MAIN.SYSTEM.@UnitInit
+   687 					.fi
+   688 				
+   689 					.ifdef MAIN.ATARI.@UnitInit
+   690 					jsr MAIN.ATARI.@UnitInit
+   691 					.fi
+   692 				
+   693 					.ifdef MAIN.ZX5.@UnitInit
+   694 					jsr MAIN.ZX5.@UnitInit
+   695 					.fi
+   696 				.endm
+   697
+   698 				; ------------------------------------------------------------
+   699
+   700 					ift .SIZEOF(MAIN.SYSTEM) > 0
+   701 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+   701 				SYSTEM: $411E..$4121
+   702 					eif
+   703
+   704 					ift .SIZEOF(MAIN.ATARI) > 0
+   705 					.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
+   706 					eif
+   707
+   708 					ift .SIZEOF(MAIN.ZX5) > 0
+   709 					.print 'ZX5: ',MAIN.ZX5,'..',MAIN.ZX5+.SIZEOF(MAIN.ZX5)-1
+   709 				ZX5: $4122..$4245
+   710 					eif
+   711
+   712 				.nowarn	.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+   712 				CODE: $4000..$42D4
+   713 					.print '$R VARS',' ',"'mcp-vars.zx5'",' ',MAIN.@RESOURCE.VARS,'..',MAIN.@RESOURCE.VARS.end-1
+   713 				$R VARS 'mcp-vars.zx5' $42D5..$4335
+   714 					.print '$R DATA',' ',"'mcp-data.zx5'",' ',MAIN.@RESOURCE.DATA,'..',MAIN.@RESOURCE.DATA.end-1
+   714 				$R DATA 'mcp-data.zx5' $4336..$4E56
+   715 					.print '$R PROG',' ',"'mcp-prog.zx5'",' ',MAIN.@RESOURCE.PROG,'..',MAIN.@RESOURCE.PROG.end-1
+   715 				$R PROG 'mcp-prog.zx5' $4E57..$6CAD
+   716
+   717 				; ------------------------------------------------------------
+   718
+   719 = 6CAE				?adr = *
+   720 					ift (?adr < ?old_adr) && (?old_adr - ?adr < $120)
+   721 					?adr = ?old_adr
+   722 					eif
+   723
+   724 					org ?adr
+   725 = 6CAE				?old_adr = *
+   726
+   727 6CAE			DATAORIGIN
+   728 6CAE 28 00 18 00 2D 0C	.by  $28 $00 $18 $00 $2D $0C
+   729
+   730 = 0006			VARINITSIZE	= *-DATAORIGIN
+   731 = 0011			VARDATASIZE	= 17
+   732
+   733 = 6CBF			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+   734
+   735 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+   735 				DATA: $6CAE..$6CBF
+   736
+   737 02E0-02E1> 81 40			run START
+   738
+   739 				; ------------------------------------------------------------
+   740
+   741 				.macro	STATICDATA
+   742 				.by  $10 $64 $65 $63 $6F $6D $70 $72  $65 $73 $73 $69 $6E $67 $2E $2E  $2E $00 $04 $56 $41 $52 $53 $00
+   743 				.by  $04 $50 $52 $4F $47 $00 $04 $44  $41 $54 $41 $00
+   744 				.endm
+   745
+   746 					end

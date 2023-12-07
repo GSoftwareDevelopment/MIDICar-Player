@@ -13,21 +13,20 @@ begin
   scradr:=SCREEN_CHANNELS+15; putINTText(#$4e+'Channels'~*+#$ce);
   scradr:=SCREEN_TIME; HLine;
   scradr:=SCREEN_TIME+1; putINTText(#$4e+'Status'~*+#$ce);
-  scradr:=SCREEN_TIME+30; putINTText(#$4e+'Counter'~*+#$ce);
   scradr:=SCREEN_OSD+40; putSpaces(20);
 
   MIDTracks:=Pointer(TRACK_DATA_ADDR);
 
-  // for chn:=0 to 15 do
-  // begin
-  //   // channelScrAdr[chn]:=SCREEN_WORK+42+chn*40;
-  //   listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
-  // end;
+  for chn:=0 to 15 do
+  begin
+    // channelScrAdr[chn]:=SCREEN_WORK+42+chn*40;
+    listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
+  end;
 
   setColors;
   calcAvailableMem;
   clearList;
-  oldLstY:=255;
+  lstOldY:=255;
   initKeyboard;
   setNMI;
   resetTimer(otm); //otm:=_tm;
@@ -45,7 +44,7 @@ begin
       jsr $2003
     end;
   end;
-  sendClearPushLCD;
+  sendClearPushLCD; // plugin
   unsetNMI;
   doneKeyboard;
   doneMIDI;

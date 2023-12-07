@@ -34,19 +34,19 @@ checkTicks:
     and #%00111111
     sta tmp
 
-// if _totalTicks>=_trackTime then ProcessTrack;
-    lda _totalTicks+3
+// if _timerTick>=_trackTick then ProcessTrack;
+    lda _timerTick+3
     sub tmp:#0
     bne L4
-    lda _totalTicks+2
+    lda _timerTick+2
     dey
     sub (curTrackPtr),y
     bne L1
-    lda _totalTicks+1
+    lda _timerTick+1
     dey
     sub (curTrackPtr),y
     bne L1
-    lda _totalTicks
+    lda _timerTick
     dey
     sub (curTrackPtr),y
   L1:

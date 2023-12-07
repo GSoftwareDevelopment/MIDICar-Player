@@ -5,8 +5,8 @@
 const
   f_counter = %10000000; // prevents counting
   f_tick    = %01000000; // tick indicator
-  f_flags   = %11000000; // flags mask
-  f_ratio   = %00001111; // timer divider mask
+  mf_flags   = %11000000; // flags mask
+  mf_ratio   = %00111111; // timer divider mask
 
   f_skipDelta = %01000000;
 

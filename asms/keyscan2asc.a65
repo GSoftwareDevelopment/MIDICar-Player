@@ -1,22 +1,26 @@
-    ldy #0
-loop:
-    lda TAB_SCAN2ASC,y
-    bmi skip
-    cmp keyscan
-    beq found
-skip:
-    iny
-    cpy #64
-    bne loop
+; internal keyboard code in Accu
+KEYDEFP = $79
 
-notFound:
+    tay
+    txa:pha
+    ldx PORTB           ; turn on OS
+    cpy #$C0
+    bcs ignore
+
+    txa
+    ora #%00000001
+    sta PORTB
+
+    lda (KEYDEFP),y     ; use system keyboard mapping
+    bmi ignore          ; no invers & control keys
+    cmp #31
+    bpl ok              ; only alphanumeric keys
+
+ignore:
     lda #0
+ok:
     sta Result
-    rts
-
-found:
-    tya
-    add #32
-    sta Result
+    stx PORTB           ; restore old PORTB
+    pla:tax
 
     rts

@@ -1,11 +1,16 @@
     .local set_defaults
 
+    lda driverBaseAddr+1
+    and #$D0
+    bne @+
+
 ; Default MC Base address - no MC!
     lda #<100
     sta driverBaseAddr
     lda #>100
     sta driverBaseAddr+1
 
+@:
 ; refresh rate
     lda #1
     sta refreshRate

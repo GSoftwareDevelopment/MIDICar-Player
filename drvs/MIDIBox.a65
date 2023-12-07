@@ -50,9 +50,9 @@ DESC	dta c'MIDIBox Driver 2.0a by GSD',$9B
     and #$f7
     sta pactl
 ; set COMMAND LINE active
-    lda pbctl
-    and #$f7
-    sta pbctl
+    ; lda pbctl
+    ; and #$f7
+    ; sta pbctl
 
 ; set serial transmission speed - ~31669 baud=1773447/(2*(0x15+7))
 ; altirra says (under debbug) it is 31960.2 baud = ?how?
@@ -63,35 +63,35 @@ DESC	dta c'MIDIBox Driver 2.0a by GSD',$9B
 
 ; set serial
     LDA #%00000111	; $07
-      ; -------x - keep keyboard debounce as is
-      ; ------x- - keep keyboard scanning as is
-      ; -----x-- - keep fast POT scan as is
-      ; ----0--- - clear POKEY two-tone mode
-      ; 0------- - clear force break; serial output to zero
+        ; -------x - keep keyboard debounce as is
+        ; ------x- - keep keyboard scanning as is
+        ; -----x-- - keep fast POT scan as is
+        ; ----0--- - clear POKEY two-tone mode
+        ; 0------- - clear force break; serial output to zero
     AND SSKCTL
     ORA #%00100000	; $20
-      ; -010---- - Trans. & Receive rates set by Channel 4
-      ;		   - Channel 4 output on Bi-Directional clock line
+        ; -010---- - Trans. & Receive rates set by Channel 4
+        ;		   - Channel 4 output on Bi-Directional clock line
     STA SSKCTL
     STA SKCTL
 
 ; set interrupts
     LDA #%11000111	; $C7
-      ; x-------  - keep Break IRQ
-      ; -x------  - keep Other key IRQ
-      ; -----xxx  - keep timer 4,2 & 1 IRQs
+        ; x-------  - keep Break IRQ
+        ; -x------  - keep Other key IRQ
+        ; -----xxx  - keep timer 4,2 & 1 IRQs
     AND POKMSK
     ORA #%00010000	; $10
-      ; --0-----  - disable serial input data ready
-      ; ---1----  - enabled serial output data ready
-      ; ----0---  - disable serial output transmission done
+        ; --0-----  - disable serial input data ready
+        ; ---1----  - enabled serial output data ready
+        ; ----0---  - disable serial output transmission done
     STA POKMSK
     STA IRQEN
 
 ; set POKEY
     LDA #%00101000 ; $28
-      ; --1----- - clock channel three with 1.79 MHz
-      ; ----1--- - join channels 4 & 3 (16 bit)
+        ; --1----- - clock channel three with 1.79 MHz
+        ; ----1--- - join channels 4 & 3 (16 bit)
     STA AUDCTL
 
     LDA #%10100000 ; $A0
@@ -225,9 +225,9 @@ waitFrame:
     ora #$08
     sta pactl
 ; clear COMMAND LINE
-    lda pbctl
-    ora #$08
-    sta pbctl
+    ; lda pbctl
+    ; ora #$08
+    ; sta pbctl
 
 ; Clear interrupts
 ; (5) serial input data ready

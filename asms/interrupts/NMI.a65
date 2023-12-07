@@ -67,10 +67,10 @@ end_key:
 
 ; change displaylist interrupt
     lda lstY
-    cmp oldLstY
+    cmp lstOldY
     beq skipDLChange
 
-    sta oldLstY
+    sta lstOldY
 
     ; tax
     ; lda adr.Yscans,x

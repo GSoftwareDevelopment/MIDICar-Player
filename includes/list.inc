@@ -1,5 +1,5 @@
 const
-  listchars : array[0..4] of byte = (
+  listchars : array[0..4] of byte = ( // selector
     $5a,  // fl_midifile
     $7b,  // fl_curPlay
     $5b,  // fl_playlist
@@ -7,13 +7,13 @@ const
     $4f   // fl_directory
   );
 
-procedure createListEntry(t:byte; s:PString); Register;
+procedure createListEntry(t:byte; s:PString); Register; // selector
 begin
   p_type:=t;
   list_putByte(p_type); list_putText(s); inc(lstTotal);
 end;
 
-procedure clearList;
+procedure clearList; // selector
 begin
   lstTotal:=0; lstCurrent:=0; lstY:=0; lstShift:=0;
   fillchar(pointer(SCREEN_WORK+40),LIST_VISIBLE_ITEMS*40,0);
@@ -21,7 +21,7 @@ begin
   fillchar(listPtr,$4000,$9B);
 end;
 
-procedure showEntry;
+procedure showEntry; // selector
 begin
   asm
     stx v     ; temporarly store X-Reg
@@ -98,7 +98,7 @@ putString:
   end;
 end;
 
-procedure showList;
+procedure showList; // selector
 begin
   IOResult:=0; list_go2Entry(lstShift); chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
@@ -115,7 +115,7 @@ begin
   IOResult:=0;
 end;
 
-procedure choiceListFile;
+procedure choiceListFile; // selector
 begin
   list_go2Entry(lstCurrent);
   if IOResult=ERR_LIST_END then exit;
@@ -184,5 +184,6 @@ begin
     IOResult:=0;
     ilscradr:=listScrAdr[lstY];
     init_inputLine;
+    setBit(stateInputLine,ils_noProcess);
   end;
 end;

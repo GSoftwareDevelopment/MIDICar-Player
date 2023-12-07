@@ -3,6 +3,8 @@ unit keys;
 interface
 
 const
+  KEY_TABLE_ADDR  = $2380;              // $080 ( 128)
+
   k_L     = 0;
   k_J     = 1;
   k_SEMICO= 2;
@@ -106,8 +108,8 @@ end;
 procedure initKeyboard;
 begin
   oldVKEYBD:=VKEYBD;
+  fillchar(pointer(KEY_TABLE_ADDR),128,0);
   NMIEN:=$00;
-
   VKEYBD:=@keyboardInt;
   NMIEN:=$40;
 end;

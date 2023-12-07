@@ -2,8 +2,6 @@ const
 {$i memory.inc}
 
   VERSION= 'dev'~;
-// base memory (under 64KB) available
-  BASEMEM_FREE = 0; // ($8000-$4000)+($ff00-$d800);
 
 // screen status
   ss_isRefresh = %10000000;  // flag for refresh list

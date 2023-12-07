@@ -4,31 +4,47 @@
 
 | Address    | Alternate    | Type    | Name            | Function                                                     | Source    |
 | ---------- | ------------ | ------- | --------------- | ------------------------------------------------------------ | --------- |
-| `12`       |              | byte    | `tm`            |                                                              | main      |
-| `13`       |              | byte    | `otm`           |                                                              | main      |
-| `$58, $59` |              | pointer | `scradr`        | position on screen                                           | main      |
+| `$12`   |      | Byte               | ctm        |             | main      |
+| `$13`   |      | Byte               | otm        |             | main      |
+| `$14`   |      | Byte               | `_tm`      |             | main      |
+| `$50` | | byte | putTextInvert |  | screen |
+| `$54`   |      | Byte               | ilpos      |             | inputLine |
+| `$55`   |      | Word               | ilscradr   |             | inputLine |
+| `$58..$59` |              | pointer | `scradr`        | position on screen                                           | screen |
+| `$5a`   |      | Byte               | lstOldY    |             |           |
+| `$5B`   |      | SmallInt           | lstShift   |             |           |
+| `$60`   |      | Byte               | lstY       |             |           |
+| `$70`   |      | SmallInt           | lstCurrent |             |           |
+| `$72`   |      | SmallInt           | lstTotal   |             |           |
+| `$74`   |      | SmallInt           | curPlay    |             |           |
+| `$79`   |      | Pointer            | KEYDEFP    |             | OS        |
 | `$D2`      |              | byte    | `refreshRate`   |                                                              | main      |
-| `$D3`      |              | byte    | `totalXMS`      |                                                              | loader    |
+| `$D3`      |              | byte    | `totalXMS`      |                                                              | main, loader |
+| `$D4`   |      | Byte               | OSDTm      |             | main      |
+| `$D5`   |      | Byte               | chn        |             | main      |
+| `$D6`   |      | Byte               | oldV       |             | main      |
+| `$D7`   |      | ShortInt<br />Byte | v<br />_v  |             | main      |
+| `$D7`   |      | Byte               | ilch       |             | inputLine |
 | `$D8`      |              | byte    | `playerStatus`  |                                                              | main      |
 | `$D9`      |              | byte    | `screenStatus`  |                                                              | main      |
-| `$DA..$DB` |              | pointer | `listPtr`       | Playlist pointer                                             | main      |
+| `$DA..$DB` |              | pointer | `listPtr`       | Playlist pointer                                             | list  |
 | `$DC..$DD` |              | pointer | `curTrackPtr`   | pointer to current proceeded track                           | midfiles  |
 | `$DE`      |              | byte    | `cTrk`          | id of current proceeded track                                | midfiles  |
 | `$DF`      |              | byte    | `playingTracks` | number of tracks currently being processed<br />Zero means the song has ended. | midfiles  |
-| `$F0-$F3`  |              | word    | `_totalTicks`   | master timer                                                 | midfiles  |
+| `$F0..$F3` |              | word    | `_timerTick` | master timer                                                 | midfiles  |
 | `$F4`      |              | byte    | `_subCnt`       | sub-counter for master timer                                 | midfiles  |
 | `$F5`      |              | byte    | `_timerStatus`  | main timer status                                            | midfiles  |
-| `$F6-$F9`  |              | long    | `_delta`        |                                                              | midfiles  |
+| `$F6..$F9` |              | long    | `_delta`        |                                                              | midfiles  |
 | `$F6`      |              | byte    | `_tmp`          | first byte of `_delta`                                       | midfiles  |
 |            |              |         |                 |                                                              |           |
 | `$E0`      | (_trkRegs+0) | byte    | `_bank`         | extended memory bank index                                   | midfiles  |
-| `$E1-$E2`  | (_trkRegs+1) | pointer | `_ptr`          | data pointer                                                 | midfiles  |
-| `$E1`      | (_trkRegs+1) | word    | `_adr`          | data address (word)                                          | midfiles  |
-| `$E3-$E6`  | (_trkRegs+3) | longint | `_trackTime`    | the time at which the track will be played                   | midfiles  |
+| `$E1..$E2` | (_trkRegs+1) | pointer | `_ptr`          | data pointer                                                 | midfiles  |
+| `$E1..$E2` | (_trkRegs+1) | word    | `_adr`          | data address (word)                                          | midfiles  |
+| `$E3..$E6` | (_trkRegs+3) | longint | `_trackTime`    | the time at which the track will be played                   | midfiles  |
 | `$E7`      | (_trkRegs+7) | byte    | `_eStatusRun`   |                                                              | midfiles  |
 |            |              |         |                 |                                                              |           |
 | `$E8`      |              | byte    | `_tickStep`     |                                                              | midfiles  |
-| `$E9`      |              | long    | `_songTicks`    | Song size in ticks                                           | midfiles  |
+| `$E9`      |              | long    | `_totalSongTicks`    | Song size in ticks                                           | midfiles  |
 |            |              |         |                 |                                                              |           |
 | `$FF`      |              | byte    | `MC_Byte`       | data for and from MC6850                                     | mc6850    |
 |            |              |         |                 |                                                              |           |
@@ -36,33 +52,9 @@
 | `$FE`      |              | byte    | `FIFO_Tail`     |                                                              | midi_fifo |
 | `$FF`      |              | byte    | `FIFO_Byte`     | data for and from FIFO                                       | midi_fifo |
 
-## Variables
-
 | Address        |         | Type               | Name        | Description | source    |
 | -------------- | ------- | ------------------ | ----------- | ----------- | --------- |
-| `$14`          |         | Byte               | `_tm`       |             | main      |
-| `$13`          |         | Byte               | otm         |             | main      |
-| `$12`          |         | Byte               | ctm         |             | main      |
-| `$D4`          |         | Byte               | OSDTm       |             | main      |
-|                |         |                    |             |             |           |
-| `$D5`          |         | Byte               | chn         |             | main      |
-| `$D6`          |         | Byte               | oldV        |             | main      |
-| `$D7`          |         | ShortInt<br />Byte | v<br />_v   |             | main      |
-|                |         |                    |             |             |           |
-| `$5A`          |         | Byte               | lstY        |             |           |
-| `$5B`          |         | SmallInt           | lstShift    |             |           |
-| `$70`          |         | SmallInt           | lstCurrent  |             |           |
-| `$74`          |         | SmallInt           | lstTotal    |             |           |
-| `$72`          |         | SmallInt           | curPlay     |             |           |
-|                |         |                    |             |             |           |
-| `$D7`          |         | Byte               | ilch        |             | inputLine |
-| `$54`          |         | Byte               | ilpos       |             | inputLine |
-| `$55`          |         | Word               | ilscradr    |             | inputLine |
-|                |         |                    |             |             |           |
-| `$88`          |         | Long               | counter     |             | main      |
-| `$8c`          |         | Long               | cntBCD      |             | main      |
-|                |         |                    |             |             |           |
-| `$0400..$048A` |         | MCP Variables      |             |             | MCP       |
+| `$0400..$04B4` |         | MCP Variables      |             |             | MCP       |
 |                |         |                    |             |             |           |
 | `$4DC..$4DF`   | 4       | DWord              | fnExt       |             | filestr   |
 | `$4e0..$4ef`   | 16      | array              | COLORS_ADDR |             | main      |
@@ -87,7 +79,7 @@
 | `$2380..$23FF`     |       128 ($80) | `KEY_TABLE_ADDR` | Keys jump table                                              | main                   |
 | `$2400..$27FF`     |     1024 ($400) | `CHARS_ADDR`     | Char set definition                                          | main                   |
 |                    |                 |                  |                                                              |                        |
-| **`$2800..$2E03`** | **1780 ($6F4)** |                  | **Screen data**                                              | **main**               |
+| **`$2800..$2E10`** | **1780 ($6F4)** |                  | **Screen data**                                              | **main**               |
 | `$2800..$2AF7`     |      760 ($2F8) | SCREEN_HEAD      | Screen header                                                |                        |
 | `$2AF8..$2B1F`     |       40 ($028) | SCREEN_FOOT      | Screen footer                                                |                        |
 | `$2B20..$2CFF`     |      720 ($2D0) | SCREEN_WORK      | Screen Work Area                                             |                        |
@@ -100,7 +92,7 @@
 | `$2EA0..$2EDF`     |        64 ($40) | `UVMETER_ADDR`   | Channel indicator data                                       | main                   |
 | `$2EE0..$2EFF`     |        32 ($20) | `SCREEN_ADRSES`  | listScrAdr                                                   | main                   |
 |                    |                 |                  |                                                              |                        |
-| `$2F00..$2F3F`     |        64 ($40) | `TAB_SCAN2ASC`   | keyboard code conversion table to ascii codes                | main (keyscan2asc.a65) |
+|~`$2F00..$2F3F`~    |       ~64 ($40)~|~`TAB_SCAN2ASC`~  |~keyboard code conversion table to ascii codes~               |~main (keyscan2asc.a65)~|
 | `$2F40..$2F75`     |        54 ($35) | `NRPM_REGS`      | DreamBlaster s2 NRPM Registers                               | nrpm                   |
 | `$2F75..$2FB3`     |        62 ($3E) | `DLIST_MIN_ADDR` | Display List for MinMode                                     | main                   |
 | `$2FB4..$2FFF`     |        75 ($4B) | `DLIST_ADDR`     | Display List                                                 | main                   |
@@ -122,5 +114,5 @@
 
 | Address        | Size       | Name       | Function    |
 | -------------- | ---------- | ---------- | ----------- |
-| `$0600`        | 256        | `FIFO_Buf` | FIFO Buffer |
+| `$0600..$06FF` | 256        | `FIFO_Buf` | FIFO Buffer |
 | `$2000..$22FF` | 768 ($300) |            | MIDI Driver |

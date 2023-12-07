@@ -1,0 +1,22 @@
+$R RCDATA  $2F40..$2F75 'res/nrpm_registers.obj'
+$R RCDATA  $2400..$27FF 'res/font_blk2-uvh.fnt'
+$R RCDATA  $2800..$283F 'res/uvmeter-h.obj'
+$R RCDATA  $2840..$288B 'res/dlist.obj'
+$R RCDATA  $288C..$28C3 'res/dlist_min.obj'
+$R RCDATA  $295C..$2D43 'res/graph.obj'
+$R RCDATA  $3000..$32CF 'res/help.obj'
+ZPAGE: $0080..$00D3
+RTBUF: $0400..$04FF
+RTLIB: $8274..$89F0
+SYSTEM: $8A91..$8B41
+KEYS: $8B42..$8BDB
+CIO: $8BDC..$8C71
+FILESTR: $8C72..$8F70
+SCREEN: $8F71..$90E5
+LIST: $90E6..$9245
+INPUTLINE: $9246..$9381
+MIDFILES: $9382..$A02A
+NRPM: $A02B..$A04B
+REMOTE: $A04C..$A0D1
+CODE: $8000..$BB57
+DATA: $0400..$04A4

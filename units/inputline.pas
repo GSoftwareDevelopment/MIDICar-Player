@@ -4,10 +4,11 @@ interface
 
 const
 // input line status
-  ils_pending    = 0;
-  ils_inprogress = 1;
-  ils_done       = 2;
-  ils_noProcess  = 128;
+  ils_idle        = 0;
+  ils_inprogress  = 1;
+  ils_done        = 2;
+  ils_mask_status = 3;
+  ils_noProcess   = 128;
 
 // input line variables
 var
@@ -16,7 +17,7 @@ var
   ilscradr:Word absolute $55;
 
   resultInputLine:boolean = false;
-  stateInputLine:Byte = ils_pending;
+  stateInputLine:Byte = ils_idle;
 
 procedure init_inputLine;
 procedure show_inputLine; assembler;
@@ -48,7 +49,7 @@ illen = 32
 
 ; get cursor position
   lda ilpos
-  sta MAIN.FILESTR.OUTSTR_ADDR
+  sta MAIN.FILESTR.OUTSTR_ADDR    ; update length of output string
   beq cursor    ; if zero, draw cursor & clear inputline
 
 ; set outStr offset
@@ -83,15 +84,17 @@ strLoop:
 cursor:
 ; check input line state
   lda stateInputLine
+  and #3
   cmp #ils_inprogress
   bne skipCursor
 
 ; draw cursor
   lda (ilscradr),y
-  bmi nospace
-  lda #0
-noSpace:
+;  bmi nospace
+;  lda #0
+;noSpace:
   eor #$80
+  and #$80
   sta (ilscradr),y
   iny
 
@@ -129,12 +132,12 @@ begin
       outStr:=Snull;
       keyb:=$ff;
       screenStatus:=screenStatus or ss_isRefresh;
-      stateInputLine:=ils_pending;
+      stateInputLine:=ils_idle;
       resultInputLine:=false;
     end
     else
     begin
-      stateInputLine:=ils_done;
+      stateInputLine:=ils_done or (stateInputLine and (not ils_mask_status));
       resultInputLine:=true;
     end;
     ilpos:=byte(outstr[0]);
@@ -145,8 +148,8 @@ begin
   begin
     outstr[ilpos]:=#$9B;
     dec(ilpos);
-  end;
-  if ilpos<79 then
+  end
+  else if ilpos<79 then
   begin
     ilch:=keyscan2asc(keyb or keymod);
     if ilch<>0 then

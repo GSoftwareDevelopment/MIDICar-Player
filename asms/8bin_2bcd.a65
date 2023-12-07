@@ -1,0 +1,14 @@
+        .local
+        lda #0
+        sta cntBCD+0
+
+loop8Bits:
+        ldy #{sed}
+        asl v
+        adc cntBCD+0
+        sta cntBCD+0
+        iny
+        bne loop8Bits+1
+        cld
+
+        .endl

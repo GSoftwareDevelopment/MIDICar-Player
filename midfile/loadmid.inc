@@ -45,24 +45,18 @@ begin
     exit;
   end;
 
-  us_per_qnote:=500000;
-{$IFDEF USE_SUPPORT_VARS}
-  tactNum:=4;
-  tactDenum:=4;
-  ticks_per_qnote:=24;
-  ticks_per_32nd:=8;
-  BPM:=120;
-{$ENDIF}
+  resetVars;
 
   trkData:=MIDTracks;
   trackCount:=0;
   totalTracks:=255;
-  _songTicks:=0;
+  _totalSongTicks:=0;
+  fileSize:=0;
 
   while (IOResult=1) and (trackCount<totalTracks) do
   begin
     BGet(CIO_CHN,@chunkTag,4);
-    Len:=ReadLongBI;
+    Len:=ReadLongBI; inc(fileSize,4+Len);
     if chunkTag=TAG_MTHD then
     begin
       format:=readWordBI;
@@ -98,15 +92,7 @@ begin
         checkLoadSize;
         loadProcess(trackCount);
         if IOResult<>1 then break;
-// Since, ONLY extended memory is used, there is no need to check ranges
-{        if hi(_adr)>=$c0 then
-        begin
-          _bget(@RBuf);
-          move(RBuf,_ptr,loadSize);
-        end
-        else}
-          _bget(_ptr);
-
+        _bget(_ptr);
         if IOResult<>1 then break;
 
         inc(_adr,loadSize);
@@ -115,16 +101,15 @@ begin
 
       _bank:=trkData^.bank;
       _ptr:=trkData^.ptr;
-      _trackTime:=0;
-      _eStatusRun:=0;
       calcTrackLength;
-      if _trackTime>_songTicks then _songTicks:=_trackTime;
-
+      if _trackTick>_totalSongTicks then _totalSongTicks:=_trackTick;
+      if timeInSec>totalSongTime then totalSongTime:=timeInSec;
       inc(trkData,1);
-    end else
+    end
+    else
       IOResult:=ERR_NOT_A_MIDI_FILE;
   end;
-  _songTicks:=_songTicks div 160;
+  _totalSongTicks:=_totalSongTicks div 160;
   asm lda #$FE \ sta PORTB end;
   result:=IOResult;
   Cls(1);

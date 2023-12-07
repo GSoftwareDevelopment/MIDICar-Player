@@ -39,6 +39,10 @@ end;
 
 procedure setNMI;
 begin
+  asm
+    txa:pha
+    sei
+  end;
   oldNMIVec:=NMIVEC;
   oldVVBLKI:=VVBLKI;
   oldDLIV:=DLIV;
@@ -46,11 +50,9 @@ begin
   asm
   JSETVBV = $E45C
 
-    txa:pha
     inc PORTB
 
   .ifdef MAIN.@DEFINES.IRQPATCH
-    sei
     lda VIMIRQ
     sta oldVIMIRQ
     sta MyIRQ.OLD_VIMIRQ
@@ -77,15 +79,23 @@ begin
     jsr JSETVBV
 
     dec PORTB
-    pla:tax
   end;
   NMIVEC:=@MyNMI;
   DLIV:=@myDLI;
   NMIEN:=$C0;
+  asm
+    cli
+    pla:tax
+  end;
 end;
 
 procedure unsetNMI;
 begin
+  asm
+    txa:pha
+    sei
+  end;
+
   NMIEN:=$00;
 {$IFDEF IRQPATCH}
   asm
@@ -104,4 +114,9 @@ begin
   NMIVEC:=oldNMIVec;
   DLIV:=oldDLIV;
   NMIEN:=$40;
+
+  asm
+    cli
+    pla:tax
+  end;
 end;

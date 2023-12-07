@@ -1,5 +1,9 @@
     icl 'dlist.inc'
     icl '../memory.inc'
+
+    opt h-
+    org DLIST_ADDR
+
 title_bar   = DL_MODE_320x192G2
 work_area   = DL_MODE_40x24T2
 vis_area    = DL_MODE_20X24T5
@@ -35,10 +39,10 @@ dl_start
 
         dta DL_JVB, A(dl_start)
 
-    single_sum 'HEAD:' SCREEN_HEAD HEAD_SIZE
-    single_sum 'FOOT:' SCREEN_FOOT FOOT_SIZE
-    single_sum 'WORK:' SCREEN_WORK WORK_SIZE
-    single_sum 'CHANNELS:' SCREEN_CHANNELS CHANNELS_SIZE
-    single_sum 'TIME:' SCREEN_TIME TIME_SIZE
-    single_sum 'TIMELINE:' SCREEN_TIMELINE TIMELINE_SIZE
-    single_sum 'STATUS:' SCREEN_STATUS STATUS_SIZE
+    ; single_sum 'HEAD:' SCREEN_HEAD HEAD_SIZE
+    ; single_sum 'FOOT:' SCREEN_FOOT FOOT_SIZE
+    ; single_sum 'WORK:' SCREEN_WORK WORK_SIZE
+    ; single_sum 'CHANNELS:' SCREEN_CHANNELS CHANNELS_SIZE
+    ; single_sum 'TIME:' SCREEN_TIME TIME_SIZE
+    ; single_sum 'TIMELINE:' SCREEN_TIMELINE TIMELINE_SIZE
+    ; single_sum 'STATUS:' SCREEN_STATUS STATUS_SIZE

@@ -1,4 +1,4 @@
-function readDescriptionFile(fname:PString):byte;
+function readDescriptionFile(fname:PString):byte; // selector+
 const
   CIO_CHN = 1;
 
@@ -60,7 +60,7 @@ begin
   clearStatus;
 end;
 
-function loadPlaylist:Byte;
+function loadPlaylist:Byte; // selector+
 const
   CIO_CHN = 1;
 

@@ -4,6 +4,8 @@ interface
 const
   TAB_NRPM_ADDR   = $2F40;              // $036 (  54)
 
+{$R 'nrpm.rc'}
+
 const
   dbs2_nrpn:Array[0..8] of byte = (
       $b0, $63, $37, // (last byte in row) NRPM high reg numeber (always the same)

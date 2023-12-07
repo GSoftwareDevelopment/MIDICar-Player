@@ -7,25 +7,25 @@ interface
 
 var
 // Zero page work registers
-  curTrackPtr:Pointer     absolute $dc;
-  cTrk:Byte               absolute $de;
-  PlayingTracks:Byte      absolute $df;
+  curTrackPtr:Pointer       absolute $dc;
+  cTrk:Byte                 absolute $de;
+  PlayingTracks:Byte        absolute $df;
 
-  _totalTicks:TDeltaVar   absolute $f0; {f0, f1, f2, f3}
-  _subCnt:Byte            absolute $f4;
-  _timerStatus:Byte       absolute $f5;
-  _delta:Longint          absolute $f6; {f6, f7, f8, f9}
-  _tmp:Byte               absolute $f6; // must by the same address as _delta!!
+  _timerTick:TDeltaVar      absolute $f0; {f0, f1, f2, f3}
+  _subCnt:Byte              absolute $f4;
+  _timerStatus:Byte         absolute $f5;
+  _delta:Longint            absolute $f6; {f6, f7, f8, f9}
+  _tmp:Byte                 absolute $f6; // must by the same address as _delta!!
 
-  _tickStep:Byte          absolute $e8;
-  _songTicks:TDeltaVar    absolute $e9; {e9, ea, eb, ec}
+  _tickStep:Byte            absolute $e8;
+  _totalSongTicks:TDeltaVar absolute $e9; {e9, ea, eb, ec}
 
 // the order of the registers MUST be the same as in the TMIDTrack record!!!
-  _bank:Byte              absolute _trkRegs;
-  _ptr:^Byte              absolute _trkRegs+1;   {16-bits}
-  _adr:Word               absolute _trkRegs+1;   // must be the same address as _ptr!!
-  _trackTime:TDeltaVar    absolute _trkRegs+3;   {32-bits}
-  _eStatusRun:Byte        absolute _trkRegs+7;
+  _bank:Byte                absolute _trkRegs;
+  _ptr:^Byte                absolute _trkRegs+1;   {16-bits}
+  _adr:Word                 absolute _trkRegs+1;   // must be the same address as _ptr!!
+  _trackTick:TDeltaVar      absolute _trkRegs+3;   {32-bits}
+  _eStatusRun:Byte          absolute _trkRegs+7;
 
 //
   MIDTracks:Pointer;
@@ -42,13 +42,19 @@ var
   tactDenum:Byte          = 4;
   ticks_per_qnote:Byte    = 24;
   ticks_per_32nd:Byte     = 8;
-  BPM:Word                = 120;
+  BPM:Single              = 120.0;
+  ms_per_tick:Single      = (60000/(120*384));
 {$ENDIF}
-  chnVolume:Array[0..15] of byte;
+  timeInSec:Single;
+  totalSongTime:Single;
+  timeBeforeSetTempo:Single;
+  ticksBeforeSetTempo:longint = 0;
+  chnVolume:Array[0..15] of byte absolute $4c0;
   oldTimerVec:Pointer     ;
 
   loadProcess:TLoadingProcess;
   tempoShift:Longint      = 0;
+  fileSize:Longint;
 
 //
 function LoadMID:shortint;
@@ -56,6 +62,7 @@ procedure initMIDI;
 procedure resetMIDI; assembler;
 procedure doneMIDI;
 procedure setTempo;
+procedure calculateCurrentTime;
 procedure ProcessTrack; Assembler;
 procedure ProcessMIDI;
 
@@ -73,20 +80,37 @@ asm
   icl 'midfile/asms/memory_bound_check.a65'
 end;
 
+procedure resetVars;
+begin
+  _timerTick:=0; _subCnt:=0;    // reset song ticks
+  _trackTick:=0;
+  timeInSec:=0;
+  ticksBeforeSetTempo:=0;
+  timeBeforeSetTempo:=0;
+  tempoShift:=0;
+
+  us_per_qnote:=500000;
+{$IFDEF USE_SUPPORT_VARS}
+  tactNum:=4;
+  tactDenum:=4;
+  ticks_per_qnote:=24;
+  ticks_per_32nd:=8;
+  BPM:=120;
+{$ENDIF}
+end;
+
+{$i 'settempo.inc'}
 {$i 'calctracklength.inc'}
 {$i 'loadmid.inc'}
-{$i 'settempo.inc'}
 {$i 'processtrack.inc'}
 {$i 'processmidi.inc'}
 
 procedure initMIDI;
 begin
-  _totalTicks:=0;    // reset song ticks
-  tempoShift:=0;
-  _timerStatus:=1;
-
+  resetVars;
   cTrk:=totalTracks;
   PlayingTracks:=totalTracks;
+  _timerStatus:=1;
 
   asm
     sei
@@ -154,7 +178,7 @@ end;
 procedure doneMIDI;
 begin
   _timerStatus:=_timerStatus or f_counter;
-  _totalTicks:=0; _subCnt:=0;
+  resetVars;
   setIntVec(iTim1,oldTimerVec);
   resetMIDI;
   asm
@@ -171,8 +195,8 @@ initialization
   oldTimerVec:=nil;
   loadProcess:=@nullLoadPrcs;
   cTrk:=0;
-  _songTicks:=0;
-  _totalTicks:=0;
+  _totalSongTicks:=0;
+  _timerTick:=0;
   _tickStep:=3;
   _timerStatus:=f_counter;
   getIntVec(iTim1,oldTimerVec);

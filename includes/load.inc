@@ -27,35 +27,30 @@ begin
   end;
 
   calcAvailableMem;
-  _bank:=totalXMS; _adr:=$4000;
+  _bank:=totalXMS; _adr:=$4000; MIDFILES.fileSize:=0;
 
-  asm
-    jsr $2003 // start driver
-  end;
-
-  sendClearPushLCD;
-  if IOResult<>ERR_LIST_ENTRY_END then
-  begin
-    list_getText(Snull);
-    sendPushLCDText(Snull);
-  end
-  else
-    sendPushLCDText(fn);
-  asm
-    sec \ jsr $200c // flush & stop driver
-  end;
+  updateSongTitle; // plugin
 
   clearStatus;
   putStatus(statusMsgs[4]);
+
+  unsetNMI();
   loadProcess:=@loadPrc; thi:=0;
   result:=LoadMid;
   thi:=255;
+  setNMI();
 
   if (result and %11111100)<>0 then
     totalTracks:=0
   else
   begin
-    list_go2Entry(curPlay); list_putByte(fl_midifile);
+    list_go2Entry(curPlay);
+    list_getByte(_v);
+    if _v=fl_curPlay then
+    begin
+      dec(listPtr);
+      list_putByte(fl_midifile);
+    end;
     curPlay:=lstCurrent;
     list_go2Entry(curPlay); list_putByte(fl_curPlay);
     move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
