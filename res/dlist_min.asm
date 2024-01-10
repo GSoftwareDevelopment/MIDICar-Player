@@ -20,19 +20,18 @@ dl_start
     :17 dta title_bar
         dta title_bar + DL_DLI
 
-        dta work_area + DL_LMS, A(SCREEN_CHANNELS)
-    :4  dta vis_area
+        dta DL_BLANK8
+        dta vis_area + DL_LMS, A(SCREEN_CHANNELS+40)
+    :3  dta vis_area
 
-        dta DL_BLANK1
-        dta work_area + DL_LMS, A(SCREEN_TIME)
-        dta DL_BLANK1
-        dta stat_area
+        dta DL_BLANK8
+        dta stat_area + DL_LMS, A(SCREEN_TIME+40)
 
         dta prgs_area + DL_LMS, A(SCREEN_TIMELINE)
         dta DL_BLANK1 + DL_DLI
         dta work_area + DL_LMS, A(SCREEN_STATUS)
 
-        dta DL_BLANK1
+        dta DL_BLANK1 + DL_DLI
         dta foot_area + DL_LMS, A(SCREEN_FOOT)
 
         dta DL_JVB, A(dl_start)

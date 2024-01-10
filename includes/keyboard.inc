@@ -126,29 +126,14 @@ end;
 procedure toggleMinMode; Keep; // selector
 begin
   tglBit(screenStatus,ss_minMode);
-  if isBitClr(screenStatus,ss_minMode) then
-    SDLST:=DLIST_ADDR
-  else
-    SDLST:=DLIST_MIN_ADDR;
+  setBit(screenStatus,ss_DLIChng);
 end;
 
 procedure toggleHelpScreen;
-var
-  oLstY:byte;
-
 begin
   tglBit(screenStatus,ss_isHelp);
-  if isBitClr(screenStatus,ss_isHelp) then
-  begin
-    dpoke(DLIST_ADDR+24,SCREEN_WORK);
-    lstY:=oLstY;
-  end
-  else
-  begin
-    dpoke(DLIST_ADDR+24,HELPSCR_ADDR);
-    oLstY:=lstY;
-    lstY:=255;
-  end;
+  setBit(screenStatus,ss_DLIChng);
+
   keyb:=255;
 end;
 
@@ -175,8 +160,10 @@ begin
         lstCurrent:=random(lstTotal)
       else
       begin
-        if keyb=k_B then v:=1 else v:=-1;
-        inc(lstCurrent,v);
+        if keyb=k_B then
+          inc(lstCurrent)   // next item
+        else
+          dec(lstCurrent);  // previous item
         if (lstCurrent>=lstTotal) then lstCurrent:=0;
         if (lstCurrent<0) then lstCurrent:=lstTotal;
       end;

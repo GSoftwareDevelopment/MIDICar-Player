@@ -2,10 +2,13 @@ CPAS = mp
 CASM = mads
 XXD = xxd -r -p
 MPBASE = ${HOME}/Atari/MadPascal/base
+XEX = ./xex-filter.pl
+ZX5 = ./zx5 -f
 
 DRVPATH = ./drvs
 BINPATH = ./bin
 ASMPATH = ./asm
+TEMPPATH = ./bin/temp
 
 DRIVER ?= MIDIBox
 
@@ -17,7 +20,7 @@ MAKE = make
 MFLAGS = 'CPAS=${CPAS}' 'CASM=${CASM}' 'XXD=${XXD}' 'BINPATH=../${BINPATH}' 'ASMPATH=../${ASMPATH}'
 CFLAGS = -x -l -t -s
 
-all: prepare compile link
+all: prepare compile link_clean link
 	@echo "\nSzah mat"
 
 drivers:
@@ -36,17 +39,29 @@ compile_pas: MCP.pas
 	${CPAS} MCP.pas -ipath:./ -define:USE_FIFO -define:USE_SUPPORT_VARS -code:8000 -data:0400 -o:${ASMPATH}/MCP.a65 >> ./logs/mp.log
 
 compile_asm: ${ASMPATH}/MCP.a65
-	${CASM} ${ASMPATH}/MCP.a65 -m:../res/macros.a65 ${CFLAGS} -i:${MPBASE} -o:${BINPATH}/mcp.bin >> ./logs/mads.log
+	${CASM} ${ASMPATH}/MCP.a65 ${CFLAGS} -i:${MPBASE} -o:${BINPATH}/mcp.bin >> ./logs/mads.log
 
-link: ${BINPATH}/loader.bin ${BINPATH}/mcp.bin
+link_clean:
 	@rm -vf ${BINPATH}/${EXEFILE}.exe >> ./logs/link.log
 
+link: ${BINPATH}/loader.bin ${BINPATH}/mcp.bin
 ifdef DRIVER
 	echo "Linking with driver..."
 	cat ${BINPATH}/${DRIVER}.drv ${BINPATH}/loader.bin ${BINPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
 else
 	echo "Linking without driver..."
 	cat ${BINPATH}/loader.bin ${BINPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
+endif
+
+sdx: prepare compile link_clean
+	@echo "Compressing..."
+	./make-sdx.sh
+ifdef DRIVER
+	echo "Linking with driver..."
+	cat ${BINPATH}/${DRIVER}.drv ${BINPATH}/loader.bin ${TEMPPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
+else
+	echo "Linking without driver..."
+	cat ${BINPATH}/loader.bin ${TEMPPATH}/mcp.bin >> ${BINPATH}/${EXEFILE}.exe
 endif
 
 clean:

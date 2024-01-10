@@ -73,10 +73,11 @@ begin
   desFiles:=lstTotal;
 
   unsetNMI();
+
   thi:=0;
   if isBitClr(keymod,kmod_Control) then
   begin
-    putStatus(statusMsgs[7]);
+    putStatus(statusMsgs[6]);
     IOResult:=readDescriptionFile(descriptionFile);
   end
   else
@@ -85,7 +86,7 @@ begin
   if IOResult=ERR_FILE_NOT_FOUND then
   begin
     desFiles:=lstTotal-desFiles;
-    putStatus(statusMsgs[6]);
+    putStatus(statusMsgs[5]);
 
     joinStrings(curDev,curPath);
     joinStrings(outStr,dirMask);
@@ -119,7 +120,9 @@ begin
     result:=IOResult;
     cls(CIO_CHN);
   end;
+
   setNMI();
+
   fn:='';
   clearStatus;
   clearControls;

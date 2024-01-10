@@ -64,10 +64,18 @@ defaultFileSpec:
 
 defaultColors:
 ; primary
+; 705 - bottom part of channels
+; 706 - selected background
+; 707 - selected foreground
+; 708 - top part of channels
+; 709 - foreground
+; 710 - background
+; 711 - middle part of channels
+; 712 - border color (channels & status background)
 ;       705,706,707,708,709,710,711,712
-    dta $00,$F8,$FF,$28,$98,$A0,$A8,$A0
+    dta $94,$F8,$FF,$24,$98,$00,$E8,$00
 ; secondary
-    dta $00,$0F,$00,$A8,$88,$00,$A8,$00
+    dta $04,$0F,$00,$A8,$88,$00,$A8,$00
 
 defaultSysExMsg:
     dta 7, $FF, $f0, $7e, $7f, $09, $01, $f7

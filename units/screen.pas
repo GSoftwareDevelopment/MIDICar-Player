@@ -4,6 +4,7 @@ interface
 
 var
   DMACTL:Byte absolute $d400;
+  SDMACTL:Byte absolute $22F;
   SDLST:Word absolute $230;
   CHBASE:Byte absolute $2f4;
   puttextinvert:Byte absolute $57;

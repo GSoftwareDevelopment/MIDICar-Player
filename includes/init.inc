@@ -1,39 +1,39 @@
 procedure init;
 begin
-  asm lda #$FE \ sta PORTB end;
-  waitFrame; DMACTL:=0;
+  SDMACTL:=0; waitFrame;
+
+  for chn:=0 to 15 do
+    listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
 
   CHBASE:=hi(CHARS_ADDR)+2; // $32;
   SDLST:=DLIST_ADDR;
 
+  MIDTracks:=Pointer(TRACK_DATA_ADDR);
+
+  setColors;
+  calcAvailableMem;
+  clearList;
+
+  lstOldY:=255;
+  initKeyboard;
+  setNMI;
+  resetTimer(otm);
+
+  playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
+  screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
+  inc(refreshRate);
+
   clearWorkArea;
   clearStatus;
   clearUVMeters;
+
   scradr:=SCREEN_CHANNELS; HLine;
   scradr:=SCREEN_CHANNELS+15; putINTText(#$4e+'Channels'~*+#$ce);
   scradr:=SCREEN_TIME; HLine;
   scradr:=SCREEN_TIME+1; putINTText(#$4e+'Status'~*+#$ce);
   scradr:=SCREEN_OSD+40; putSpaces(20);
 
-  MIDTracks:=Pointer(TRACK_DATA_ADDR);
-
-  for chn:=0 to 15 do
-  begin
-    // channelScrAdr[chn]:=SCREEN_WORK+42+chn*40;
-    listScrAdr[chn]:=SCREEN_WORK+44+chn*40;
-  end;
-
-  setColors;
-  calcAvailableMem;
-  clearList;
-  lstOldY:=255;
-  initKeyboard;
-  setNMI;
-  resetTimer(otm); //otm:=_tm;
-  playerStatus:=(playerStatus and (ps_calcLen+ps_loop)) or ps_isStopped;
-  screenStatus:=screenStatus and (not ss_isOSD+ss_minMode);
-  inc(refreshRate);
-  waitFrame; DMACTL:=34;
+  waitFrame; SDMACTL:=34;
 end;
 
 procedure exit2DOS; keep;

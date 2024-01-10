@@ -3,7 +3,7 @@ unit keys;
 interface
 
 const
-  KEY_TABLE_ADDR  = $2380;              // $080 ( 128)
+  KEY_TABLE_ADDR  = $2300;              // $080 ( 128)
 
   k_L     = 0;
   k_J     = 1;

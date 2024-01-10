@@ -71,7 +71,18 @@ begin
   scradr:=SCREEN_TIME+40; putINTText(controls[3]);
   putStatus(statusMsgs[3]);
   doneMIDI;
+  asm
+    lda PORTB
+    pha
+    ldy totalXMS
+    lda $100,y
+    sta PORTB
+  end;
   move(pointer(START_INFO_ADDR),pointer(TRACK_DATA_ADDR),512);
+  asm
+    pla
+    sta PORTB
+  end;
   chn:=0;
   clearUVMeters;
 end;

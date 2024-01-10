@@ -100,7 +100,7 @@ var
 
 begin
   _v:=destructureFullPath(outstr,curDev,curPath,fn);
-  if (_v and dp_dev=0) then curDev:='D:';
+  if (_v and dp_dev=0) then curDev:=#$44+#$3A; // 'D:';
   if (_v and dp_path=0) then getCurrentPath(2,curDev,curPath);
   PathDelimiter(curPath,'>');
 end;

@@ -27,7 +27,7 @@ begin
   end;
 
   calcAvailableMem;
-  _bank:=totalXMS; _adr:=$4000; MIDFILES.fileSize:=0;
+  _bank:=totalXMS; _adr:=$4200; MIDFILES.fileSize:=0;
 
   updateSongTitle; // plugin
 
@@ -35,9 +35,11 @@ begin
   putStatus(statusMsgs[4]);
 
   unsetNMI();
+
   loadProcess:=@loadPrc; thi:=0;
   result:=LoadMid;
   thi:=255;
+
   setNMI();
 
   if (result and %11111100)<>0 then
@@ -53,7 +55,18 @@ begin
     end;
     curPlay:=lstCurrent;
     list_go2Entry(curPlay); list_putByte(fl_curPlay);
-    move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),512);
+    asm
+      lda PORTB
+      pha
+      ldy totalXMS
+      lda $100,y
+      sta PORTB
+    end;
+    move(pointer(TRACK_DATA_ADDR),pointer(START_INFO_ADDR),$200);
+    asm
+      pla
+      sta PORTB
+    end;
   end;
   setBit(screenStatus,ss_isRefresh);
   clearStatus;

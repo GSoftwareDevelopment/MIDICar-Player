@@ -22,27 +22,31 @@ dl_start
         dta work_area + DL_LMS, A(SCREEN_WORK), DL_BLANK1
     :11 dta work_area, DL_BLANK1
 
-        dta work_area + DL_LMS, A(SCREEN_CHANNELS)
+        dta work_area + DL_LMS + DL_DLI, A(SCREEN_CHANNELS)
     :4  dta vis_area
 
-        dta DL_BLANK1
+        dta DL_BLANK1 + DL_DLI
         dta work_area + DL_LMS, A(SCREEN_TIME)
         dta DL_BLANK1
         dta stat_area
 
         dta prgs_area + DL_LMS, A(SCREEN_TIMELINE)
-        dta DL_BLANK1 + DL_DLI
+        dta DL_BLANK1
         dta work_area + DL_LMS, A(SCREEN_STATUS)
 
-        dta DL_BLANK1
+        dta DL_BLANK1 + DL_DLI
         dta foot_area + DL_LMS, A(SCREEN_FOOT)
 
         dta DL_JVB, A(dl_start)
 
-    ; single_sum 'HEAD:' SCREEN_HEAD HEAD_SIZE
-    ; single_sum 'FOOT:' SCREEN_FOOT FOOT_SIZE
-    ; single_sum 'WORK:' SCREEN_WORK WORK_SIZE
-    ; single_sum 'CHANNELS:' SCREEN_CHANNELS CHANNELS_SIZE
-    ; single_sum 'TIME:' SCREEN_TIME TIME_SIZE
-    ; single_sum 'TIMELINE:' SCREEN_TIMELINE TIMELINE_SIZE
-    ; single_sum 'STATUS:' SCREEN_STATUS STATUS_SIZE
+    single_sum 'HEAD:' SCREEN_HEAD HEAD_SIZE
+    single_sum 'FOOT:' SCREEN_FOOT FOOT_SIZE
+    single_sum 'WORK:' SCREEN_WORK WORK_SIZE
+    single_sum 'CHANNELS:' SCREEN_CHANNELS CHANNELS_SIZE
+    single_sum 'TIME:' SCREEN_TIME TIME_SIZE
+    single_sum 'TIMELINE:' SCREEN_TIMELINE TIMELINE_SIZE
+    single_sum 'STATUS:' SCREEN_STATUS STATUS_SIZE
+
+    .macro single_sum desc start size
+        .print '  SCREEN-', :desc, ' ', :start, '..', :start+:size-1, ' (', :size, ')'
+    .endm

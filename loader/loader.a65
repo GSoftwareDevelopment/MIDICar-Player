@@ -1,6 +1,6 @@
 ; .def DEBUG
 
-    org $8000
+    org $3000
 
 ; constants
 EOL = $9B
@@ -12,8 +12,8 @@ PORTB   = $D301
 
 ; variables
 
-refreshRate     = $D2
-AEXTMEM         = $D3
+refreshRate     = $61
+AEXTMEM         = $62
 playerStatus    = $D8
 screenStatus    = $D9
 
@@ -22,7 +22,7 @@ isLoaded        = $81   ; driver is loaded
 driverBaseAddr  = $82
 cmdlnVec        = $84
 colors_tab      = $4E0
-SysEx_MSG       = $3B00
+SysEx_MSG       = $3D00
 outstr          = $55A  ; MCP full file spec input
 
 ; MCBASE  = $D8

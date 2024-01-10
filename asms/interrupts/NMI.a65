@@ -1,9 +1,11 @@
 RTCLOK = $12
 ATRACT = 77
-DLIV   = $200;
-SDLST  = $230;
+DLIV   = $200
+SDMACTL= $22f
+SDLST  = $230
 KBCODE = $d209
 SKSTAT = $d20f
+DMACTL = $d400
 DLPTR  = $d402
 NMIRES = $d40f
 
@@ -17,24 +19,30 @@ KEYDEL = $02f1
     jmp (DLIV)
 
 VBL:
-// systemowa procedure obsługi RTClock ($C0E2)
     cld
+// store registers
     sta rega
     stx regx
     sty regy
     STA NMIRES
+
+// reset atract counter
     lda #0
     sta ATRACT
 
+    lda SDMACTL
+    sta DMACTL
+
+// set displaylist
     lda SDLST
     sta DLPTR
     lda SDLST+1
     sta DLPTR+1
 
+// RTCLOCK
     inc RTCLOK+2
-end_rtclk:
 
-skipTHI:
+// keyboard
     lda SKSTAT
     and #$04
     beq skip_keyDelay
@@ -66,44 +74,42 @@ skip_key:
 end_key:
 
 ; change displaylist interrupt
-    lda lstY
-    cmp lstOldY
-    beq skipDLChange
+    lda lstY                // is current list Y position is
+    cmp lstOldY             // not changed?
+    beq skipDLChange        // true ... skip DL change
 
-    sta lstOldY
+    sta lstOldY             // store new list Y position
 
-    ; tax
-    ; lda adr.Yscans,x
-    ; sta lstYScanLine
-
-    ldy #0
-    ldx #26
+    ldy #0                  // workarea line number
+    ldx #26                 // display list offset
 loop:
-    lda DLIST_ADDR,x
-    cpy lstY
+    lda DLIST_ADDR,x        // fetch DL value
+    cpy lstY                // if workarea line number is the same ad current list Y position...
     bne clearDL
-    ora #$80
+    ora #$80                // true ...set Interrupt
     bmi store
 clearDL:
-    and #$7f
+    and #$7f                // false ...clear Interrupt
 store:
-    sta DLIST_ADDR,x
+    sta DLIST_ADDR,x        // store DL value
 next:
     inx
     txa
     and #1
-    bne loop
-    iny
-    cpy #LIST_VISIBLE_ITEMS
+    bne loop                // each two DL entry is modified
+    iny                     // increase work line number
+    cpy #LIST_VISIBLE_ITEMS // is it last line?
     bne loop
 
 skipDLChange:
 
+; set DisplayList Interrupt
     lda #<MAIN.MYDLI
     sta DLIV
     lda #>MAIN.MYDLI
     sta DLIV+1
 
+; restore registers
     lda rega:#0
     ldx regx:#0
     ldy regy:#0

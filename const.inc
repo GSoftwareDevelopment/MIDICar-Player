@@ -11,6 +11,7 @@ const
   ss_colorSet  = %00001000;  // flag for color set mode
   ss_minMode   = %00000100;  // flag for mini mode
   ss_plsMode   = %00000010;  // flag for playlist mode
+  ss_DLIChng   = %00000001;
 
 // player status
   ps_loop      = %00000011;

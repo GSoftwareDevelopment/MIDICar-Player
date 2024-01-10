@@ -2,7 +2,9 @@
 {$LIBRARYPATH './units/'}
 {$LIBRARYPATH './includes/'}
 {$DEFINE ROMOFF}
+{$DEFINE NOROMFONT}
 {$DEFINE IRQPATCH}
+{$DEFINE DISABLEIOCBCOPY}
 Uses
   keys,
   CIO,
@@ -35,8 +37,8 @@ var
   screenStatus:Byte absolute $D9;
 
 // this value is initialized by loader
-  refreshRate:Byte absolute $D2;
-  totalXMS:Byte absolute $D3;
+  refreshRate:Byte absolute $61;
+  totalXMS:Byte absolute $62;
 
 //
   memAvailable:longint;
@@ -45,7 +47,6 @@ var
 
   listScrAdr:array[0..15] of word absolute SCREEN_ADRSES;
 
-  lstYscanLine:Byte absolute $57;
   lstY:Byte absolute $60;
   lstOldY:Byte absolute $5a;
   lstShift:SmallInt absolute $5B;
@@ -61,6 +62,7 @@ var
   counter:Longint; // absolute $76;
   cntBCD:Longint; // absolute $7a;
   seconds:Word;
+  oLstY:byte;
 
 //
 
@@ -124,7 +126,12 @@ asm
 end;
 
 begin
-  asm lda PORTB \ pha end;
+  asm
+    lda PORTB
+    pha
+    lda #$FE
+    sta PORTB
+  end;
   init;
   registerKeyboard;
 
@@ -151,6 +158,28 @@ begin
     if timer(otm,refreshRate) then
     begin
       resetTimer(otm);
+
+      if isBitSet(screenStatus,ss_DLIchng) then
+      begin
+        clrBit(screenStatus,ss_DLIchng);
+
+        if isBitClr(screenStatus,ss_minMode) then
+          SDLST:=DLIST_ADDR
+        else
+          SDLST:=DLIST_MIN_ADDR;
+
+        if isBitClr(screenStatus,ss_isHelp) then
+        begin
+          dpoke(DLIST_ADDR+24,SCREEN_WORK);
+          lstY:=oLstY;
+        end
+        else
+        begin
+          dpoke(DLIST_ADDR+24,HELPSCR_ADDR);
+          oLstY:=lstY;
+          lstY:=255;
+        end;
+      end;
 
       if isBitSet(screenStatus,ss_isOSD) then
       begin
@@ -214,6 +243,7 @@ begin
 
       asm
         lda MAIN.KEYS.keyb
+        bmi key_not_defined
         asl @
         tay
 

@@ -1,7 +1,7 @@
 const
   controls:Array[0..3] of String[5] =
   (
-    #$fb+#0+#$fc+#0+#$fd,   // all controls
+    #$bb+#0+#$bc+#0+#$bd,   // all controls
     #$fb+#0+#0+#0+#0,       // play
     #0+#0+#$fc+#0+#0,       // pause
     #$0+#0+#$0+#0+#$fd      // stop
@@ -15,14 +15,13 @@ const
     #$de+#$df   // sloop_shuffle
   );
 
-  statusMsgs : array[0..8] of String =
+  statusMsgs : array[0..7] of String =
   (
     #$4e+'Playing'*~+#$ce,
     #$4e+'No song'*~+#$ce,
     #$4e+' Pause '*~+#$ce,
     #$4e+'Stopped'*~+#$ce,
     #$4e+'  Loading '*~,
-    '',
     #$4e+'  Reading directory'*~+#$ce,
     #$4e+'  Reading description'*~+#$ce,
     #$4e+'  Reading playlist'*~+#$ce

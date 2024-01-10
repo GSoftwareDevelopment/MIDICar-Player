@@ -1,16 +1,27 @@
 make[1]: Wejście do katalogu '/mnt/data/Projekty/MIDI/MIDIcar/res'
+
 compile dlist...
+  SCREEN-HEAD: $2D08..$2FFF ($02F8)
+  SCREEN-FOOT: $29C0..$29E7 ($0028)
+  SCREEN-WORK: $29E8..$2BC7 ($01E0)
+  SCREEN-CHANNELS: $2BC8..$2C3F ($0078)
+  SCREEN-TIME: $2C40..$2C7B ($003C)
+  SCREEN-TIMELINE: $2C7C..$2CA3 ($0028)
+  SCREEN-STATUS: $2CE0..$2D07 ($0028)
 Writing object file...
-156 lines of source assembled in 2 pass
+171 lines of source assembled in 3 pass
 76 bytes written to the object file
+
 compile dlist_min...
 Writing object file...
-142 lines of source assembled in 2 pass
-56 bytes written to the object file
+144 lines of source assembled in 2 pass
+54 bytes written to the object file
+
 compile nrpm_registers...
 Writing object file...
 61 lines of source assembled in 2 pass
 54 bytes written to the object file
+
 xxd -r -p graph.hex graph.obj
 xxd -r -p uvmeter.hex uvmeter.obj
 xxd -r -p uvmeter-h.hex uvmeter-h.obj

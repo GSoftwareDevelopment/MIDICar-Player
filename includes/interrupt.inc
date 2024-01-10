@@ -1,6 +1,6 @@
-const
-  thumblr:array[0..3] of byte = ($a9,$9c,$9d,$9e);
-  Yscans:Array[0..10] of byte = (24,29,33,38,42,47,51,56,60,65,69);
+// const
+//  thumblr:array[0..3] of byte = ($a9,$9c,$9d,$9e);
+//  Yscans:Array[0..10] of byte = (24,29,33,38,42,47,51,56,60,65,69);
 
 var
   DLIV:Pointer absolute $200;
@@ -8,7 +8,7 @@ var
   NMIEN:Byte absolute $D40E;
   NMIVEC:Pointer absolute $FFFA;
   oldDLIV,
-  oldVVBLKI,
+  // oldVVBLKI,
   oldNMIVec:Pointer;
   thi:Byte absolute $1f;
 
@@ -32,10 +32,10 @@ asm
   icl 'asms/interrupts/NMI.a65'
 end;
 
-procedure ImmediateVBLK; Interrupt; Assembler;
-asm
-  icl 'asms/interrupts/immediateVB.a65'
-end;
+// procedure ImmediateVBLK; Interrupt; Assembler;
+// asm
+//   icl 'asms/interrupts/immediateVB.a65'
+// end;
 
 procedure setNMI;
 begin
@@ -44,7 +44,7 @@ begin
     sei
   end;
   oldNMIVec:=NMIVEC;
-  oldVVBLKI:=VVBLKI;
+  // oldVVBLKI:=VVBLKI;
   oldDLIV:=DLIV;
   NMIEN:=$00;
   asm
@@ -67,16 +67,16 @@ begin
     cli
   .endif
 
-    lda VVBLKI
-    sta ImmediateVBLK.OLD_VBLKI
-    lda VVBLKI+1
-    sta ImmediateVBLK.OLD_VBLKI+1
+    // lda VVBLKI
+    // sta ImmediateVBLK.OLD_VBLKI
+    // lda VVBLKI+1
+    // sta ImmediateVBLK.OLD_VBLKI+1
 
 
-    lda #6
-    ldy #<ImmediateVBLK
-    ldx #>ImmediateVBLK
-    jsr JSETVBV
+    // lda #6
+    // ldy #<ImmediateVBLK
+    // ldx #>ImmediateVBLK
+    // jsr JSETVBV
 
     dec PORTB
   end;
@@ -110,7 +110,7 @@ begin
     cli
   end;
 {$ENDIF}
-  VVBLKI:=oldVVBLKI;
+  // VVBLKI:=oldVVBLKI;
   NMIVEC:=oldNMIVec;
   DLIV:=oldDLIV;
   NMIEN:=$40;

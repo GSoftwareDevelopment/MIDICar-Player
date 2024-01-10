@@ -72,12 +72,16 @@ begin
   validPath;
   clearList;
 
-  putStatus(statusMsgs[8]);
+  putStatus(statusMsgs[7]);
 
   thi:=0;
   createListEntry(fl_device,outStr);
 
+  unsetNMI();
+
   result:=readDescriptionFile(fn);
+
+  setNMI();
 
   fn:='';
   clearStatus;

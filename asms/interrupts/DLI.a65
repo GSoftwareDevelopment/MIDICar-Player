@@ -6,28 +6,40 @@ NMIRES = $D40f
 DLIV   = $200
 tmpreg = $6B
 
-setTitleColor:
+  .macro m@PATCH
 .ifdef MAIN.@DEFINES.IRQPATCH
-  sta NMIRES
+    sta NMIRES
 .endif
+  .endm
+
+  .macro m@setVDLI newVDLI
+    lda #<:newVDLI
+    ldy #>:newVDLI
+    sta DLIV
+    sty DLIV+1
+  .endm
+
+DLI_setTitleColor:
+  m@PATCH
   pha:tya:pha
 
+  lda 710
   ldy #$0f
   sta WSYNC
+  sta COLPF2
   sty COLPF1
 
-  lda #<setSelectorColor
-  sta DLIV
-  lda #>setSelectorColor
-  sta DLIV+1
+  lda screenStatus
+  and #ss_minMode
+  bne noSetCursorColor
+
+  m@setVDLI DLI_setSelectorColor
 
   pla:tay:pla
   rti
 
-setSelectorColor:
-.ifdef MAIN.@DEFINES.IRQPATCH
-  sta NMIRES
-.endif
+DLI_setSelectorColor:
+  m@PATCH
   pha:tya:pha
 
   ldy 709
@@ -37,27 +49,21 @@ setSelectorColor:
   lda screenStatus
   and #ss_minMode+ss_isHelp
   bne noSetCursorColor
-  lda #<setCursorColor
-  ldy #>setCursorColor
-  sta DLIV
-  sty DLIV+1
+
+  m@setVDLI DLI_setCursorColor
 
   pla:tay:pla
   rti
+
 noSetCursorColor:
-  lda #<setFooterColor
-  ldy #>setFooterColor
-  sta DLIV
-  sty DLIV+1
+  m@setVDLI DLI_setChannelsColor
 
   pla:tay:pla
   rti
 
 
-setCursorColor:
-.ifdef MAIN.@DEFINES.IRQPATCH
-  sta NMIRES
-.endif
+DLI_setCursorColor:
+  m@PATCH
   pha:tya:pha
 
   lda 706
@@ -66,78 +72,61 @@ setCursorColor:
   sty COLPF1
   sta COLPF2
 
-  lda #<restoreColor
-  sta DLIV
-  lda #>restoreColor
-  sta DLIV+1
+  m@setVDLI DLI_restoreColor
 
   pla:tay:pla
   rti
 
-restoreColor:
-.ifdef MAIN.@DEFINES.IRQPATCH
-  sta NMIRES
-.endif
+DLI_restoreColor:
+  m@PATCH
   pha:tya:pha
 
-  lda 712
+  lda 710
   ldy 709
   sta WSYNC
   sty COLPF1
   sta COLPF2
 
-  lda #<setFooterColor
-  sta DLIV
-  lda #>setFooterColor
-  sta DLIV+1
+  m@setVDLI DLI_setChannelsColor
 
   pla:tay:pla
   rti
 
-setFooterColor:
-.ifdef MAIN.@DEFINES.IRQPATCH
-  sta NMIRES
-.endif
+DLI_setChannelsColor:
+  m@PATCH
+  pha:tya:pha
+
+  lda 705
+  sta WSYNC
+  sta COLPF1
+
+  m@setVDLI DLI_setStatusColor
+
+  pla:tay:pla
+  rti
+
+DLI_setStatusColor:
+  m@PATCH
+  pha:tya:pha
+
+  lda 709
+  sta WSYNC
+  sta COLPF1
+
+  m@setVDLI DLI_setFooterColor
+
+  pla:tay:pla
+  rti
+
+DLI_setFooterColor:
+  m@PATCH
   pha:tya:pha
 
   ldy #$0f
   sta WSYNC
   sty COLPF1
 
-  lda #<setTitleColor
-  sta DLIV
-  lda #>setTitleColor
-  sta DLIV+1
+  m@setVDLI DLI_setTitleColor
 
   pla:tay:pla
   rti
-
-; changeColor:
-;   pha:tya:pha
-
-;   sta NMIRES
-
-;   lda VCOUNT
-;   cmp lstYscanLine
-;   beq change
-;   bcs restore
-
-; change:
-;   lda 706
-;   ldy 707
-;   sta WSYNC
-;   sty COLPF1
-;   sta COLPF2
-
-;   pla:tay:pla
-;   rti
-
-; restore:
-;   lda 712
-;   ldy 709
-;   sta WSYNC
-;   sty COLPF1
-;   sta COLPF2
-
-;   pla:tay:pla
-

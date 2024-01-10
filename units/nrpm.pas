@@ -2,7 +2,7 @@ unit NRPM;
 
 interface
 const
-  TAB_NRPM_ADDR   = $2F40;              // $036 (  54)
+  TAB_NRPM_ADDR   = $2400-$36;// F40;              // $036 (  54)
 
 {$R 'nrpm.rc'}
 

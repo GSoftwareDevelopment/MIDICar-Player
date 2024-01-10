@@ -142,7 +142,7 @@ end;
 
 procedure resetMIDI; assembler;
 asm
-GM_RESET_ADDR = $3B00;
+GM_RESET_ADDR = $3D00;
 
   txa:pha
 
