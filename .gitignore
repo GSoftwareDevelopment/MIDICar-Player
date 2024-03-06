@@ -3,3 +3,4 @@ bin/*
 tmp
 res/!
 drvs/old
+logs

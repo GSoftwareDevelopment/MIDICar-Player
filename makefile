@@ -1,7 +1,7 @@
 CPAS = mp
 CASM = mads
 XXD = xxd -r -p
-MPBASE = ${HOME}/Atari/MadPascal/base
+# MPBASE = ${HOME}/Atari/Mad-Pascal-master/base
 XEX = ./xex-filter.pl
 ZX5 = ./zx5 -f
 
