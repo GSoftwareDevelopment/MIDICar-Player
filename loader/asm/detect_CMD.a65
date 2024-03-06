@@ -7,10 +7,10 @@ detect_DOS:
     bcs FoundDOS
 
 NoDOS:
+    pla
+    pla
     lda #<MSG_NO_DOS
     ldy #>MSG_NO_DOS
-    pla
-    pla
     jmp exit2DOS
 
 FoundDOS:
@@ -61,13 +61,20 @@ skipFile:
     lda (cmdlnVec),y
     cmp #' '
     beq @+
+    cmp #$9B
+    beq fail
     iny
     bne skipFile
     beq fail
 
 @:
+    iny
+    lda (cmdlnVec),y
+    cmp #' '
+    beq @-
     cmp #$9B
     beq fail
+
     sty get_param.lbufpos
 
 ok:

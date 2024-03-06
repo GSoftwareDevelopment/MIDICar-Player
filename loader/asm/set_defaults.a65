@@ -48,6 +48,14 @@
     dey
     bpl @-
 
+; clear
+    ldy #0
+    lda #$9B
+@:
+    sta $500,y
+    dey
+    bne @-
+
 ; file specification
     ldy #0
 @:
