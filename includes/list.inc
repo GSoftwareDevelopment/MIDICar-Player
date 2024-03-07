@@ -99,7 +99,11 @@ putString:
 end;
 
 procedure showList; // selector
+var
+  opt:byte;
+
 begin
+  opt:=p_type;
   IOResult:=0; list_go2Entry(lstShift); chn:=0;
   while (chn<LIST_VISIBLE_ITEMS) do
   begin
@@ -113,6 +117,7 @@ begin
     inc(chn);
   end;
   IOResult:=0;
+  p_type:=opt;
 end;
 
 procedure choiceListFile; // selector
@@ -162,8 +167,8 @@ begin
     end;
   end;
 
-  if isBitClr(keymod,kmod_shift) then
-  begin
+  // if isBitClr(keymod,kmod_shift) then
+  // begin
     if (p_type=fl_playlist) or
        (p_type=fl_midifile) then
       if isBitClr(screenStatus,ss_plsMode) then
@@ -173,17 +178,17 @@ begin
 
     if (p_type=fl_midifile) then
       IOResult:=loadSong;
-  end
-  else
-  begin
-    if (p_type=fl_parentdir) or
-       (p_type=fl_device) then exit;
-    if IOResult<>ERR_LIST_ENTRY_END then
-      list_getText(Snull);
-    outStr:=Snull;
-    IOResult:=0;
-    ilscradr:=listScrAdr[lstY];
-    init_inputLine;
-    setBit(stateInputLine,ils_noProcess);
-  end;
+  // end;
+  // else
+  // begin
+  //   if (p_type=fl_parentdir) or
+  //      (p_type=fl_device) then exit;
+  //   if IOResult<>ERR_LIST_ENTRY_END then
+  //     list_getText(Snull);
+  //   outStr:=Snull;
+  //   IOResult:=0;
+  //   ilscradr:=listScrAdr[lstY];
+  //   init_inputLine;
+  //   setBit(stateInputLine,ils_noProcess);
+  // end;
 end;
