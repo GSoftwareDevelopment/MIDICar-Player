@@ -1,7 +1,7 @@
 CPAS = mp
 CASM = mads
 XXD = xxd -r -p
-# MPBASE = ${HOME}/Atari/Mad-Pascal-master/base
+# MPBASE = ${HOME}/Atari/MadPascal/base
 XEX = ./xex-filter.pl
 ZX5 = ./zx5 -f
 
@@ -39,7 +39,7 @@ compile_pas: MCP.pas
 	${CPAS} MCP.pas -ipath:./ -define:USE_FIFO -define:USE_SUPPORT_VARS -code:8000 -data:0400 -o:${ASMPATH}/MCP.a65 >> ./logs/mp.log
 
 compile_asm: ${ASMPATH}/MCP.a65
-	${CASM} ${ASMPATH}/MCP.a65 ${CFLAGS} -i:${MPBASE} -o:${BINPATH}/mcp.bin >> ./logs/mads.log
+	${CASM} ${ASMPATH}/MCP.a65 ${CFLAGS} -i:${MPBASE}/base/ -o:${BINPATH}/mcp.bin >> ./logs/mads.log
 
 link_clean:
 	@rm -vf ${BINPATH}/${EXEFILE}.exe >> ./logs/link.log
